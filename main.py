@@ -61,7 +61,7 @@ if 'click_totals' not in st.session_state:
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
-REDIRECT_URI = 'https://https://seo-tool.streamlit.app/'  # Updated redirect URI
+REDIRECT_URI = 'https://seo-tool.streamlit.app/'  # Updated redirect URI
 
 
 def authorize_app():
