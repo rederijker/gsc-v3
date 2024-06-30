@@ -74,8 +74,7 @@ def authorize_app():
     
     return st.session_state.credentials
 
-@st.cache_data(show_spinner=False)
-def fetch_data_chunk(_webmasters_service, site_url, start_date, end_date, dimensions, filters, selected_type, start_row, row_limit=None):
+def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensions, filters, selected_type, start_row, row_limit=None):
     request_body = {
         "startDate": start_date.strftime('%Y-%m-%d'),
         "endDate": end_date.strftime('%Y-%m-%d'),
@@ -99,7 +98,7 @@ def fetch_data_chunk(_webmasters_service, site_url, start_date, end_date, dimens
                 }]
             })
 
-    response_data = _webmasters_service.searchanalytics().query(siteUrl=site_url, body=request_body).execute()
+    response_data = webmasters_service.searchanalytics().query(siteUrl=site_url, body=request_body).execute()
     rows = response_data.get('rows', [])
     return rows
 
@@ -201,9 +200,6 @@ if credentials:
                             st.warning("No data retrieved from API.")
                             break
 
-                        # Log the rows for debugging
-                        st.write("Fetched Rows: ", rows)
-
                         data_list = []
                         for row in rows:
                             data_entry = {dimension: row['keys'][dimensions.index(dimension.upper())] for dimension in dimensions}
@@ -228,13 +224,15 @@ if credentials:
                         progress_bar.progress(min(total_downloaded_rows / (row_limit if row_limit else total_downloaded_rows + len(rows)), 1.0))
                     
                     st.session_state.data_loaded = True
+                    st.session_state.download_ready = True
                     progress_bar.progress(100)
 
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
 
-                csv = convert_df_to_csv(st.session_state.df)
-                st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
+if st.session_state.data_loaded and st.session_state.download_ready:
+    csv = st.session_state.df.to_csv(index=False).encode('utf-8')
+    st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
 
                 
 if st.session_state.data_loaded:
