@@ -61,7 +61,6 @@ def authorize_app():
     flow.redirect_uri = REDIRECT_URI
 
     query_params = st.query_params
-    st.write("Query parameters:", query_params)  # Debug: Visualizza i parametri della query
     auth_code = query_params.get('code', None)
 
     if auth_code:
@@ -72,10 +71,8 @@ def authorize_app():
                 flow.fetch_token(code=auth_code)
                 credentials = flow.credentials
                 st.session_state.credentials = credentials
-                st.write("Token fetched successfully")
             except Exception as e:
                 st.write(f"Error during authorization: {e}")
-                st.write(f"Auth code: {auth_code}")
 
     if st.session_state.credentials is None:
         auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
