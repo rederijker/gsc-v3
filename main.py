@@ -59,7 +59,7 @@ def authorize_app():
     flow = Flow.from_client_config(client_config, scopes=OAUTH_SCOPE)
     flow.redirect_uri = REDIRECT_URI
 
-    query_params = st.query_params
+    query_params = st.experimental_get_query_params()
     auth_code = query_params.get('code', None)
 
     if auth_code:
@@ -231,6 +231,10 @@ if credentials:
 
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
+
+if st.session_state.data_loaded and st.session_state.download_ready:
+    csv = st.session_state.df.to_csv(index=False).encode('utf-8')
+    st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
 
 if st.session_state.data_loaded and st.session_state.download_ready:
     csv = st.session_state.df.to_csv(index=False).encode('utf-8')
