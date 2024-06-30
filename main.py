@@ -43,6 +43,7 @@ if 'download_ready' not in st.session_state:
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
 REDIRECT_URI = 'https://seo-tool.streamlit.app/'  # Updated redirect URI
 
+
 def authorize_app():
     client_config = {
         "web": {
@@ -60,15 +61,21 @@ def authorize_app():
     flow.redirect_uri = REDIRECT_URI
 
     query_params = st.query_params
+    st.write("Query parameters:", query_params)  # Debug: Visualizza i parametri della query
     auth_code = query_params.get('code', None)
 
     if auth_code:
-        try:
-            flow.fetch_token(code=auth_code)
-            credentials = flow.credentials
-            st.session_state.credentials = credentials
-        except Exception as e:
-            st.write(f"Error during authorization: {e}")
+        st.write("Auth code received:", auth_code)  # Debug: Visualizza il codice di autorizzazione
+        if not st.session_state.credentials:
+            st.write("Attempting to fetch token...")
+            try:
+                flow.fetch_token(code=auth_code)
+                credentials = flow.credentials
+                st.session_state.credentials = credentials
+                st.write("Token fetched successfully")
+            except Exception as e:
+                st.write(f"Error during authorization: {e}")
+                st.write(f"Auth code: {auth_code}")
 
     if st.session_state.credentials is None:
         auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
