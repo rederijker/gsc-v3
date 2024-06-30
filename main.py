@@ -41,7 +41,6 @@ if 'click_totals' not in st.session_state:
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
 REDIRECT_URI = 'https://seo-tool.streamlit.app/'  # Updated redirect URI
 
-
 def authorize_app():
     client_config = {
         "web": {
@@ -236,6 +235,6 @@ if credentials:
 
                 csv = convert_df_to_csv(st.session_state.df)
                 st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
-
+                
 if st.session_state.data_loaded:
     df = st.session_state.df
