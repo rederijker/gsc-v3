@@ -62,7 +62,7 @@ def authorize_app():
     query_params = st.query_params
     auth_code = query_params.get('code', None)
 
-    if auth_code and not st.session_state.credentials:
+    if auth_code:
         try:
             flow.fetch_token(code=auth_code[0])
             credentials = flow.credentials
@@ -235,6 +235,3 @@ if credentials:
 if st.session_state.data_loaded and st.session_state.download_ready:
     csv = st.session_state.df.to_csv(index=False).encode('utf-8')
     st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
-                
-if st.session_state.data_loaded:
-    df = st.session_state.df
