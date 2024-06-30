@@ -1,38 +1,17 @@
+import streamlit as st
+import httplib2
+import pandas as pd
+import numpy as np
+import time
+from datetime import datetime, timedelta
+import altair as alt
+from collections import Counter
+import itertools
+
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
-import streamlit as st
-import httplib2
-import pandas as pd
-from apiclient.discovery import build
-from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.file import Storage
-import numpy as np
-import matplotlib.pyplot as plt
-import plotly.express as px
-import plotly.graph_objects as go  # Importa il modulo go da Plotly
-import time
-from streamlit_extras.metric_cards import style_metric_cards
-from streamlit_raw_echarts import st_echarts, JsCode
-from datetime import datetime, timedelta
-import altair as alt
-# clustering
-from collections import Counter
-import itertools
-import re
-import requests
-from bs4 import BeautifulSoup
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
-
-st.set_page_config(
-    page_title="Google Search Console API",
-    page_icon="🔍",
-    layout="wide"
-)
-
 
 # Initialize session state
 if 'credentials' not in st.session_state:
@@ -57,7 +36,6 @@ if 'keyword_groups' not in st.session_state:
     st.session_state.keyword_groups = None
 if 'click_totals' not in st.session_state:
     st.session_state.click_totals = None
-
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
@@ -124,8 +102,6 @@ def fetch_data_chunk(_webmasters_service, site_url, start_date, end_date, dimens
 
     response_data = _webmasters_service.searchanalytics().query(siteUrl=site_url, body=request_body).execute()
     return response_data.get('rows', [])
-
-#TAB3 PAGE OPTIMIZATION
 
 st.subheader('Authenticate with Google Account')
 st.write("➡️ [Google Cloud Console](https://console.cloud.google.com/apis/credentials)")
@@ -244,5 +220,3 @@ if credentials:
 
 if st.session_state.data_loaded:
     df = st.session_state.df
-
-
