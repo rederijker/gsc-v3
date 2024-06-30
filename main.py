@@ -42,7 +42,6 @@ OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
 REDIRECT_URI = 'https://seo-tool.streamlit.app/'  # Updated redirect URI
 
 
-
 def authorize_app():
     client_config = {
         "web": {
@@ -172,9 +171,9 @@ if credentials:
                 for dimension in selected_dimensions:
                     col1, col2 = st.columns(2)
                     with col1:
-                        operator = st.selectbox(f'{dimension}', ['equals', 'contains', 'notEquals', 'notContains', 'includingRegex', 'excludingRegex'])
+                        operator = st.selectbox(f'{dimension} operator', ['equals', 'contains', 'notEquals', 'notContains', 'includingRegex', 'excludingRegex'])
                     with col2:
-                        filter_value = st.text_input(label="Value", placeholder=" value", key=unique_key)
+                        filter_value = st.text_input(label="Value", placeholder="value", key=unique_key)
                     unique_key += 1
                     st.session_state.dimension_filters[dimension] = {'operator': operator, 'filter_value': filter_value}
 
@@ -240,5 +239,3 @@ if credentials:
 
 if st.session_state.data_loaded:
     df = st.session_state.df
-    st.write("DataFrame Preview:")
-    st.dataframe(df)
