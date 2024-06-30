@@ -235,6 +235,7 @@ if credentials:
 
                 csv = convert_df_to_csv(st.session_state.df)
                 st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
+
                 
 if st.session_state.data_loaded:
     df = st.session_state.df
