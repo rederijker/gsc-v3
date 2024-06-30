@@ -29,7 +29,7 @@ from urllib.parse import urlparse, parse_qs
 
 #PAGE CONFIGURATION
 st.set_page_config(
-    page_title="SEO Gnosis: Master Search Console Data Like a Pro-by Cristianon Caggiula",
+    page_title="SEO Gnosis: Master Search Console Data Like a Pro-by Cristiano Caggiula",
     page_icon="🔍",
     layout="wide"
 )
