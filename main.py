@@ -62,6 +62,9 @@ if 'download_ready' not in st.session_state:
 
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
+def clear_data():
+    st.session_state.df = None
+    
 #TAB3 PAGE OPTIMIZATION
 def clean_text(text):
     return re.sub(r'\s+', ' ', text).strip().lower()
@@ -998,6 +1001,7 @@ if credentials:
             row_limit = st.number_input('Row limit', min_value=1, max_value=25000, value=25000) if check_box_row == 'Yes' else None
 
         if st.button('GET DATA ⬇️'):
+            clear_data()
             if st.session_state.selected_site:
                 dimensions = [dim for dim in selected_dimensions]
 
