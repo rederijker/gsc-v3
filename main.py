@@ -1619,6 +1619,8 @@ if st.session_state.data_loaded:
                     if 'page_data' in st.session_state and st.session_state.page_data:
                         page_data = df[df['Cleaned_Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
                         grouped_page_data = aggregate_queries(page_data)
+                    else:
+                        st.write("")
             
                         # Analisi della copertura delle parole chiave
                         with st.container():
