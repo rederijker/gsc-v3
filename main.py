@@ -42,6 +42,7 @@ OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
 REDIRECT_URI = 'https://seo-tool.streamlit.app/'  # Updated redirect URI
 
 
+
 def authorize_app():
     client_config = {
         "web": {
@@ -101,7 +102,8 @@ def fetch_data_chunk(_webmasters_service, site_url, start_date, end_date, dimens
             })
 
     response_data = _webmasters_service.searchanalytics().query(siteUrl=site_url, body=request_body).execute()
-    return response_data.get('rows', [])
+    rows = response_data.get('rows', [])
+    return rows
 
 st.subheader('Authenticate with Google Account')
 st.write("➡️ [Google Cloud Console](https://console.cloud.google.com/apis/credentials)")
@@ -129,28 +131,28 @@ if credentials:
                     request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': st.session_state.selected_site}
                     response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
 
-                inspection_result = response.get('inspectionResult', {})
-                index_status_result = inspection_result.get('indexStatusResult', {})
-                mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
-                rich_results_result = inspection_result.get('richResultsResult', {})
+                    inspection_result = response.get('inspectionResult', {})
+                    index_status_result = inspection_result.get('indexStatusResult', {})
+                    mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
+                    rich_results_result = inspection_result.get('richResultsResult', {})
 
-                st.write("### Result")
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.write("🤖INDEX STATE")
-                    st.write(f"Verdict: {index_status_result.get('verdict', 'N/A')}")
-                    st.write(f"Coverage State: {index_status_result.get('coverageState', 'N/A')}")
-                    st.write(f"Robots.txt State: {index_status_result.get('robotsTxtState', 'N/A')}")
-                with col2:
-                    st.write("📱MOBILE USABILTY")
-                    st.write(f"Verdict: {mobile_usability_result.get('verdict', 'N/A')}")
-                with col3:
-                    st.write("⭐RICH RESULTS")
-                    st.write(f"Verdict: {rich_results_result.get('verdict', 'N/A')}")
+                    st.write("### Result")
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.write("🤖INDEX STATE")
+                        st.write(f"Verdict: {index_status_result.get('verdict', 'N/A')}")
+                        st.write(f"Coverage State: {index_status_result.get('coverageState', 'N/A')}")
+                        st.write(f"Robots.txt State: {index_status_result.get('robotsTxtState', 'N/A')}")
+                    with col2:
+                        st.write("📱MOBILE USABILTY")
+                        st.write(f"Verdict: {mobile_usability_result.get('verdict', 'N/A')}")
+                    with col3:
+                        st.write("⭐RICH RESULTS")
+                        st.write(f"Verdict: {rich_results_result.get('verdict', 'N/A')}")
 
-                st.write(inspection_result.get('inspectionResultLink', 'N/A'))
-                with st.expander("Complete response"):
-                    st.write(f'Response: {response}')
+                    st.write(inspection_result.get('inspectionResultLink', 'N/A'))
+                    with st.expander("Complete response"):
+                        st.write(f'Response: {response}')
 
     with tab1:
         col1, col2, col3 = st.columns(3)
@@ -172,7 +174,7 @@ if credentials:
                     with col1:
                         operator = st.selectbox(f'{dimension}', ['equals', 'contains', 'notEquals', 'notContains', 'includingRegex', 'excludingRegex'])
                     with col2:
-                        filter_value = st.text_input(label="", placeholder=" value", key=unique_key)
+                        filter_value = st.text_input(label="Value", placeholder=" value", key=unique_key)
                     unique_key += 1
                     st.session_state.dimension_filters[dimension] = {'operator': operator, 'filter_value': filter_value}
 
@@ -197,8 +199,26 @@ if credentials:
                     while True:
                         rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, start_date, end_date, dimensions, st.session_state.dimension_filters, selected_type, start_row, row_limit)
                         
-                        chunk_df = pd.DataFrame(rows, columns=[*dimensions, 'Clicks', 'Impressions', 'CTR', 'Position'])
-                        st.session_state.df = pd.concat([st.session_state.df, chunk_df])
+                        if not rows:
+                            st.warning("No data retrieved from API.")
+                            break
+
+                        # Log the rows for debugging
+                        st.write("Fetched Rows: ", rows)
+
+                        data_list = []
+                        for row in rows:
+                            data_entry = {dimension: row['keys'][dimensions.index(dimension.upper())] for dimension in dimensions}
+                            data_entry.update({
+                                'Clicks': row['clicks'],
+                                'Impressions': row['impressions'],
+                                'CTR': row['ctr'],
+                                'Position': row['position']
+                            })
+                            data_list.append(data_entry)
+
+                        chunk_df = pd.DataFrame(data_list)
+                        st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
                         
                         total_downloaded_rows += len(rows)
                         start_row += len(rows)
@@ -220,3 +240,5 @@ if credentials:
 
 if st.session_state.data_loaded:
     df = st.session_state.df
+    st.write("DataFrame Preview:")
+    st.dataframe(df)
