@@ -60,6 +60,7 @@ if 'click_totals' not in st.session_state:
 if 'download_ready' not in st.session_state:
     st.session_state.download_ready = False
 
+required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
 #TAB3 PAGE OPTIMIZATION
 def clean_text(text):
