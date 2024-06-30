@@ -92,7 +92,7 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
                 request_body['dimensionFilterGroups'] = []
             request_body['dimensionFilterGroups'].append({
                 'filters': [{
-                    'dimension': dimension,
+                    'dimension': dimension.lower(),
                     'expression': filter_value,
                     'operator': filter_operator
                 }]
@@ -182,7 +182,7 @@ if credentials:
 
         if st.button('GET DATA ⬇️'):
             if st.session_state.selected_site:
-                dimensions = [dim.upper() for dim in selected_dimensions]
+                dimensions = [dim for dim in selected_dimensions]
 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
@@ -202,7 +202,7 @@ if credentials:
 
                         data_list = []
                         for row in rows:
-                            data_entry = {dimension: row['keys'][dimensions.index(dimension.upper())] for dimension in dimensions}
+                            data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
                             data_entry.update({
                                 'Clicks': row['clicks'],
                                 'Impressions': row['impressions'],
