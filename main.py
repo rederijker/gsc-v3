@@ -36,6 +36,8 @@ if 'keyword_groups' not in st.session_state:
     st.session_state.keyword_groups = None
 if 'click_totals' not in st.session_state:
     st.session_state.click_totals = None
+if 'download_ready' not in st.session_state:
+    st.session_state.download_ready = False
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
@@ -57,7 +59,7 @@ def authorize_app():
     flow = Flow.from_client_config(client_config, scopes=OAUTH_SCOPE)
     flow.redirect_uri = REDIRECT_URI
 
-    query_params = st.experimental_get_query_params()
+    query_params = st.query_params
     auth_code = query_params.get('code', None)
 
     if auth_code and not st.session_state.credentials:
@@ -69,7 +71,7 @@ def authorize_app():
             st.write(f"Error during authorization: {e}")
 
     if st.session_state.credentials is None:
-        auth_url, _ = flow.authorization_url(prompt='consent')
+        auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
         st.write(f"➡️ Go to [this link]({auth_url}) and authorize app")
     
     return st.session_state.credentials
@@ -233,7 +235,6 @@ if credentials:
 if st.session_state.data_loaded and st.session_state.download_ready:
     csv = st.session_state.df.to_csv(index=False).encode('utf-8')
     st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
-
                 
 if st.session_state.data_loaded:
     df = st.session_state.df
