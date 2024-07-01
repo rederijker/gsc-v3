@@ -59,7 +59,20 @@ if 'click_totals' not in st.session_state:
     st.session_state.click_totals = None
 if 'download_ready' not in st.session_state:
     st.session_state.download_ready = False
-
+if 'scan_started' not in st.session_state:
+    st.session_state.scan_started = False
+if 'search_query' not in st.session_state:
+    st.session_state.search_query = ''
+if 'show_heading' not in st.session_state:
+    st.session_state.show_heading = True
+if 'show_keyword_metrics' not in st.session_state:
+    st.session_state.show_keyword_metrics = True
+if 'show_meta' not in st.session_state:
+    st.session_state.show_meta = True
+if 'show_body_alt' not in st.session_state:
+    st.session_state.show_body_alt = True
+if 'show_not_covered' not in st.session_state:
+    st.session_state.show_not_covered = False
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
 def clear_data():
