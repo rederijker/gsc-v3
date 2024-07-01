@@ -909,8 +909,9 @@ def authorize_app():
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
             <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
             </div>
-            <button style="text-align:center;font-size:17px;"><a href="{auth_url}">Login with Google</a></button>            
-            ", unsafe_allow_html=True)    
+            <button style="text-align:center;font-size:17px;"><a href="{auth_url}">Login Google</a></button>            
+            """""", unsafe_allow_html=True) 
+            
     return st.session_state.credentials
 
 def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensions, filters, selected_type, start_row, row_limit=None):
@@ -940,10 +941,6 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
     response_data = webmasters_service.searchanalytics().query(siteUrl=site_url, body=request_body).execute()
     rows = response_data.get('rows', [])
     return rows
-
-
-
-
 
 st.markdown("""
     <style>
