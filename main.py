@@ -1832,6 +1832,8 @@ if st.session_state.data_loaded:
                         st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
                         # Calculate click totals
                         st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
+                    else:
+                        st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
             
             if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
                 sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
@@ -1855,10 +1857,6 @@ if st.session_state.data_loaded:
                         ax.set_ylabel('Group Name')
                         ax.set_title('Top 5 Groups by Clicks')
                         st.pyplot(fig)
-            
-            if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
-                sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
-                top_groups = sorted_groups[:5]
             
                 st.subheader("🔑 Groups Overview")
                 top_groups_data = []
