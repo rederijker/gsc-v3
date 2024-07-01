@@ -892,7 +892,7 @@ def authorize_app():
     if auth_code:
         st.write("Auth code received:", auth_code)  # Debug: Visualizza il codice di autorizzazione
         if not st.session_state.credentials:
-            st.write("Attempting to fetch token...")
+            st.write("Connecting...")
             try:
                 flow.fetch_token(code=auth_code)
                 credentials = flow.credentials
