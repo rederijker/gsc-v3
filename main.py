@@ -1884,10 +1884,13 @@ if st.session_state.data_loaded:
                 selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
             
                 if selected_group:
-                    group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
-                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
-                    st.write(f"Details for group: {selected_group}")
-                    st.dataframe(keyword_clicks_df)
+                    try:
+                        group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
+                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
+                        st.write(f"Details for group: {selected_group}")
+                        st.dataframe(keyword_clicks_df)
+                    except KeyError as e:
+                        st.warning(str(e))
             
                 # Grafico dei Top 5 gruppi per clic
                 st.subheader("📊 Top 5 Groups by Clicks")
