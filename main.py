@@ -890,9 +890,10 @@ def authorize_app():
     auth_code = query_params.get('code', None)
 
     if auth_code:
+        st.header("SEO Gnosis")
         st.write("Auth code received:", auth_code)  # Debug: Visualizza il codice di autorizzazione
         if not st.session_state.credentials:
-            st.write("Connecting...")
+            st.write("✅ Connected with Google Search Console API")
             try:
                 flow.fetch_token(code=auth_code)
                 credentials = flow.credentials
