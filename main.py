@@ -1330,9 +1330,9 @@ if st.session_state.data_loaded:
                 
 
 
-        # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+       # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
         if 'Query' in df.columns and 'Page' in df.columns:
-            with st.container(border=True):
+            with st.container():
                 st.subheader("2. Queries distribution on SERP Pages Report")
                 st.divider()
                 col1, col2 = st.columns([2, 1])
@@ -1401,8 +1401,7 @@ if st.session_state.data_loaded:
                     # Visualizza il DataFrame
                     st.dataframe(page_distribution)
         else:
-            st.warning("The DataFrame must contain both 'Query' and 'Page' columns to generate the report.")  
-
+            st.warning("The DataFrame must contain both 'Query' and 'Page' columns to generate the report.")
         
     try:
         # Controllo se la colonna 'Page' è presente
