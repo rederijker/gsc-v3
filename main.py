@@ -941,6 +941,10 @@ st.write("Welcome to SEO Gnosis! Explore and analyze Google Search Console data 
 st.markdown("""
     <style>
     .st-emotion-cache-13k62yr {background: #0d1025;}
+    .st-emotion-cache-qcpnpn.e1f1d6gn0 {
+    border: 2px solid #5300a6;}
+    .st-emotion-cache-qcpnpn.e1f1d6gn0 {
+    background: #060813;}
         
     </style>
     """, unsafe_allow_html=True)
