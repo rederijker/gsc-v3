@@ -1603,7 +1603,6 @@ if st.session_state.data_loaded:
             analyze_page_performance(df)
 
 
-  
         with tab3:
             with st.container():
                 st.subheader("1. Queries Coverage Analysis")
@@ -1615,12 +1614,13 @@ if st.session_state.data_loaded:
                         "This report checks if Google's considered queries are present in various webpage elements such as the title, meta description, headings, body content, and ALT tags. This helps you identify gaps by finding missing important keywords.")
             
                 with col2:
-                    if 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
+                    if st.session_state.df is not None and 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
                         selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
+                        scan_button = st.button("Analyze Page🤖", key='scan_button')
                     else:
-                        st.warning("To use this feature, include the 'Page' and 'Query' among the dimensions.")
-                    scan_button = st.button("Analyze Page🤖", key='scan_button')
-            
+                        st.warning("To use this feature, ensure that the data contains the 'Page' and 'Query' dimensions.")
+                        scan_button = False
+    
                 if scan_button or 'scan_started' in st.session_state:
                     st.session_state.scan_started = True
                     if selected_page and (selected_page != st.session_state.get('selected_page', None)):
