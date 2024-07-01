@@ -940,7 +940,6 @@ st.header('SEO Gnosis')
 st.write("Welcome to SEO Gnosis! Explore and analyze Google Search Console data with ease. Authenticate effortlessly, choose your website, and access features like URL inspection and search analytics. Customize your searches and enjoy unlimited rows of data, without the need for programming skills. Unleash the full potential of your website's visibility with this user-friendly tool, perfect for webmasters, SEO experts, and digital marketers.")
 st.markdown("""
     <style>
-    .st-emotion-cache-13k62yr {background: #0d1025;}
     .st-emotion-cache-qcpnpn.e1f1d6gn0 {
     border: 2px solid #5300a6;}
     .st-emotion-cache-qcpnpn.e1f1d6gn0 {
