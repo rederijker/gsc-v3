@@ -1839,32 +1839,32 @@ if st.session_state.data_loaded:
                     except Exception as e:
                         st.error(f"An error occurred: {e}")
             
-            if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
-                sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
-                top_groups = sorted_groups[:5]
-                tab1, tab2 = st.columns([2, 2])
-                with tab1:
-                    try:
-                        st.subheader("🔑 Groups")
-                        for group, total_clicks in sorted_groups:
-                            with st.expander(f"{group} - Total Clicks: {total_clicks}"):
-                                keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
-                                st.write(keyword_clicks_df)
-                    except KeyError as e:
-                        st.warning(str(e))
-   
-                with tab2:
-                    top_groups_clicks = [click for group, click in top_groups]
-                    top_group_names = [group for group, click in top_groups]
-            
-                    if len(top_groups) > 0:
-                        fig, ax = plt.subplots()
-                        ax.barh(top_group_names, top_groups_clicks)
-                        ax.set_xlabel('Total Clicks')
-                        ax.set_ylabel('Group Name')
-                        ax.set_title('Top 5 Groups by Clicks')
-                        st.pyplot(fig)
+                if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
+                    sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
+                    top_groups = sorted_groups[:5]
+                    tab1, tab2 = st.columns([2, 2])
+                    with tab1:
+                        try:
+                            st.subheader("🔑 Groups")
+                            for group, total_clicks in sorted_groups:
+                                with st.expander(f"{group} - Total Clicks: {total_clicks}"):
+                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                    st.write(keyword_clicks_df)
+                        except KeyError as e:
+                            st.warning(str(e))
+       
+                    with tab2:
+                        top_groups_clicks = [click for group, click in top_groups]
+                        top_group_names = [group for group, click in top_groups]
+                
+                        if len(top_groups) > 0:
+                            fig, ax = plt.subplots()
+                            ax.barh(top_group_names, top_groups_clicks)
+                            ax.set_xlabel('Total Clicks')
+                            ax.set_ylabel('Group Name')
+                            ax.set_title('Top 5 Groups by Clicks')
+                            st.pyplot(fig)
             
                 st.subheader("🔑 Groups Overview")
                 top_groups_data = []
