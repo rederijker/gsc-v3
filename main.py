@@ -1332,7 +1332,7 @@ if st.session_state.data_loaded:
 
             # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
             if 'Query' in df.columns and 'Page' in df.columns:
-                with st.container():
+                with st.container(border=True):
                     st.subheader("2. Queries distribution on SERP Pages Report")
                     st.divider()
                     col1, col2 = st.columns([2, 1])
