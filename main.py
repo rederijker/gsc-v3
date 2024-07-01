@@ -940,7 +940,7 @@ st.markdown("""
             <div class="header" style="padding:5%;">
             <h1 style="text-align:center;">SEO Gnosis</h1>
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
-            <p>Welcome to SEO Gnosis! Effortlessly explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
+            <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
             </div>
             """, unsafe_allow_html=True)
 
