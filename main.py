@@ -903,21 +903,21 @@ def authorize_app():
 
     if st.session_state.credentials is None:
         auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
-         st.markdown(f"""
-            <div class="header" style="padding:5%;">
-            <h1 style="text-align:center;">SEO Gnosis</h1>
-            <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
-            <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
-            </div>
-            <div style="text-align:center;">
-                <a href="{auth_url}" style="text-decoration:none;">
-                    <button style="background-color: white; color: #4285F4; border: 1px solid #4285F4; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center;">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;">
-                        Login with Google
-                    </button>
-                </a>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="header" style="padding:5%;">
+        <h1 style="text-align:center;">SEO Gnosis</h1>
+        <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
+        <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
+        </div>
+        <div style="text-align:center;">
+            <a href="{auth_url}" style="text-decoration:none;">
+                <button style="background-color: white; color: #4285F4; border: 1px solid #4285F4; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" style="width: 20px; height: 20px; margin-right: 8px;">
+                    Login with Google
+                </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
 
             
