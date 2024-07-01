@@ -912,7 +912,7 @@ def authorize_app():
             <div style="text-align:center;">
                 <a href="{auth_url}" style="text-decoration:none;">
                     <button style="background-color: #4285F4; color: white; border: none; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer;">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">
+                        <img src="https://it.wikipedia.org/wiki/Logo_Google#/media/File:Google_2015_logo.svg" alt="Google logo" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">
                         Login with Google
                     </button>
                 </a>
