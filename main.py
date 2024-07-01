@@ -1146,7 +1146,7 @@ if st.session_state.data_loaded:
             st.write("### Traffic Trend")
             st.warning("No graph available without date data.")
 
-    tab1, tab2, tab3, tab4 = st.tabs(["QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPING"])
+    tab1, tab2, tab3, tab4 = st.tabs(["QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
    
     
     with tab1:
@@ -1761,12 +1761,10 @@ if st.session_state.data_loaded:
            
     
         with tab4:
-            st.subheader("Keyword Grouping")
-            st.subheader("Keyword Grouping")
-        
+            st.subheader("Queries Grouper")        
             col1, col2 = st.columns(2)
             with col1:
-                st.subheader("💬 Select language")
+                st.write("💬 Select language")
                 language = st.selectbox("", ["English", "Italian"])
             
                 if language == "English":
