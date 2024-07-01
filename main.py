@@ -1476,136 +1476,132 @@ if st.session_state.data_loaded:
         
     
     with tab2:
-        if 'Page' in df.columns:
-            #Supponiamo che `df` sia già definito e contenga i dati necessari
-            try:
-                # Raggruppamento dei dati
-                agg_funcs = {
-                    'Impressions': 'sum',
-                    'Clicks': 'sum',
-                    'CTR': 'mean',
-                    'Position': 'mean'
-                }
-                
-                df_aggregated_popular_page = df.groupby('Page').agg(agg_funcs).reset_index()
-                
-                df_aggregated_popular_page['CTR'] = (df_aggregated_popular_page['Clicks'] / df_aggregated_popular_page['Impressions'])
-                df_aggregated_popular_page['CTR'] = df_aggregated_popular_page['CTR'].map('{:.2%}'.format)
-                df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'CTR': 'Average CTR'})
-                df_aggregated_popular_page['Position'] = df_aggregated_popular_page['Position'].round(2)
-                average_position_popular = df_aggregated_popular_page['Position'].mean()
-                df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'Position': 'Average Position'})
-                average_clic_df_popular = df_aggregated_popular_page['Clicks'].mean()
-                average_impression_df_pupular = df_aggregated_popular_page['Impressions'].mean()
+       # Supponiamo che `df` sia già definito e contenga i dati necessari
+        try:
+            # Raggruppamento dei dati
+            agg_funcs = {
+                'Impressions': 'sum',
+                'Clicks': 'sum',
+                'CTR': 'mean',
+                'Position': 'mean'
+            }
+            df_aggregated_popular_page = df.groupby('Page').agg(agg_funcs).reset_index()
             
-                popular_pages = df_aggregated_popular_page[
-                    (df_aggregated_popular_page['Average CTR'] > formatted_ctr_m) &
-                    (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
-                    (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
-                    (df_aggregated_popular_page['Average Position'] < 10)
-                ].sort_values(by='Clicks', ascending=False)
-                
-                less_pages = df_aggregated_popular_page[
-                    (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
-                    (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
-                    (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
-                    (df_aggregated_popular_page['Average Position'] < 10)
-                ]
-                
-                opp_pages = df_aggregated_popular_page[
-                    (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
-                    (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
-                    (df_aggregated_popular_page['Average Position'] > 10 ) &
-                    (df_aggregated_popular_page['Average Position'] <= 20)
-                ]
-                
-                worst_pages = df_aggregated_popular_page[
-                    (df_aggregated_popular_page['Clicks'] < average_clic_df_popular) &
-                    (df_aggregated_popular_page['Impressions'] < average_impression_df_pupular) &
-                    (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
-                    (df_aggregated_popular_page['Average Position'] > average_position_popular)
-                ]
-                with st.container(border=True):
-                    st.subheader("1. Pages Health Check Report")            
-                    st.divider()
-                    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
-                    
-                    format_average_clicks_popular = "{:.2f}".format(average_clic_df_popular)
-                    format_average_impression_popular = "{:.2f}".format(average_impression_df_pupular)
-                    format_average_position_popular = "{:.2f}".format(average_position_popular)
+            df_aggregated_popular_page['CTR'] = (df_aggregated_popular_page['Clicks'] / df_aggregated_popular_page['Impressions'])
+            df_aggregated_popular_page['CTR'] = df_aggregated_popular_page['CTR'].map('{:.2%}'.format)
+            df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'CTR': 'Average CTR'})
+            df_aggregated_popular_page['Position'] = df_aggregated_popular_page['Position'].round(2)
+            average_position_popular = df_aggregated_popular_page['Position'].mean()
+            df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'Position': 'Average Position'})
+            average_clic_df_popular = df_aggregated_popular_page['Clicks'].mean()
+            average_impression_df_pupular = df_aggregated_popular_page['Impressions'].mean()
         
-                    with col1: 
-                        st.write("This report provides an overview of your website's page performance and help identify areas for improvement.")                
-                    with col2:
-                        st.metric("Pages Average Clicks", value=format_average_clicks_popular)
-                    with col3:
-                        st.metric("Pages Average Impressions", value=format_average_impression_popular)
-                    with col4:
-                        st.metric("Pages Average CTR", value=formatted_ctr_m)
-                    with col5:
-                        st.metric("Pages Average Position", value=format_average_position_popular)
-                        st.text("")      
-                   
-                    
-                    worst_pages_count = worst_pages.shape[0]
-                    opp_pages_count = opp_pages.shape[0]
-                    less_pages_count = less_pages.shape[0]
-                    popular_pages_count = popular_pages.shape[0]
-                    
-                    chart_data = {
-                        "Set": ["Best Pages", "Less Effective Pages", "Ranking opportunities", "Require attention"],
-                        "N°Pages": [popular_pages_count, less_pages_count, opp_pages_count, worst_pages_count]
-                    }
-                
-                    # Creazione del grafico a barre colorato con plotly
-                    fig = px.bar(
-                        x=chart_data["Set"],
-                        y=chart_data["N°Pages"],
-                        labels={"x": "Set", "y": "N°Pages"},
-                        title="🏥 Pages health check graph",
-                        color=chart_data["Set"],
-                        color_discrete_map={
-                            "Best Pages": "green",
-                            "Less Effective Pages": "yellow",
-                            "Ranking opportunities": "blue",
-                            "Require attention": "red"
-                        }
-                    )
-                               
-                    fig.update_layout(showlegend=False)
-                    
-                    
-                    col1, col2=st.columns([2,2])
-                    with col1:
-                        # Visualizzare il grafico in Streamlit
-                        st.plotly_chart(fig, use_container_width=True)
-                    with col2:
-                        st.markdown("<br><br>", unsafe_allow_html=True)
-                        st.markdown("<br><br>", unsafe_allow_html=True)
-                        with st.expander(":green[BEST PAGES]"):
-                            st.write("Pages with an elevated Click-Through Rate (CTR), a significant volume of Clicks, and a substantial number of Impressions (exceeding the average), with Average position within the top 10 search engine result positions.")
-                            st.write(popular_pages)
-                        with st.expander(":orange[LESS EFFECTIVE PAGES]"):
-                            st.write("Page with High Clicks, High Impressions and Average position within the top 10 search engine result positions, but low CTR")
-                            st.write(less_pages)
-                        with st.expander(":blue[PAGES WITH RANKING OPPORTUNITES]"):
-                            st.write("Page with High Clicks, High Impressions but average position between 10-20 in SERP")
-                            st.write(opp_pages)
-                        with st.expander(":red[PAGES THAT REQUIRE ATTENTION]"):
-                            st.write("Page low Clicks, Low Impression, Low CTR and Low Position in comparison to the average")
-                            st.write(worst_pages)
-                
-            except KeyError as e:
-                st.warning(e)
-                st.warning("To use this feature, include the 'Page' and 'Query' among the dimensions.")
-                        
-                st.markdown("<br>", unsafe_allow_html=True)
+            popular_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Average CTR'] > formatted_ctr_m) &
+                (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average Position'] < 10)
+            ].sort_values(by='Clicks', ascending=False)
             
+            less_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
+                (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average Position'] < 10)
+            ]
+            
+            opp_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average Position'] > 10 ) &
+                (df_aggregated_popular_page['Average Position'] <= 20)
+            ]
+            
+            worst_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Clicks'] < average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] < average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
+                (df_aggregated_popular_page['Average Position'] > average_position_popular)
+            ]
             with st.container(border=True):
-                analyze_page_performance(df)
-        else:
-            st.warning("page?")
+                st.subheader("1. Pages Health Check Report")            
+                st.divider()
+                col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+                
+                format_average_clicks_popular = "{:.2f}".format(average_clic_df_popular)
+                format_average_impression_popular = "{:.2f}".format(average_impression_df_pupular)
+                format_average_position_popular = "{:.2f}".format(average_position_popular)
     
+                with col1: 
+                    st.write("This report provides an overview of your website's page performance and help identify areas for improvement.")                
+                with col2:
+                    st.metric("Pages Average Clicks", value=format_average_clicks_popular)
+                with col3:
+                    st.metric("Pages Average Impressions", value=format_average_impression_popular)
+                with col4:
+                    st.metric("Pages Average CTR", value=formatted_ctr_m)
+                with col5:
+                    st.metric("Pages Average Position", value=format_average_position_popular)
+                    st.text("")      
+               
+                
+                worst_pages_count = worst_pages.shape[0]
+                opp_pages_count = opp_pages.shape[0]
+                less_pages_count = less_pages.shape[0]
+                popular_pages_count = popular_pages.shape[0]
+                
+                chart_data = {
+                    "Set": ["Best Pages", "Less Effective Pages", "Ranking opportunities", "Require attention"],
+                    "N°Pages": [popular_pages_count, less_pages_count, opp_pages_count, worst_pages_count]
+                }
+            
+                # Creazione del grafico a barre colorato con plotly
+                fig = px.bar(
+                    x=chart_data["Set"],
+                    y=chart_data["N°Pages"],
+                    labels={"x": "Set", "y": "N°Pages"},
+                    title="🏥 Pages health check graph",
+                    color=chart_data["Set"],
+                    color_discrete_map={
+                        "Best Pages": "green",
+                        "Less Effective Pages": "yellow",
+                        "Ranking opportunities": "blue",
+                        "Require attention": "red"
+                    }
+                )
+                           
+                fig.update_layout(showlegend=False)
+                
+                
+                col1, col2=st.columns([2,2])
+                with col1:
+                    # Visualizzare il grafico in Streamlit
+                    st.plotly_chart(fig, use_container_width=True)
+                with col2:
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+                    with st.expander(":green[BEST PAGES]"):
+                        st.write("Pages with an elevated Click-Through Rate (CTR), a significant volume of Clicks, and a substantial number of Impressions (exceeding the average), with Average position within the top 10 search engine result positions.")
+                        st.write(popular_pages)
+                    with st.expander(":orange[LESS EFFECTIVE PAGES]"):
+                        st.write("Page with High Clicks, High Impressions and Average position within the top 10 search engine result positions, but low CTR")
+                        st.write(less_pages)
+                    with st.expander(":blue[PAGES WITH RANKING OPPORTUNITES]"):
+                        st.write("Page with High Clicks, High Impressions but average position between 10-20 in SERP")
+                        st.write(opp_pages)
+                    with st.expander(":red[PAGES THAT REQUIRE ATTENTION]"):
+                        st.write("Page low Clicks, Low Impression, Low CTR and Low Position in comparison to the average")
+                        st.write(worst_pages)
+            
+        except KeyError as e:
+            st.warning(e)
+            st.warning("To use this feature, include the 'Page' and 'Query' among the dimensions.")
+                    
+            st.markdown("<br>", unsafe_allow_html=True)
+        
+        with st.container(border=True):
+            analyze_page_performance(df)
+
 
         with tab3:
             with st.container():
