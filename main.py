@@ -890,13 +890,13 @@ def authorize_app():
     auth_code = query_params.get('code', None)
 
     if auth_code:
- 
+        st.markdown(f"""
+        <h1 style="text-align:center;">SEO Gnosis</h1>""",
+        unsafe_allow_html=True
+        )
         st.write("Auth code received:", auth_code)  # Debug: Visualizza il codice di autorizzazione
         if not st.session_state.credentials:
-            st.markdown(f"""
-            <h1 style="text-align:center;">SEO Gnosis</h1>""",
-            unsafe_allow_html=True
-            )
+
             st.write("✅ You are connected with Google Search Console API")
             try:
                 flow.fetch_token(code=auth_code)
