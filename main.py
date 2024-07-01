@@ -1763,7 +1763,7 @@ if st.session_state.data_loaded:
         with tab4:
             st.subheader("Keyword Grouping")
             st.subheader("Keyword Grouping")
-            
+        
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader("💬 Select language")
@@ -1844,12 +1844,16 @@ if st.session_state.data_loaded:
                 top_groups = sorted_groups[:5]
                 tab1, tab2 = st.columns([2, 2])
                 with tab1:
-                    st.subheader("🔑 Groups")
-                    for group, total_clicks in sorted_groups:
-                        with st.expander(f"{group} - Total Clicks: {total_clicks}"):
-                            keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                            keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
-                            st.write(keyword_clicks_df)
+                    try:
+                        st.subheader("🔑 Groups")
+                        for group, total_clicks in sorted_groups:
+                            with st.expander(f"{group} - Total Clicks: {total_clicks}"):
+                                keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                st.write(keyword_clicks_df)
+                    except KeyError as e:
+                        st.warning(str(e))
+   
                 with tab2:
                     top_groups_clicks = [click for group, click in top_groups]
                     top_group_names = [group for group, click in top_groups]
