@@ -908,7 +908,14 @@ def authorize_app():
             <h1 style="text-align:center;">SEO Gnosis</h1>
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
             <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
-            <button style="text-align:center;font-size:17px;"><a href="{auth_url}">Login </a></button>
+            </div>
+            <div style="text-align:center;">
+                <a href="{auth_url}" style="text-decoration:none;">
+                    <button style="background-color: #4285F4; color: white; border: none; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 8px;">
+                        Login with Google
+                    </button>
+                </a>
             </div>
             """, unsafe_allow_html=True)
 
