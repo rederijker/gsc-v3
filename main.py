@@ -909,11 +909,8 @@ def authorize_app():
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
             <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
             </div>
-            <p style="text-align:center;font-size:17px;"><a href="{auth_url}">Login</a></p>
-            """, unsafe_allow_html=True)
-
-        st.write(f"➡️ Go to [this link]({auth_url}) and authorize app")
-    
+            <button style="text-align:center;font-size:17px;"><a href="{auth_url}">Login with Google</a></button>            
+            ", unsafe_allow_html=True)    
     return st.session_state.credentials
 
 def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensions, filters, selected_type, start_row, row_limit=None):
