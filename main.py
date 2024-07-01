@@ -909,8 +909,8 @@ def authorize_app():
             <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
             </div>
             <p style="text-align:center;font-size:17px;"><a href="{auth_url}">Login</a></p>
-            """, unsafe_allow_html=True)                          
-        
+            """, unsafe_allow_html=True)
+
         st.write(f"➡️ Go to [this link]({auth_url}) and authorize app")
     
     return st.session_state.credentials
