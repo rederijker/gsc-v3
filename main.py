@@ -1397,11 +1397,14 @@ if st.session_state.data_loaded:
                 with col2:
                     # Visualizza il DataFrame
                     st.dataframe(page_distribution)          
-        
-            df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
 
-            with st.container(border=True):
-                
+        
+    try:
+        # Controllo se la colonna 'Page' è presente
+        if 'Page' in df.columns:
+            df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
+    
+            with st.container():
                 st.subheader("3. Queries Cannibalization Report")            
                 st.divider()
                 
@@ -1467,9 +1470,16 @@ if st.session_state.data_loaded:
                     # Display the filtered DataFrame
                     st.write(f"Metrics for the selected Query: {query_selected}")
                     st.dataframe(filtered_report)
-
-            
+    
+            # Esegui altre analisi o funzioni qui
             analyze_query_performance(df)
+    
+        else:
+            # Mostra un messaggio di avviso se la colonna 'Page' non è presente
+            st.warning("La colonna 'Page' non è presente nel DataFrame. L'analisi della cannibalizzazione delle query non può essere eseguita.")
+    except Exception as e:
+        st.error(f"Si è verificato un errore: {e}")
+
                 
 
         
