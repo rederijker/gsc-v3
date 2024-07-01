@@ -935,11 +935,13 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
     return rows
 
 
-with st.container(border=True):
-    st.markdown("""
-                <h1 style="text-align:center;">SEO Gnosis</h1>
-                <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
-                """, unsafe_allow_html=True)
+
+st.markdown("""
+            <div class="header" style="padding:10%;">
+            <h1 style="text-align:center;">SEO Gnosis</h1>
+            <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
+            </div>
+            """, unsafe_allow_html=True)
 
 st.header('SEO Gnosis')
 st.write("Welcome to SEO Gnosis! Explore and analyze Google Search Console data with ease. Authenticate effortlessly, choose your website, and access features like URL inspection and search analytics. Customize your searches and enjoy unlimited rows of data, without the need for programming skills. Unleash the full potential of your website's visibility with this user-friendly tool, perfect for webmasters, SEO experts, and digital marketers.")
