@@ -902,14 +902,14 @@ def authorize_app():
 
     if st.session_state.credentials is None:
         auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
-        st.markdown("""
+        st.markdown(f"""
             <div class="header" style="padding:5%;">
             <h1 style="text-align:center;">SEO Gnosis</h1>
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
             <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
             </div>
-            <p><a href="{auth_url}"> Logi</a></p>
-            """, unsafe_allow_html=True)                            
+            <p style="text-align:center;font-size:17px;"><a href="{auth_url}">Login</a></p>
+            """, unsafe_allow_html=True)                          
         
         st.write(f"➡️ Go to [this link]({auth_url}) and authorize app")
     
