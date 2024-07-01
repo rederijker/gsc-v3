@@ -1762,6 +1762,7 @@ if st.session_state.data_loaded:
     
         with tab4:
             st.subheader("Keyword Grouping")
+            st.subheader("Keyword Grouping")
             
             col1, col2 = st.columns(2)
             with col1:
@@ -1825,15 +1826,18 @@ if st.session_state.data_loaded:
             
             if st.button("Group Keywords with Clicks ✨"):
                 with st.spinner("Grouping..."):
-                    if keyword_column in df.columns and clicks_column in df.columns:
-                        # Remove duplicates and sum clicks
-                        df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
-                        # Group keywords
-                        st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
-                        # Calculate click totals
-                        st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
-                    else:
-                        st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
+                    try:
+                        if keyword_column in df.columns and clicks_column in df.columns:
+                            # Remove duplicates and sum clicks
+                            df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
+                            # Group keywords
+                            st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
+                            # Calculate click totals
+                            st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
+                        else:
+                            st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
             
             if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
                 sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
