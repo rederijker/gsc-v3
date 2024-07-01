@@ -938,7 +938,7 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
 with st.container(border=True):
     st.markdown("""
                 <h1 style="text-align:center;">SEO Gnosis</h1>
-                <h2>Master Google Search Console Data like a Pro with a Free SEO tool</h2>
+                <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
                 """, unsafe_allow_html=True)
 
 st.header('SEO Gnosis')
