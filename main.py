@@ -908,7 +908,7 @@ def authorize_app():
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
             <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
             </div>
-            <p><a href="({{auth_url}})"> Logi</a></p>
+            <p><a href="({{auth_url})"> Logi</a></p>
             """, unsafe_allow_html=True)                            
         
         st.write(f"➡️ Go to [this link]({auth_url}) and authorize app")
