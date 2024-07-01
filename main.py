@@ -940,11 +940,10 @@ st.markdown("""
             <div class="header" style="padding:10%;">
             <h1 style="text-align:center;">SEO Gnosis</h1>
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
+            <p>Welcome to SEO Gnosis! Explore and analyze Google Search Console data with ease. Authenticate effortlessly, choose your website, and access features like URL inspection and search analytics. Customize your searches and enjoy unlimited rows of data, without the need for programming skills. Unleash the full potential of your website's visibility with this user-friendly tool, perfect for webmasters, SEO experts, and digital marketers.</p>
             </div>
             """, unsafe_allow_html=True)
 
-st.header('SEO Gnosis')
-st.write("Welcome to SEO Gnosis! Explore and analyze Google Search Console data with ease. Authenticate effortlessly, choose your website, and access features like URL inspection and search analytics. Customize your searches and enjoy unlimited rows of data, without the need for programming skills. Unleash the full potential of your website's visibility with this user-friendly tool, perfect for webmasters, SEO experts, and digital marketers.")
 st.markdown("""
     <style>
     .st-emotion-cache-qcpnpn.e1f1d6gn0 {
