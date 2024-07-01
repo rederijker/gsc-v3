@@ -940,57 +940,12 @@ st.header('SEO Gnosis')
 st.write("Welcome to SEO Gnosis! Explore and analyze Google Search Console data with ease. Authenticate effortlessly, choose your website, and access features like URL inspection and search analytics. Customize your searches and enjoy unlimited rows of data, without the need for programming skills. Unleash the full potential of your website's visibility with this user-friendly tool, perfect for webmasters, SEO experts, and digital marketers.")
 st.markdown("""
     <style>
-        .main {
-            background-color: #333333;
-            color: white;
-            font-family: 'Arial', sans-serif;
-        }
-        .stButton button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-        .stButton button:hover {
-            background-color: #45a049;
-        }
-        .header h1 {
-            color: #FFFFFF;
-            text-align: center;
-        }
-        .content {
-            padding: 20px;
-            text-align: center;
-        }
-        .highlight {
-            color: #4CAF50;
-        }
+        
     </style>
     """, unsafe_allow_html=True)
 
 # Intestazione dell'app
-st.markdown("""
-    <div class="header">
-        <h1>SEO Gnosis</h1>
-    </div>
-    """, unsafe_allow_html=True)
 
-# Contenuto dell'app
-st.markdown("""
-    <div class="content">
-        <p>Welcome to <span class="highlight">SEO Gnosis</span>! Explore and analyze Google Search Console data with ease.</p>
-        <p>Authenticate effortlessly, choose your website, and access features like URL inspection and search analytics.</p>
-        <p>Customize your searches and enjoy unlimited rows of data, without the need for programming skills. Unleash the full potential of your website's visibility with this user-friendly tool, perfect for webmasters, SEO experts, and digital marketers.</p>
-        <p>➡️ Go to <a href="YOUR_AUTH_URL" target="_blank" style="color: #4CAF50; text-decoration: none;"><b>this link</b></a> and authorize the app.</p>
-    </div>
-    """, unsafe_allow_html=True)
 
 # Carica e visualizza l'immagine del logo
 
