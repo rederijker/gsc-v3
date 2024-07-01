@@ -1602,6 +1602,9 @@ if st.session_state.data_loaded:
                     with st.expander(":red[PAGES THAT REQUIRE ATTENTION]"):
                         st.write("Page low Clicks, Low Impression, Low CTR and Low Position in comparison to the average")
                         st.write(worst_pages)
+
+            with st.container(border=True):
+                analyze_page_performance(df)
             
         except KeyError as e:
             st.warning(e)
@@ -1609,8 +1612,7 @@ if st.session_state.data_loaded:
                     
             st.markdown("<br>", unsafe_allow_html=True)
         
-        with st.container(border=True):
-            analyze_page_performance(df)
+ 
 
 
         with tab3:
