@@ -1590,9 +1590,9 @@ if st.session_state.data_loaded:
             analyze_page_performance(df)
 
 
-        
+  
         with tab3:
-            with st.container(border=True):
+            with st.container():
                 st.subheader("1. Queries Coverage Analysis")
                 st.divider()
             
@@ -1602,8 +1602,8 @@ if st.session_state.data_loaded:
                         "This report checks if Google's considered queries are present in various webpage elements such as the title, meta description, headings, body content, and ALT tags. This helps you identify gaps by finding missing important keywords.")
             
                 with col2:
-                    if 'Page' in df.columns and 'Query' in df.columns and all(column in df.columns for column in required_columns):
-                        selected_page = st.selectbox("Select a page", df['Page'].unique(), key='select_page')
+                    if 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
+                        selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
                     else:
                         st.warning("To use this feature, include the 'Page' and 'Query' among the dimensions.")
                     scan_button = st.button("Analyze Page🤖", key='scan_button')
@@ -1616,12 +1616,10 @@ if st.session_state.data_loaded:
                             st.session_state.page_data = fetch_page_data(selected_page)
                         st.session_state.keyword_analysis = None
             
-                    if 'page_data' in st.session_state and st.session_state.page_data:
-                        page_data = df[df['Cleaned_Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
+                    if 'page_data' in st.session_state and st.session_state.page_data is not None:
+                        page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
                         grouped_page_data = aggregate_queries(page_data)
-                    else:
-                        st.write("")
-            
+                  
                         # Analisi della copertura delle parole chiave
                         with st.container():
                             st.markdown(
@@ -1641,36 +1639,20 @@ if st.session_state.data_loaded:
                                 st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                             else:
                                 # Gestione dello stato del filtro di ricerca per query
-                                if 'search_query' not in st.session_state:
-                                    st.session_state.search_query = ''
-            
+                                search_query = st.text_input(
+                                    label="",
+                                    placeholder="Filter queries containing:",
+                                    value=st.session_state.get('search_query', '')
+                                )
+                                st.session_state.search_query = search_query
+                                if search_query:
+                                    keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
+    
                                 # Checkbox per mostrare/nascondere colonne
-                                if 'show_heading' not in st.session_state:
-                                    st.session_state.show_heading = True
-                                if 'show_keyword_metrics' not in st.session_state:
-                                    st.session_state.show_keyword_metrics = True
-                                if 'show_meta' not in st.session_state:
-                                    st.session_state.show_meta = True
-                                if 'show_body_alt' not in st.session_state:
-                                    st.session_state.show_body_alt = True
-            
-                                col1, col2 = st.columns([1, 2])
-                                with col1:
-                                    search_query = st.text_input(
-                                        label="",
-                                        placeholder="Filter queries containing:",
-                                        value=st.session_state.get('search_query', '')
-                                    )
-                                    st.session_state.search_query = search_query
-                                    if search_query:
-                                        keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
-                                with col2:
-                                    st.write("")
-                                    popover = st.popover("Filters")
-                                    show_heading = popover.checkbox("Show/hide heading", st.session_state.show_heading)
-                                    show_keyword_metrics = popover.checkbox("Show/hide keyword metrics", st.session_state.show_keyword_metrics)
-                                    show_meta = popover.checkbox("Show/hide meta", st.session_state.show_meta)
-                                    show_body_alt = popover.checkbox("Show/hide body alt", st.session_state.show_body_alt)
+                                show_heading = st.checkbox("Show/hide heading", st.session_state.show_heading)
+                                show_keyword_metrics = st.checkbox("Show/hide keyword metrics", st.session_state.show_keyword_metrics)
+                                show_meta = st.checkbox("Show/hide meta", st.session_state.show_meta)
+                                show_body_alt = st.checkbox("Show/hide body alt", st.session_state.show_body_alt)
             
                                 st.session_state.show_heading = show_heading
                                 st.session_state.show_keyword_metrics = show_keyword_metrics
@@ -1691,8 +1673,6 @@ if st.session_state.data_loaded:
                                 keyword_df = keyword_df[columns_to_show]
             
                                 # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                if 'show_not_covered' not in st.session_state:
-                                    st.session_state.show_not_covered = False
                                 show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
                                 st.session_state.show_not_covered = show_not_covered
             
@@ -1723,32 +1703,32 @@ if st.session_state.data_loaded:
                                 opportunity_keywords = get_opportunity_keywords(grouped_page_data, keyword_presence)
                                 st.dataframe(opportunity_keywords)
         
-            with st.container(border=True):
+            with st.container():
                 st.subheader("2. Page Topics")
                 st.divider()
                 st.write(
                     "We have grouped the keywords for which Google is considering your page to identify the main themes. For each theme, you can check the total clicks and impressions, as well as the coverage percentage of the theme by your page content.")
-                with st.spinner("Clustering topics..."):
-                    clustered_keywords, model = cluster_keywords(grouped_page_data)
-                    cluster_names = get_cluster_names(clustered_keywords)
-                    clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
-                    clustered_df, model = cluster_keywords(df)
-            
-                for cluster in clustered_keywords['Cluster'].unique():
-                    cluster_name = cluster_names[cluster]
-                    cluster_df = clustered_keywords[clustered_keywords['Cluster'] == cluster]
-                    total_keywords = len(cluster_df)
-                    covered_keywords = cluster_df['Covered'].sum()
-                    coverage_percentage = (covered_keywords / total_keywords) * 100
-                    cluster_name = cluster_name.upper()
-            
-                    with st.expander(
-                            f"**:blue[{cluster_name}]**  | __Clicks {cluster_df['Clicks'].sum()}__  | Impressions {cluster_df['Impressions'].sum()} |  Coverage by page content {coverage_percentage:.2f}%"):
-                        st.dataframe(cluster_df[['Query', 'Clicks', 'Impressions', 'CTR', 'Position', 'Covered']])
-            
-            if 'scan_started' in st.session_state and st.session_state.scan_started:
-                st.write("")
-       
+                if 'page_data' in st.session_state and st.session_state.page_data is not None:
+                    with st.spinner("Clustering topics..."):
+                        clustered_keywords, model = cluster_keywords(grouped_page_data)
+                        cluster_names = get_cluster_names(clustered_keywords)
+                        clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
+                    
+                        for cluster in clustered_keywords['Cluster'].unique():
+                            cluster_name = cluster_names[cluster]
+                            cluster_df = clustered_keywords[clustered_keywords['Cluster'] == cluster]
+                            total_keywords = len(cluster_df)
+                            covered_keywords = cluster_df['Covered'].sum()
+                            coverage_percentage = (covered_keywords / total_keywords) * 100
+                            cluster_name = cluster_name.upper()
+                    
+                            with st.expander(
+                                    f"**:blue[{cluster_name}]**  | __Clicks {cluster_df['Clicks'].sum()}__  | Impressions {cluster_df['Impressions'].sum()} |  Coverage by page content {coverage_percentage:.2f}%"):
+                                st.dataframe(cluster_df[['Query', 'Clicks', 'Impressions', 'CTR', 'Position', 'Covered']])
+                
+                if 'scan_started' in st.session_state and st.session_state.scan_started:
+                    st.write("")
+           
     
         with tab4:
             st.subheader("Keyword Grouping")
