@@ -1330,79 +1330,79 @@ if st.session_state.data_loaded:
                 
 
 
-       # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
-        if 'Query' in df.columns and 'Page' in df.columns:
-            with st.container():
-                st.subheader("2. Queries distribution on SERP Pages Report")
-                st.divider()
-                col1, col2 = st.columns([2, 1])
-                with col1:
-                    st.write("")
-        
-                    def assign_page(position):
-                        if position <= 10:
-                            return 'Page 1'
-                        elif position <= 20:
-                            return 'Page 2'
-                        elif position <= 30:
-                            return 'Page 3'
-                        elif position <= 40:
-                            return 'Page 4'
-                        elif position <= 50:
-                            return 'Page 5'
-                        elif position <= 60:
-                            return 'Page 6'
-                        elif position <= 70:
-                            return 'Page 7'
-                        elif position <= 80:
-                            return 'Page 8'
-                        elif position <= 90:
-                            return 'Page 9'
-                        elif position <= 100:
-                            return 'Page 10'
-                        else:
-                            return 'Beyond Page 10'
-        
-                    # Assicurati che il DataFrame contenga una colonna 'Position'
-                    df_query_page_serp = df.copy()
-                    df_query_page_serp['SERP_Page'] = df_query_page_serp['Position'].apply(assign_page)
-        
-                    # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
-                    df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
-        
-                    # Conta il numero totale di query uniche
-                    total_unique_queries = df_query_performance_unique['Query'].nunique()
-        
-                    # Raggruppa per pagina e conta il numero di query uniche
-                    page_distribution = df_query_performance_unique.groupby('SERP_Page').size().reset_index(name='Num_Queries')
-        
-                    # Calcola la percentuale del totale
-                    page_distribution['Percentage_of_Total'] = (page_distribution['Num_Queries'] / total_unique_queries) * 100
-        
-                    # Ordina il DataFrame per pagina
-                    page_order = ['Page 1', 'Page 2', 'Page 3', 'Page 4', 'Page 5', 'Page 6', 'Page 7', 'Page 8', 'Page 9', 'Page 10', 'Beyond Page 10']
-                    page_distribution['SERP_Page'] = pd.Categorical(page_distribution['SERP_Page'], categories=page_order, ordered=True)
-                    page_distribution = page_distribution.sort_values('SERP_Page')
-        
-                    # Visualizza il numero totale di query uniche
-                    st.write(f"Total Unique Queries: {total_unique_queries}")
-        
-                    # Creare il grafico a barre
-                    fig_bar = px.bar(page_distribution, x='SERP_Page', y='Num_Queries', title='Number of Queries per Google SERP Page', text='Percentage_of_Total', color='SERP_Page', category_orders={'SERP_Page': page_order})
-                    fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
-        
-                    # Rimuovere la legenda
-                    fig_bar.update_layout(showlegend=False)
-        
-                    # Visualizzare il grafico utilizzando Streamlit
-                    st.plotly_chart(fig_bar)
-        
-                with col2:
-                    # Visualizza il DataFrame
-                    st.dataframe(page_distribution)
-        else:
-            st.warning("The DataFrame must contain both 'Query' and 'Page' columns to generate the report.")
-        
+    # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+    if 'Query' in df.columns and 'Page' in df.columns:
+        with st.container():
+            st.subheader("2. Queries distribution on SERP Pages Report")
+            st.divider()
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.write("")
+    
+                def assign_page(position):
+                    if position <= 10:
+                        return 'Page 1'
+                    elif position <= 20:
+                        return 'Page 2'
+                    elif position <= 30:
+                        return 'Page 3'
+                    elif position <= 40:
+                        return 'Page 4'
+                    elif position <= 50:
+                        return 'Page 5'
+                    elif position <= 60:
+                        return 'Page 6'
+                    elif position <= 70:
+                        return 'Page 7'
+                    elif position <= 80:
+                        return 'Page 8'
+                    elif position <= 90:
+                        return 'Page 9'
+                    elif position <= 100:
+                        return 'Page 10'
+                    else:
+                        return 'Beyond Page 10'
+    
+                # Assicurati che il DataFrame contenga una colonna 'Position'
+                df_query_page_serp = df.copy()
+                df_query_page_serp['SERP_Page'] = df_query_page_serp['Position'].apply(assign_page)
+    
+                # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
+                df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
+    
+                # Conta il numero totale di query uniche
+                total_unique_queries = df_query_performance_unique['Query'].nunique()
+    
+                # Raggruppa per pagina e conta il numero di query uniche
+                page_distribution = df_query_performance_unique.groupby('SERP_Page').size().reset_index(name='Num_Queries')
+    
+                # Calcola la percentuale del totale
+                page_distribution['Percentage_of_Total'] = (page_distribution['Num_Queries'] / total_unique_queries) * 100
+    
+                # Ordina il DataFrame per pagina
+                page_order = ['Page 1', 'Page 2', 'Page 3', 'Page 4', 'Page 5', 'Page 6', 'Page 7', 'Page 8', 'Page 9', 'Page 10', 'Beyond Page 10']
+                page_distribution['SERP_Page'] = pd.Categorical(page_distribution['SERP_Page'], categories=page_order, ordered=True)
+                page_distribution = page_distribution.sort_values('SERP_Page')
+    
+                # Visualizza il numero totale di query uniche
+                st.write(f"Total Unique Queries: {total_unique_queries}")
+    
+                # Creare il grafico a barre
+                fig_bar = px.bar(page_distribution, x='SERP_Page', y='Num_Queries', title='Number of Queries per Google SERP Page', text='Percentage_of_Total', color='SERP_Page', category_orders={'SERP_Page': page_order})
+                fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
+    
+                # Rimuovere la legenda
+                fig_bar.update_layout(showlegend=False)
+    
+                # Visualizzare il grafico utilizzando Streamlit
+                st.plotly_chart(fig_bar)
+    
+            with col2:
+                # Visualizza il DataFrame
+                st.dataframe(page_distribution)
+    else:
+        st.warning("The DataFrame must contain both 'Query' and 'Page' columns to generate the report.")
+    
     try:
         # Controllo se la colonna 'Page' è presente
         if 'Page' in df.columns:
