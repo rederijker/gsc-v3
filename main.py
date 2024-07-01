@@ -1404,7 +1404,7 @@ if st.session_state.data_loaded:
         if 'Page' in df.columns:
             df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
     
-            with st.container():
+            with st.container(border=True):
                 st.subheader("3. Queries Cannibalization Report")            
                 st.divider()
                 
