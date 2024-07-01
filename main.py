@@ -918,8 +918,62 @@ def authorize_app():
             </a>
         </div>
         """, unsafe_allow_html=True)
-
-
+        st.markdown(f"""
+            <style>
+                .header {{
+                    padding: 5%;
+                    text-align: center;
+                    background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+                    border-radius: 10px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }}
+                h1, h2 {{
+                    font-family: 'Arial', sans-serif;
+                    color: #333;
+                }}
+                p {{
+                    font-family: 'Arial', sans-serif;
+                    color: #666;
+                    font-size: 17px;
+                }}
+                .google-button {{
+                    display: inline-flex;
+                    align-items: center;
+                    background-color: white;
+                    color: #4285F4;
+                    border: 1px solid #4285F4;
+                    padding: 10px 20px;
+                    font-size: 17px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    transition: background-color 0.3s, box-shadow 0.3s;
+                }}
+                .google-button:hover {{
+                    background-color: #f1f1f1;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                }}
+                .google-logo {{
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                }}
+                .center {{
+                    text-align: center;
+                }}
+            </style>
+            <div class="header">
+                <h1>SEO Gnosis</h1>
+                <h2>Master Google Search Console Data like a Pro with a Free SEO tool</h2>
+                <p>Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
+            </div>
+            <div class="center" style="margin-top: 20px;">
+                <a href="{auth_url}" class="google-button">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" class="google-logo">
+                    Login with Google
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
             
     return st.session_state.credentials
 
