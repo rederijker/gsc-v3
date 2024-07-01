@@ -1403,86 +1403,86 @@ if st.session_state.data_loaded:
             else:
                 st.warning("The DataFrame must contain both 'Query' and 'Page' columns to generate the report.")
         
-    try:
-        # Controllo se la colonna 'Page' è presente
-        if 'Page' in df.columns:
-            df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
-    
-            with st.container(border=True):
-                st.subheader("3. Queries Cannibalization Report")            
-                st.divider()
-                
-                # Group by the cleaned page and query, and calculate the metrics
-                query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
-                    'Position': 'mean',
-                    'CTR': 'mean',
-                    'Clicks': 'sum',
-                    'Impressions': 'sum'
-                }).reset_index()
-                
-                # Group queries by page
-                query_page_group = query_page_metrics.groupby('Query')['Cleaned_Page'].apply(lambda pages: list(set(pages))).reset_index()
-                query_page_group.columns = ['Query', 'Pages']
-                
-                # Identify cannibalized queries
-                cannibalized_queries = query_page_group[query_page_group['Pages'].apply(lambda x: len(x) > 1)]
-                
-                # Create a cannibalization report
-                cannibalization_report = cannibalized_queries.explode('Pages').merge(query_page_metrics, left_on=['Query', 'Pages'], right_on=['Query', 'Cleaned_Page']).drop(columns=['Pages'])
-                
-                # Count unique cannibalized queries
-                num_unique_queries = cannibalized_queries['Query'].nunique()
-                
-                # Count the number of pages that are cannibalizing queries
-                num_cannibalizing_pages = cannibalization_report['Cleaned_Page'].nunique()
-                
-                # Calculate the average number of pages cannibalizing each query
-                num_pages_per_query = cannibalization_report.groupby('Query')['Cleaned_Page'].nunique()
-                average_pages_per_query = num_pages_per_query.mean()
-            
-                # Create a DataFrame with the columns 'Query' and 'Number of Pages'
-                cannibalized_queries['Cannibals Pages'] = cannibalized_queries['Pages'].apply(len)
-                cannibalized_query_page_counts = cannibalized_queries[['Query', 'Cannibals Pages']]      
-                cannibalized_query_page_counts_ordered = cannibalized_query_page_counts.sort_values('Cannibals Pages', ascending=False)
-            
-                # Display the report
-                col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-                with col1:
-                    st.write("It shows queries appearing on multiple pages and the number of pages per query. Select a query to see detailed metrics for each page (CTR, clicks, position, impressions) aiding in resolving cannibalization issues.")
+        try:
+            # Controllo se la colonna 'Page' è presente
+            if 'Page' in df.columns:
+                df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
+        
+                with st.container(border=True):
+                    st.subheader("3. Queries Cannibalization Report")            
+                    st.divider()
                     
-                    def convert_cannibalization_report_to_csv(cannibalization_report):
-                        return cannibalization_report.to_csv(index=False).encode('utf-8')
+                    # Group by the cleaned page and query, and calculate the metrics
+                    query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
+                        'Position': 'mean',
+                        'CTR': 'mean',
+                        'Clicks': 'sum',
+                        'Impressions': 'sum'
+                    }).reset_index()
                     
-                    csvcann = convert_cannibalization_report_to_csv(cannibalization_report)
-                    st.download_button(label="Download cannibalization report CSV", data=csvcann, file_name='cannibalization_report.csv', mime='text/csv')
+                    # Group queries by page
+                    query_page_group = query_page_metrics.groupby('Query')['Cleaned_Page'].apply(lambda pages: list(set(pages))).reset_index()
+                    query_page_group.columns = ['Query', 'Pages']
+                    
+                    # Identify cannibalized queries
+                    cannibalized_queries = query_page_group[query_page_group['Pages'].apply(lambda x: len(x) > 1)]
+                    
+                    # Create a cannibalization report
+                    cannibalization_report = cannibalized_queries.explode('Pages').merge(query_page_metrics, left_on=['Query', 'Pages'], right_on=['Query', 'Cleaned_Page']).drop(columns=['Pages'])
+                    
+                    # Count unique cannibalized queries
+                    num_unique_queries = cannibalized_queries['Query'].nunique()
+                    
+                    # Count the number of pages that are cannibalizing queries
+                    num_cannibalizing_pages = cannibalization_report['Cleaned_Page'].nunique()
+                    
+                    # Calculate the average number of pages cannibalizing each query
+                    num_pages_per_query = cannibalization_report.groupby('Query')['Cleaned_Page'].nunique()
+                    average_pages_per_query = num_pages_per_query.mean()
                 
-                with col2:
-                    st.metric("Unique cannibalized queries", f"{num_unique_queries}")
-                with col3:
-                    st.metric("Pages cannibalizing queries", f"{num_cannibalizing_pages}")
-                with col4:
-                    st.metric("AVG n° of pages cannibalizing each query", f"{average_pages_per_query:.2f}")
-            
-                col1, col2 = st.columns([1, 2])
-                with col1:
-                    st.dataframe(cannibalized_query_page_counts_ordered)
-                with col2:
-                    query_selected = st.selectbox("Select a cannibalized Query", cannibalized_queries['Query'])
-                    # Filter the report based on the selected query
-                    filtered_report = cannibalization_report[cannibalization_report['Query'] == query_selected]
+                    # Create a DataFrame with the columns 'Query' and 'Number of Pages'
+                    cannibalized_queries['Cannibals Pages'] = cannibalized_queries['Pages'].apply(len)
+                    cannibalized_query_page_counts = cannibalized_queries[['Query', 'Cannibals Pages']]      
+                    cannibalized_query_page_counts_ordered = cannibalized_query_page_counts.sort_values('Cannibals Pages', ascending=False)
+                
+                    # Display the report
+                    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+                    with col1:
+                        st.write("It shows queries appearing on multiple pages and the number of pages per query. Select a query to see detailed metrics for each page (CTR, clicks, position, impressions) aiding in resolving cannibalization issues.")
+                        
+                        def convert_cannibalization_report_to_csv(cannibalization_report):
+                            return cannibalization_report.to_csv(index=False).encode('utf-8')
+                        
+                        csvcann = convert_cannibalization_report_to_csv(cannibalization_report)
+                        st.download_button(label="Download cannibalization report CSV", data=csvcann, file_name='cannibalization_report.csv', mime='text/csv')
                     
-                    # Display the filtered DataFrame
-                    st.write(f"Metrics for the selected Query: {query_selected}")
-                    st.dataframe(filtered_report)
-    
-            # Esegui altre analisi o funzioni qui
-            analyze_query_performance(df)
-    
-        else:
-            # Mostra un messaggio di avviso se la colonna 'Page' non è presente
-            st.warning("La colonna 'Page' non è presente nel DataFrame. L'analisi della cannibalizzazione delle query non può essere eseguita.")
-    except Exception as e:
-        st.error(f"Si è verificato un errore: {e}")
+                    with col2:
+                        st.metric("Unique cannibalized queries", f"{num_unique_queries}")
+                    with col3:
+                        st.metric("Pages cannibalizing queries", f"{num_cannibalizing_pages}")
+                    with col4:
+                        st.metric("AVG n° of pages cannibalizing each query", f"{average_pages_per_query:.2f}")
+                
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        st.dataframe(cannibalized_query_page_counts_ordered)
+                    with col2:
+                        query_selected = st.selectbox("Select a cannibalized Query", cannibalized_queries['Query'])
+                        # Filter the report based on the selected query
+                        filtered_report = cannibalization_report[cannibalization_report['Query'] == query_selected]
+                        
+                        # Display the filtered DataFrame
+                        st.write(f"Metrics for the selected Query: {query_selected}")
+                        st.dataframe(filtered_report)
+        
+                # Esegui altre analisi o funzioni qui
+                analyze_query_performance(df)
+        
+            else:
+                # Mostra un messaggio di avviso se la colonna 'Page' non è presente
+                st.warning("La colonna 'Page' non è presente nel DataFrame. L'analisi della cannibalizzazione delle query non può essere eseguita.")
+        except Exception as e:
+            st.error(f"Si è verificato un errore: {e}")
 
                 
 
