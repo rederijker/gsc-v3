@@ -1621,8 +1621,9 @@ if st.session_state.data_loaded:
                         st.warning("To use this feature, ensure that the data contains the 'Page' and 'Query' dimensions.")
                         scan_button = False
     
-                if scan_button or 'scan_started' in st.session_state:
-                    st.session_state.scan_started = True
+                if scan_button or st.session_state.scan_started:
+                    if scan_button:
+                        st.session_state.scan_started = True
                     if selected_page and (selected_page != st.session_state.get('selected_page', None)):
                         st.session_state.selected_page = selected_page
                         with st.spinner("Fetching page data..."):
