@@ -893,8 +893,8 @@ def authorize_app():
  
         st.write("Auth code received:", auth_code)  # Debug: Visualizza il codice di autorizzazione
         if not st.session_state.credentials:
-            st.markdown(f"
-            <h1 style="text-align:center;">SEO Gnosis</h1>",
+            st.markdown(f"""
+            <h1 style="text-align:center;">SEO Gnosis</h1>""",
             unsafe_allow_html=True
             )
             st.write("✅ You are connected with Google Search Console API")
