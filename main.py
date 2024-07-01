@@ -903,7 +903,7 @@ def authorize_app():
 
     if st.session_state.credentials is None:
         auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
-        gif_url = "https://github.com/rederijker/gsc-v3/blob/main/assets/background.gif"
+        gif_url = "https://github.com/rederijker/gsc-v3/blob/main/assets/background.gif?raw=true"
         st.markdown(f"""
         <div class="header" style="padding:5%;background-image:url({gif_url});">
         <h1 style="text-align:center;">SEO Gnosis</h1>
