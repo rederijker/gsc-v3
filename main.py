@@ -912,7 +912,7 @@ def analyze_query_position_changes(df):
     })
     
     # Unisci i dati dei due periodi
-    performance_df_position_analysis = pd.merge(first_half_performance_position_analysis, second_half_performance_position_analysis, on='Query', how='outer').fillna(0)
+    performance_df_position_analysis = pd.merge(first_half_performance_position_analysis, second_half_performance_position_analysis, on='Query', how='outer')
     
     # Calcola la variazione di posizione media tra i periodi
     performance_df_position_analysis['Position_Change'] = performance_df_position_analysis['Position_Second_Half'] - performance_df_position_analysis['Position_First_Half']
@@ -928,6 +928,12 @@ def analyze_query_position_changes(df):
     position_percentage_change = (overall_position_trend / avg_position_first_half) * 100
     position_score_change = -overall_position_trend
     position_score_percentage_change = -position_percentage_change
+    
+    # Filtro a toggle per includere/escludere query con dati mancanti
+    include_missing_data = st.toggle("Include queries with missing data in one of the periods", value=True)
+    
+    if not include_missing_data:
+        performance_df_position_analysis = performance_df_position_analysis.dropna()
     
     with st.container(border=True):
         st.subheader("4. Query Position Changes Report")
@@ -1024,7 +1030,6 @@ def analyze_query_position_changes(df):
                 'Impressions_First_Half': '{:.0f}',
                 'Impressions_Second_Half': '{:.0f}'
             }))
-
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
