@@ -895,15 +895,16 @@ def authorize_app():
         unsafe_allow_html=True
         )
         st.write("Auth code received:", auth_code)  # Debug: Visualizza il codice di autorizzazione
+        st.write("✅ You are connected with Google Search Console API")
         if not st.session_state.credentials:
-
-            st.write("✅ You are connected with Google Search Console API")
+            
             try:
                 flow.fetch_token(code=auth_code)
                 credentials = flow.credentials
                 st.session_state.credentials = credentials
             except Exception as e:
                 st.write(f"Error during authorization: {e}")
+                st.write(f"Please reauthenticate")
 
     if st.session_state.credentials is None:
         auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
