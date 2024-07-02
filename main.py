@@ -1147,7 +1147,12 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
 
 st.markdown("""
     <style>
-
+.st-emotion-cache-qcpnpn {
+    border: 2px solid rgb(3 169 244 / 50%);
+    border-radius: 0.5rem;
+    padding: calc(-1px + 0.9rem);
+    background: rgb(0 0 0 / 24%);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, .6);}
         
     </style>
     """, unsafe_allow_html=True)
