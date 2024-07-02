@@ -935,12 +935,13 @@ def analyze_query_position_changes(df):
     position_score_percentage_change = -position_percentage_change
     
     # Filtro a toggle per includere/escludere query con dati mancanti
+    st.markdown("### Filters")
     include_missing_data = st.checkbox("Include queries with missing data in one of the periods", value=True)
     
     if not include_missing_data:
         performance_df_position_analysis = performance_df_position_analysis.dropna(subset=['Position_First_Half', 'Position_Second_Half'])
 
-    with st.container(border=True):
+    with st.container():
         st.subheader("4. Query Position Changes Report")
         st.divider()
         col1, col2, col3 = st.columns([3, 1, 1])
@@ -1037,16 +1038,20 @@ def analyze_query_position_changes(df):
             }))
 
         with st.expander("QUERIES THAT DROPPED OUT OF SERP ❌"):
+            st.markdown("""
+            Per determinare se una query è uscita dalla SERP, possiamo basarci sull'assenza di impression e clic nel secondo periodo, dopo essere stata presente nel primo periodo. Questo scenario suggerisce che la query non sta più ricevendo traffico, il che potrebbe essere dovuto a:
+
+            - **Riduzione delle Ricerche**: La query potrebbe non essere più rilevante o cercata dagli utenti.
+            - **Perdita di Posizione**: La query potrebbe aver perso visibilità nelle SERP, finendo su pagine successive dove riceve meno traffico.
+            - **Modifica dell'Algoritmo**: Un cambiamento nell'algoritmo di ricerca di Google potrebbe aver influenzato la visibilità della query.
+            - **Rimozione del Contenuto**: Il contenuto che rispondeva a quella query potrebbe essere stato rimosso o deindicizzato.
+            """)
             st.dataframe(queries_out_of_serp[[
-                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half', 'Impressions_First_Half', 'Impressions_Second_Half'
+                'Query', 'Position_First_Half', 'Clicks_First_Half', 'Impressions_First_Half'
             ]].reset_index(drop=True).style.format({
                 'Position_First_Half': '{:.2f}',
-                'Position_Second_Half': '{:.2f}',
-                'Position_Change': '{:.2f}',
                 'Clicks_First_Half': '{:.0f}',
-                'Clicks_Second_Half': '{:.0f}',
-                'Impressions_First_Half': '{:.0f}',
-                'Impressions_Second_Half': '{:.0f}'
+                'Impressions_First_Half': '{:.0f}'
             }))
 
 
@@ -1694,14 +1699,15 @@ if st.session_state.data_loaded:
             
                     # Esegui altre analisi o funzioni qui
                     analyze_query_performance(df)
-                    analyze_query_position_changes(df)
+                    
             
                 else:
                     # Mostra un messaggio di avviso se la colonna 'Page' non è presente
                     st.warning("La colonna 'Page' non è presente nel DataFrame. L'analisi della cannibalizzazione delle query non può essere eseguita.")
             except Exception as e:
                 st.error(f"Si è verificato un errore: {e}")
-
+                
+            analyze_query_position_changes(df)
                 
 
         
