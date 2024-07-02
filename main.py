@@ -1697,8 +1697,7 @@ if st.session_state.data_loaded:
                             st.write(f"Metrics for the selected Query: {query_selected}")
                             st.dataframe(filtered_report)
             
-                    # Esegui altre analisi o funzioni qui
-                    analyze_query_performance(df)
+
                     
             
                 else:
@@ -1706,8 +1705,16 @@ if st.session_state.data_loaded:
                     st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
             except Exception as e:
                 st.error(f"Si è verificato un errore: {e}")
-                
-            analyze_query_position_changes(df)
+            
+            if 'Date' and 'Query' in df.columns:
+                analyze_query_performance(df)
+            else:
+                st.warning("Add 'Date' and 'Query' to dimensions to show 4. Queries Traffic Changes Report")
+
+            if 'Date' and 'Query' in df.columns:
+                analyze_query_position_changes(df)
+            else:
+                st.warning("Add 'Date' and 'Query' to dimensions to show 5. Query Position Changes Report")
                 
 
         
