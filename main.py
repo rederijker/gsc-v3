@@ -865,7 +865,7 @@ def analyze_query_performance(df):
                 'Position_Change': '{:.2f}'
             }))
 #REPORT CAMBI DI POSIZIONAMENTO
-pd.set_option("styler.render.max_elements", 10**9)
+pd.set_option("styler.render.max_elements", 20000000)
 
 def analyze_query_position_changes(df):
     # Creare una copia del DataFrame di partenza per evitare conflitti con altre analisi
