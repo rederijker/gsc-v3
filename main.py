@@ -324,7 +324,7 @@ def analyze_page_performance(df):
     
     # Assicurati che il DataFrame contenga una colonna "Date"
     if 'Date' not in df_page_performance_analysis.columns:
-        st.error("The DataFrame must contain a 'Date' column.")
+        st.warning("The DataFrame must contain a 'Date' column.")
         return
     
     # Conversione della colonna 'Date' in datetime
@@ -603,7 +603,7 @@ def analyze_query_performance(df):
     
     # Assicurati che il DataFrame contenga una colonna "Date"
     if 'Date' not in df_query_performance_analysis.columns:
-        st.error("The DataFrame must contain a 'Date' column.")
+        st.warning("Add 'Date' and 'Query' to dimensions to show 4. Queries Traffic Changes Report")
         return
     
     # Conversione della colonna 'Date' in datetime
@@ -873,7 +873,7 @@ def analyze_query_position_changes(df):
     
     # Assicurati che il DataFrame contenga una colonna "Date"
     if 'Date' not in df_position_analysis.columns:
-        st.error("The DataFrame must contain a 'Date' column.")
+        st.error("Add 'Date' and 'Query' to dimensions to show 5. Query Position Changes Report")
         return
     
     # Conversione della colonna 'Date' in datetime
@@ -1706,15 +1706,10 @@ if st.session_state.data_loaded:
             except Exception as e:
                 st.error(f"Si è verificato un errore: {e}")
             
-            if 'Date' and 'Query' in df.columns:
-                analyze_query_performance(df)
-            else:
-                st.warning("Add 'Date' and 'Query' to dimensions to show 4. Queries Traffic Changes Report")
+            analyze_query_performance(df)
 
-            if 'Date' and 'Query' in df.columns:
-                analyze_query_position_changes(df)
-            else:
-                st.warning("Add 'Date' and 'Query' to dimensions to show 5. Query Position Changes Report")
+            analyze_query_position_changes(df)
+
                 
 
         
