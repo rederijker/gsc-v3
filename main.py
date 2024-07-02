@@ -1860,7 +1860,7 @@ if st.session_state.data_loaded:
                         selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
                         scan_button = st.button("Analyze Page🤖", key='scan_button')
                     else:
-                        st.warning("To use this feature, ensure that the data contains the 'Page' and 'Query' dimensions.")
+                        st.warning("To use this feature, ensure that the dimensions contains the 'Page' and 'Query'.")
                         scan_button = False
     
                 if scan_button or st.session_state.scan_started:
