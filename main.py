@@ -941,8 +941,8 @@ def analyze_query_position_changes(df):
     if not include_missing_data:
         performance_df_position_analysis = performance_df_position_analysis.dropna(subset=['Position_First_Half', 'Position_Second_Half'])
 
-    with st.container():
-        st.subheader("4. Query Position Changes Report")
+    with st.container(border=True):
+        st.subheader("5. Query Position Changes Report")
         st.divider()
         col1, col2, col3 = st.columns([3, 1, 1])
         with col1:        
@@ -1623,7 +1623,7 @@ if st.session_state.data_loaded:
                         # Visualizza il DataFrame
                         st.dataframe(page_distribution)
             else:
-                st.warning("The DataFrame must contain both 'Query' and 'Page' columns to generate the report.")
+                st.warning("Add 'Query' or 'Page' dimension to generate the 2. Queries distribution on SERP Pages Report")
         
             try:
                 # Controllo se la colonna 'Page' è presente
@@ -1703,7 +1703,7 @@ if st.session_state.data_loaded:
             
                 else:
                     # Mostra un messaggio di avviso se la colonna 'Page' non è presente
-                    st.warning("La colonna 'Page' non è presente nel DataFrame. L'analisi della cannibalizzazione delle query non può essere eseguita.")
+                    st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
             except Exception as e:
                 st.error(f"Si è verificato un errore: {e}")
                 
