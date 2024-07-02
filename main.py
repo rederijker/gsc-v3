@@ -1834,10 +1834,10 @@ if st.session_state.data_loaded:
                         st.write(worst_pages)
 
             with st.container(border=True):
+               
                 analyze_page_performance(df)
             
         except KeyError as e:
-            st.warning(e)
             st.warning("Add 'Page' to dimensions to show 1. Pages Health Check Report.")
                     
             st.markdown("<br>", unsafe_allow_html=True)
