@@ -1764,7 +1764,7 @@ if st.session_state.data_loaded:
                 (df_aggregated_popular_page['Average Position'] > average_position_popular)
             ]
             with st.container(border=True):
-                st.subheader("1. Pages Health Check Report and 2. Pages Traffic Changes Report")            
+                st.subheader("1. Pages Health Check Report")            
                 st.divider()
                 col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
                 
@@ -1838,7 +1838,7 @@ if st.session_state.data_loaded:
                 analyze_page_performance(df)
             
         except KeyError as e:
-            st.warning("Add 'Page' to dimensions to show 1. Pages Health Check Report.")
+            st.warning("Add 'Page' to dimensions to show 1. Pages Health Check Report and 2. Pages Traffic Changes Report")
                     
             st.markdown("<br>", unsafe_allow_html=True)
         
