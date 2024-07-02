@@ -1836,7 +1836,7 @@ if st.session_state.data_loaded:
             
         except KeyError as e:
             st.warning(e)
-            st.warning("To use this feature, include the 'Page' and 'Query' among the dimensions.")
+            st.warning("Add 'Page' to dimensions to show 1. Pages Health Check Report.")
                     
             st.markdown("<br>", unsafe_allow_html=True)
         
