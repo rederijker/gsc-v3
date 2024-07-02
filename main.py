@@ -890,21 +890,25 @@ def analyze_query_position_changes(df):
     first_half_df_position_analysis = filtered_df_position_analysis[filtered_df_position_analysis['Date'].dt.date <= midpoint_position_analysis]
     second_half_df_position_analysis = filtered_df_position_analysis[filtered_df_position_analysis['Date'].dt.date > midpoint_position_analysis]
     
-    # Calcola le medie di posizione media e somma di click per ogni periodo e ogni query
+    # Calcola le medie di posizione media, somma di click e impression per ogni periodo e ogni query
     first_half_performance_position_analysis = first_half_df_position_analysis.groupby('Query').agg({
         'Position': 'mean',
-        'Clicks': 'sum'
+        'Clicks': 'sum',
+        'Impressions': 'sum'
     }).reset_index().rename(columns={
         'Position': 'Position_First_Half',
-        'Clicks': 'Clicks_First_Half'
+        'Clicks': 'Clicks_First_Half',
+        'Impressions': 'Impressions_First_Half'
     })
     
     second_half_performance_position_analysis = second_half_df_position_analysis.groupby('Query').agg({
         'Position': 'mean',
-        'Clicks': 'sum'
+        'Clicks': 'sum',
+        'Impressions': 'sum'
     }).reset_index().rename(columns={
         'Position': 'Position_Second_Half',
-        'Clicks': 'Clicks_Second_Half'
+        'Clicks': 'Clicks_Second_Half',
+        'Impressions': 'Impressions_Second_Half'
     })
     
     # Unisci i dati dei due periodi
@@ -984,35 +988,41 @@ def analyze_query_position_changes(df):
         # Visualizza i risultati
         with st.expander("QUERIES THAT IMPROVED POSITION ⬆️"):
             st.dataframe(improved_position_queries[[
-                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half'
+                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half', 'Impressions_First_Half', 'Impressions_Second_Half'
             ]].reset_index(drop=True).style.format({
                 'Position_First_Half': '{:.2f}',
                 'Position_Second_Half': '{:.2f}',
                 'Position_Change': '{:.2f}',
                 'Clicks_First_Half': '{:.0f}',
-                'Clicks_Second_Half': '{:.0f}'
+                'Clicks_Second_Half': '{:.0f}',
+                'Impressions_First_Half': '{:.0f}',
+                'Impressions_Second_Half': '{:.0f}'
             }))
         
         with st.expander("QUERIES THAT WORSENED POSITION ⬇️"):
             st.dataframe(worsened_position_queries[[
-                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half'
+                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half', 'Impressions_First_Half', 'Impressions_Second_Half'
             ]].reset_index(drop=True).style.format({
                 'Position_First_Half': '{:.2f}',
                 'Position_Second_Half': '{:.2f}',
                 'Position_Change': '{:.2f}',
                 'Clicks_First_Half': '{:.0f}',
-                'Clicks_Second_Half': '{:.0f}'
+                'Clicks_Second_Half': '{:.0f}',
+                'Impressions_First_Half': '{:.0f}',
+                'Impressions_Second_Half': '{:.0f}'
             }))
         
         with st.expander("QUERIES WITH NO POSITION CHANGES ➡️"):
             st.dataframe(stable_position_queries[[
-                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half'
+                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half', 'Impressions_First_Half', 'Impressions_Second_Half'
             ]].reset_index(drop=True).style.format({
                 'Position_First_Half': '{:.2f}',
                 'Position_Second_Half': '{:.2f}',
                 'Position_Change': '{:.2f}',
                 'Clicks_First_Half': '{:.0f}',
-                'Clicks_Second_Half': '{:.0f}'
+                'Clicks_Second_Half': '{:.0f}',
+                'Impressions_First_Half': '{:.0f}',
+                'Impressions_Second_Half': '{:.0f}'
             }))
 
 
