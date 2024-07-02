@@ -1153,6 +1153,10 @@ st.markdown("""
     padding: calc(-1px + 0.9rem);
     background: rgb(0 0 0 / 24%);
     box-shadow: 0 15px 25px rgba(0, 0, 0, .6);}
+    h3 {
+    color: #00BCD4;
+
+    text-align: center;}
         
     </style>
     """, unsafe_allow_html=True)
