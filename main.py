@@ -864,6 +864,157 @@ def analyze_query_performance(df):
                 'Position_Second_Half': '{:.2f}',
                 'Position_Change': '{:.2f}'
             }))
+#REPORT CAMBI DI POSIZIONAMENTO
+def analyze_query_position_changes(df):
+    # Creare una copia del DataFrame di partenza per evitare conflitti con altre analisi
+    df_position_analysis = df.copy()
+    
+    # Assicurati che il DataFrame contenga una colonna "Date"
+    if 'Date' not in df_position_analysis.columns:
+        st.error("The DataFrame must contain a 'Date' column.")
+        return
+    
+    # Conversione della colonna 'Date' in datetime
+    df_position_analysis['Date'] = pd.to_datetime(df_position_analysis['Date'])
+    
+    # Utilizza l'intervallo di date nel DataFrame
+    start_date_position_analysis = df_position_analysis['Date'].min().date()
+    end_date_position_analysis = df_position_analysis['Date'].max().date()
+    
+    # Filtra il DataFrame in base alle date disponibili
+    filtered_df_position_analysis = df_position_analysis[(df_position_analysis['Date'].dt.date >= start_date_position_analysis) & (df_position_analysis['Date'].dt.date <= end_date_position_analysis)]
+    
+    # Definisci i periodi di confronto
+    midpoint_position_analysis = start_date_position_analysis + (end_date_position_analysis - start_date_position_analysis) / 2
+    
+    first_half_df_position_analysis = filtered_df_position_analysis[filtered_df_position_analysis['Date'].dt.date <= midpoint_position_analysis]
+    second_half_df_position_analysis = filtered_df_position_analysis[filtered_df_position_analysis['Date'].dt.date > midpoint_position_analysis]
+    
+    # Calcola le medie di posizione media e somma di click per ogni periodo e ogni query
+    first_half_performance_position_analysis = first_half_df_position_analysis.groupby('Query').agg({
+        'Position': 'mean',
+        'Clicks': 'sum'
+    }).reset_index().rename(columns={
+        'Position': 'Position_First_Half',
+        'Clicks': 'Clicks_First_Half'
+    })
+    
+    second_half_performance_position_analysis = second_half_df_position_analysis.groupby('Query').agg({
+        'Position': 'mean',
+        'Clicks': 'sum'
+    }).reset_index().rename(columns={
+        'Position': 'Position_Second_Half',
+        'Clicks': 'Clicks_Second_Half'
+    })
+    
+    # Unisci i dati dei due periodi
+    performance_df_position_analysis = pd.merge(first_half_performance_position_analysis, second_half_performance_position_analysis, on='Query', how='outer').fillna(0)
+    
+    # Calcola la variazione di posizione media tra i periodi
+    performance_df_position_analysis['Position_Change'] = performance_df_position_analysis['Position_Second_Half'] - performance_df_position_analysis['Position_First_Half']
+    
+    # Identifica le query che hanno migliorato, peggiorato o sono rimaste stabili in termini di posizione
+    improved_position_queries = performance_df_position_analysis[performance_df_position_analysis['Position_Change'] < 0]
+    worsened_position_queries = performance_df_position_analysis[performance_df_position_analysis['Position_Change'] > 0]
+    stable_position_queries = performance_df_position_analysis[performance_df_position_analysis['Position_Change'] == 0]
+    
+    # Analizza il trend generale di posizione media
+    avg_position_first_half = first_half_performance_position_analysis['Position_First_Half'].mean()
+    overall_position_trend = performance_df_position_analysis['Position_Change'].mean()
+    position_percentage_change = (overall_position_trend / avg_position_first_half) * 100
+    position_score_change = -overall_position_trend
+    position_score_percentage_change = -position_percentage_change
+    
+    with st.container(border=True):
+        st.subheader("4. Query Position Changes Report")
+        st.divider()
+        col1, col2, col3 = st.columns([3, 1, 1])
+        with col1:        
+            st.markdown("""
+            This report divides the time period into two halves and compares them.
+            The comparison is made between the following date ranges:
+            """)
+            st.markdown(f"""
+            - **First half period**: {start_date_position_analysis} to {midpoint_position_analysis}
+            - **Second half period**: {midpoint_position_analysis + pd.Timedelta(days=1)} to {end_date_position_analysis}
+            """)
+        with col2:
+            if overall_position_trend < 0:
+                st.metric("Average Position Change", f"{overall_position_trend:.2f}", f"{position_percentage_change:.2f}%", delta_color="normal")
+            else:
+                st.metric("Average Position Change", f"{overall_position_trend:.2f}", f"{position_percentage_change:.2f}%", delta_color="inverse")
+    
+        # Creazione del grafico a barre con plotly
+        bar_data_position_analysis = {
+            "Position Change": ["Improved Position", "Worsened Position", "No Changes"],
+            "Count": [improved_position_queries.shape[0], worsened_position_queries.shape[0], stable_position_queries.shape[0]]
+        }
+        
+        fig_position_analysis = px.bar(
+            bar_data_position_analysis, 
+            x="Position Change", 
+            y="Count", 
+            title="Position Change Overview",
+            labels={"Position Change": "Position Change Type", "Count": "Number of Queries"},
+            color="Position Change",
+            color_discrete_map={
+                "Improved Position": "#32CD32",
+                "Worsened Position": "coral",
+                "No Changes": "grey"
+            }
+        )
+        fig_position_analysis.update_layout(
+            showlegend=False,
+            title=dict(
+                text="Position Change Overview",
+                y=0.8,
+                yanchor='bottom'
+            )
+        )
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(fig_position_analysis, use_container_width=True)
+        with col2:
+            st.markdown("<br></br>", unsafe_allow_html=True)
+            if overall_position_trend < 0:
+                st.success(f"The overall trend of average position is improving (lowering). Variation: {position_score_change:.2f} positions, improvement of {position_score_percentage_change:.2f}%.")
+            else:
+                st.warning(f"The overall trend of average position is worsening (rising). Variation: {position_score_change:.2f} positions, worsening of {position_score_percentage_change:.2f}%.")
+    
+        # Visualizza i risultati
+        with st.expander("QUERIES THAT IMPROVED POSITION ⬆️"):
+            st.dataframe(improved_position_queries[[
+                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half'
+            ]].reset_index(drop=True).style.format({
+                'Position_First_Half': '{:.2f}',
+                'Position_Second_Half': '{:.2f}',
+                'Position_Change': '{:.2f}',
+                'Clicks_First_Half': '{:.0f}',
+                'Clicks_Second_Half': '{:.0f}'
+            }))
+        
+        with st.expander("QUERIES THAT WORSENED POSITION ⬇️"):
+            st.dataframe(worsened_position_queries[[
+                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half'
+            ]].reset_index(drop=True).style.format({
+                'Position_First_Half': '{:.2f}',
+                'Position_Second_Half': '{:.2f}',
+                'Position_Change': '{:.2f}',
+                'Clicks_First_Half': '{:.0f}',
+                'Clicks_Second_Half': '{:.0f}'
+            }))
+        
+        with st.expander("QUERIES WITH NO POSITION CHANGES ➡️"):
+            st.dataframe(stable_position_queries[[
+                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half'
+            ]].reset_index(drop=True).style.format({
+                'Position_First_Half': '{:.2f}',
+                'Position_Second_Half': '{:.2f}',
+                'Position_Change': '{:.2f}',
+                'Clicks_First_Half': '{:.0f}',
+                'Clicks_Second_Half': '{:.0f}'
+            }))
+
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
@@ -1509,6 +1660,7 @@ if st.session_state.data_loaded:
             
                     # Esegui altre analisi o funzioni qui
                     analyze_query_performance(df)
+                    analyze_query_position_changes(df)
             
                 else:
                     # Mostra un messaggio di avviso se la colonna 'Page' non è presente
