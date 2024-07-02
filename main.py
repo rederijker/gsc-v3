@@ -922,6 +922,9 @@ def analyze_query_position_changes(df):
     worsened_position_queries = performance_df_position_analysis[performance_df_position_analysis['Position_Change'] > 0]
     stable_position_queries = performance_df_position_analysis[performance_df_position_analysis['Position_Change'] == 0]
     
+    # Identifica le query che sono uscite dalla SERP
+    queries_out_of_serp = performance_df_position_analysis[(performance_df_position_analysis['Impressions_First_Half'] > 0) & (performance_df_position_analysis['Impressions_Second_Half'].isna())]
+    
     # Analizza il trend generale di posizione media
     avg_position_first_half = first_half_performance_position_analysis['Position_First_Half'].mean()
     overall_position_trend = performance_df_position_analysis['Position_Change'].mean()
@@ -930,11 +933,11 @@ def analyze_query_position_changes(df):
     position_score_percentage_change = -position_percentage_change
     
     # Filtro a toggle per includere/escludere query con dati mancanti
-    include_missing_data = st.toggle("Include queries with missing data in one of the periods", value=True)
+    include_missing_data = st.checkbox("Include queries with missing data in one of the periods", value=True)
     
     if not include_missing_data:
-        performance_df_position_analysis = performance_df_position_analysis.dropna()
-    
+        performance_df_position_analysis = performance_df_position_analysis.dropna(subset=['Position_First_Half', 'Position_Second_Half'])
+
     with st.container(border=True):
         st.subheader("4. Query Position Changes Report")
         st.divider()
@@ -1030,6 +1033,20 @@ def analyze_query_position_changes(df):
                 'Impressions_First_Half': '{:.0f}',
                 'Impressions_Second_Half': '{:.0f}'
             }))
+
+        with st.expander("QUERIES THAT DROPPED OUT OF SERP ❌"):
+            st.dataframe(queries_out_of_serp[[
+                'Query', 'Position_First_Half', 'Position_Second_Half', 'Position_Change', 'Clicks_First_Half', 'Clicks_Second_Half', 'Impressions_First_Half', 'Impressions_Second_Half'
+            ]].reset_index(drop=True).style.format({
+                'Position_First_Half': '{:.2f}',
+                'Position_Second_Half': '{:.2f}',
+                'Position_Change': '{:.2f}',
+                'Clicks_First_Half': '{:.0f}',
+                'Clicks_Second_Half': '{:.0f}',
+                'Impressions_First_Half': '{:.0f}',
+                'Impressions_Second_Half': '{:.0f}'
+            }))
+
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
