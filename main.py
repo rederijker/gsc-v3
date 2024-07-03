@@ -1318,7 +1318,6 @@ if st.session_state.data_loaded:
     formatted_ctr_m = "{:.2f}%".format(average_ctr_perc)
     total_impressions_m = df['Impressions'].sum()
     with st.container(border=True):
-  # Crea una copia del DataFrame per lavorare sui filtri
         copy_website_data = df.copy()
         
         # Rimuovi la colonna "Cleaned_Page" se esiste nella copia
@@ -1326,11 +1325,14 @@ if st.session_state.data_loaded:
             copy_website_data = copy_website_data.drop(columns=['Cleaned_Page'])
         
         st.subheader("Website Data")
-        st.divider()
+        st.divider()      
+   
+     
         
-        # Creazione dei filtri dinamicamente in base alle dimensioni nel DataFrame
-        col1, col2 = st.columns(2)
+        # Aggiornamento delle metriche
+        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
         with col1:
+            st.write(f" Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
             dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
             selected_dimension = st.selectbox("Select Dimension", dimensions)
         
@@ -1344,17 +1346,12 @@ if st.session_state.data_loaded:
                     copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
             
-        
-        # Calcola le metriche in base ai dati filtrati
-        total_clicks = copy_website_data['Clicks'].sum()
-        total_impressions = copy_website_data['Impressions'].sum()
-        average_position = copy_website_data['Position'].mean()
-        average_ctr = copy_website_data['CTR'].mean() * 100
-        
-        # Aggiornamento delle metriche
-        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
-        with col1:
-            st.write(f" Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
+            
+            # Calcola le metriche in base ai dati filtrati
+            total_clicks = copy_website_data['Clicks'].sum()
+            total_impressions = copy_website_data['Impressions'].sum()
+            average_position = copy_website_data['Position'].mean()
+            average_ctr = copy_website_data['CTR'].mean() * 100
         
         with col2:
             st.metric(label="Total Clicks", value=total_clicks)
