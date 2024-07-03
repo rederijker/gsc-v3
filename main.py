@@ -1323,7 +1323,7 @@ if st.session_state.data_loaded:
         
         # Rimuovi la colonna "cleaned page" se esiste nella copia
         if 'Cleaned_Page' in copy_website_data.columns:
-            copy_website_data = copy_website_data.drop(columns=['cleaned page'])
+            copy_website_data = copy_website_data.drop(columns=['Cleaned_Page'])
 
         
         st.subheader("Website Data")
