@@ -448,16 +448,16 @@ def analyze_page_performance(df):
         color_discrete_map=color_discrete_map
     )
 
-    fig_page_performance_analysis.update_layout(
-        showlegend=False,
-        title=dict(
-            text="Traffic Change Overview",
-            y=0.8,  # Alza il titolo più vicino al grafico
-            yanchor='bottom',
-            paper_bgcolor='rgb(10,14,18)',
-            plot_bgcolor='rgb(10,14,18)'
-        )
-    )
+fig_page_performance_analysis.update_layout(
+    showlegend=False,
+    title=dict(
+        text="Traffic Change Overview",
+        y=0.8,  # Alza il titolo più vicino al grafico
+        yanchor='bottom'
+    ),
+    paper_bgcolor='rgb(10,14,18)',  # Colore di sfondo del layout
+    plot_bgcolor='rgb(10,14,18)'    # Colore di sfondo dell'area del grafico
+)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -735,10 +735,10 @@ def analyze_query_performance(df):
             title=dict(
                 text="Traffic Change Overview",
                 y=0.8,  # Alza il titolo più vicino al grafico
-                yanchor='bottom',
-                paper_bgcolor='rgb(10,14,18)',
-                plot_bgcolor='rgb(10,14,18)'
-            )
+                yanchor='bottom'
+            ),
+            paper_bgcolor='rgb(10,14,18)',  # Colore di sfondo del layout
+            plot_bgcolor='rgb(10,14,18)'    # Colore di sfondo dell'area del grafico
         )
         col1, col2 = st.columns(2)
         with col1:
@@ -988,10 +988,10 @@ def analyze_query_position_changes(df):
             title=dict(
                 text="Position Change Overview",
                 y=0.8,
-                yanchor='bottom',
-                paper_bgcolor='rgb(10,14,18)',
-                plot_bgcolor='rgb(10,14,18)'
-            )
+                yanchor='bottom'
+            ),
+            paper_bgcolor='rgb(10,14,18)',  # Colore di sfondo del layout
+            plot_bgcolor='rgb(10,14,18)'    # Colore di sfondo dell'area del grafico
         )
         col1, col2 = st.columns(2)
         with col1:
@@ -1451,7 +1451,7 @@ if st.session_state.data_loaded:
                          
                     
                     # Aggiungi titolo
-                    fig.update_layout(
+                    fig
                         title="Query Performance Bubble Chart",
                         paper_bgcolor='rgb(10,14,18)',  
                         plot_bgcolor='rgb(10,14,18)' 
