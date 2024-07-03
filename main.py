@@ -1362,7 +1362,7 @@ if st.session_state.data_loaded:
                             {"type": "line", "name": "Position", "data": df_graf['Position'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#5BC3EB"}, "showSymbol": False, "yAxisIndex": 1, "axisLabel": {"show": "Position"}}
                         ],
                         "yAxis": [{"type": "value", "name": ""}, {"type": "value", "inverse": True, "show": False}],
-                        "backgroundColor": "#0E1117",
+                        "backgroundColor": "#0a0e12",
                         "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
                     }
     
