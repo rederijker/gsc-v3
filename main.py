@@ -1809,8 +1809,6 @@ if st.session_state.data_loaded:
                     labels={"x": "Set", "y": "N°Pages"},
                     title="🏥 Pages health check graph",
                     color=chart_data["Set"],
-                    paper_bgcolor='rgb(10,14,18)',  
-                    plot_bgcolor='rgb(10,14,18)' 
                     color_discrete_map={
                         "Best Pages": "green",
                         "Less Effective Pages": "yellow",
@@ -1819,7 +1817,7 @@ if st.session_state.data_loaded:
                     }
                 )
                            
-                fig.update_layout(showlegend=False)
+                fig.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)' )
                 
                 
                 col1, col2=st.columns([2,2])
