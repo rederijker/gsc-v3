@@ -1446,8 +1446,8 @@ if st.session_state.data_loaded:
                     # Aggiungi titolo
                     fig.update_layout(
                         title="Query Performance Bubble Chart",
-                        paper_bgcolor='rgba(0,0,0,0.24)',  
-                        plot_bgcolor='rgba(0,0,0,0.24)' 
+                        paper_bgcolor='rgb(10,14,18)',  
+                        plot_bgcolor='rgb(10,14,18)' 
                     )
                     
                     # Aggiungi la mappa di colori per la dimensione delle bolle
