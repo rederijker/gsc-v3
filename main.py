@@ -453,7 +453,9 @@ def analyze_page_performance(df):
         title=dict(
             text="Traffic Change Overview",
             y=0.8,  # Alza il titolo più vicino al grafico
-            yanchor='bottom'
+            yanchor='bottom',
+            paper_bgcolor='rgb(10,14,18)',
+            plot_bgcolor='rgb(10,14,18)'
         )
     )
 
@@ -733,7 +735,9 @@ def analyze_query_performance(df):
             title=dict(
                 text="Traffic Change Overview",
                 y=0.8,  # Alza il titolo più vicino al grafico
-                yanchor='bottom'
+                yanchor='bottom',
+                paper_bgcolor='rgb(10,14,18)',
+                plot_bgcolor='rgb(10,14,18)'
             )
         )
         col1, col2 = st.columns(2)
@@ -984,7 +988,9 @@ def analyze_query_position_changes(df):
             title=dict(
                 text="Position Change Overview",
                 y=0.8,
-                yanchor='bottom'
+                yanchor='bottom',
+                paper_bgcolor='rgb(10,14,18)',
+                plot_bgcolor='rgb(10,14,18)'
             )
         )
         col1, col2 = st.columns(2)
@@ -1621,8 +1627,7 @@ if st.session_state.data_loaded:
                         fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
             
                         # Rimuovere la legenda
-                        fig_bar.update_layout(showlegend=False)
-            
+                        fig_bar.update_layout(showlegend=False,paper_bgcolor='rgb(10,14,18)',plot_bgcolor='rgb(10,14,18)' )          
                         # Visualizzare il grafico utilizzando Streamlit
                         st.plotly_chart(fig_bar)
             
