@@ -1180,9 +1180,11 @@ if credentials:
     if not st.session_state.available_sites:
         site_list = webmasters_service.sites().list().execute()
         st.session_state.available_sites = [site['siteUrl'] for site in site_list.get('siteEntry', [])]
-
-    st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
-
+    col1, col2 =st.columns([1,2])
+    with col1:
+        st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
+    with col2:
+        st.write("")
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
     with tab2:
@@ -1244,6 +1246,8 @@ if credentials:
             row_limit_options = ['No', 'Yes']
             check_box_row = st.radio('SET ROW LIMIT?', row_limit_options)
             row_limit = st.number_input('Row limit', min_value=1, max_value=25000, value=25000) if check_box_row == 'Yes' else None
+
+        
 
         if st.button('GET DATA ⬇️'):
             clear_data()
