@@ -1335,7 +1335,7 @@ if st.session_state.data_loaded:
     
         col1, col2 = st.columns(2)
         with col1:
-            st.dataframe(df, width=2000, height=550)
+            st.dataframe(df, width=2000, height=520)
     
         with col2:
             if 'Date' in df.columns:
