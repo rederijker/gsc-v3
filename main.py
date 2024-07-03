@@ -1323,7 +1323,7 @@ if st.session_state.data_loaded:
         col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
         with col1:
             st.write(f" Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
-          
+        
         with col2:
             st.metric(label="Total Clicks", value=total_clicks)
         with col3:
@@ -1332,24 +1332,34 @@ if st.session_state.data_loaded:
             st.metric(label="Average Position", value=f"{average_position:.2f}")
         with col5:
             st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
-    
+        
         col1, col2 = st.columns(2)
         with col1:
-            st.dataframe(df, width=2000, height=520)
-    
+            # Aggiungi i filtri
+            dimension = st.selectbox("Select Dimension", ["Query", "Page", "Country"])
+            selected_values = st.multiselect(f"Select {dimension}", options=df[dimension].unique())
+        
+            # Filtra il DataFrame in base alla selezione
+            if selected_values:
+                df_filtered = df[df[dimension].isin(selected_values)]
+            else:
+                df_filtered = df
+        
+            st.dataframe(df_filtered, width=2000, height=520)
+        
         with col2:
-            if 'Date' in df.columns:
-                df_graf = df.groupby('Date').agg({
+            if 'Date' in df_filtered.columns:
+                df_graf = df_filtered.groupby('Date').agg({
                     'Clicks': 'sum',
                     'Impressions': 'sum',
                     'CTR': 'mean',
                     'Position': 'mean'
                 }).reset_index()
-    
+        
                 def traffic_report(df_graf):
                     df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
                     df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
-    
+        
                     options = {
                         "xAxis": {
                             "type": "category",
@@ -1375,9 +1385,9 @@ if st.session_state.data_loaded:
                         "backgroundColor": "#0a0e12",
                         "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
                     }
-    
+        
                     st_echarts(option=options, theme='chalk', height=500, width='100%')
-    
+        
                 traffic_report(df_graf)
             else:
                 st.write("### Traffic Trend")
