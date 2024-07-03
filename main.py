@@ -1322,7 +1322,7 @@ if st.session_state.data_loaded:
         copy_website_data = df.copy()
         
         # Rimuovi la colonna "cleaned page" se esiste nella copia
-        if 'Cleaned_page' in copy_website_data.columns:
+        if 'Cleaned_Page' in copy_website_data.columns:
             copy_website_data = copy_website_data.drop(columns=['cleaned page'])
 
         
