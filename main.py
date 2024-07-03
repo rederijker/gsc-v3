@@ -1217,7 +1217,7 @@ if credentials:
                         st.write(f'Response: {response}')
 
     with tab1:
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns([1,2,1])
         with col1:
             options_type = {'Web': 'web', 'News': 'news', 'Discovery': 'discovery', 'Image': 'image', 'Video': 'video'}
             today = datetime.now()
