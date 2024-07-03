@@ -1339,7 +1339,7 @@ if st.session_state.data_loaded:
         col1, col2 = st.columns(2)
         with col1:
             # Crea i filtri dinamicamente in base alle dimensioni nel DataFrame
-            dimensions = [col for col in df.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
+            dimensions = [col for col in df.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position', 'cleaned page']]
             selected_dimension = st.selectbox("Select Dimension", dimensions)
         
             if selected_dimension == 'Query':
