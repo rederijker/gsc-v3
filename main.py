@@ -1451,7 +1451,7 @@ if st.session_state.data_loaded:
                          
                     
                     # Aggiungi titolo
-                    fig
+                    fig.update_layout(
                         title="Query Performance Bubble Chart",
                         paper_bgcolor='rgb(10,14,18)',  
                         plot_bgcolor='rgb(10,14,18)' 
