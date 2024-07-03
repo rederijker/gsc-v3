@@ -1337,6 +1337,17 @@ if st.session_state.data_loaded:
         col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
         with col1:
             st.write(f" Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
+            dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
+            selected_dimension = st.selectbox("Select Dimension", dimensions)
+        
+            if selected_dimension == 'Query':
+                search_query = st.text_input("Enter Query")
+                if search_query:
+                    copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False)]
+            else:
+                selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
+                if selected_values:
+                    copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
         with col2:
             st.metric(label="Total Clicks", value=total_clicks)
@@ -1350,17 +1361,7 @@ if st.session_state.data_loaded:
         # Creazione dei filtri dinamicamente in base alle dimensioni nel DataFrame
         col1, col2 = st.columns(2)
         with col1:
-            dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
-            selected_dimension = st.selectbox("Select Dimension", dimensions)
-        
-            if selected_dimension == 'Query':
-                search_query = st.text_input("Enter Query")
-                if search_query:
-                    copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False)]
-            else:
-                selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
-                if selected_values:
-                    copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
+
         
             st.dataframe(copy_website_data, width=2000, height=520)
         
