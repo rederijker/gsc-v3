@@ -1333,23 +1333,29 @@ if st.session_state.data_loaded:
         with col5:
             st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
         
+        # Crea una copia del DataFrame per lavorare sui filtri
+        copy_website_data = df.copy()
+        
         col1, col2 = st.columns(2)
         with col1:
-            # Aggiungi i filtri
-            dimension = st.selectbox("Select Dimension", ["Query", "Page", "Country"])
-            selected_values = st.multiselect(f"Select {dimension}", options=df[dimension].unique())
+            # Crea i filtri dinamicamente in base alle dimensioni nel DataFrame
+            dimensions = [col for col in df.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
+            selected_dimension = st.selectbox("Select Dimension", dimensions)
         
-            # Filtra il DataFrame in base alla selezione
-            if selected_values:
-                df_filtered = df[df[dimension].isin(selected_values)]
+            if selected_dimension == 'Query':
+                search_query = st.text_input("Enter Query")
+                if search_query:
+                    copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False)]
             else:
-                df_filtered = df
+                selected_values = st.multiselect(f"Select {selected_dimension}", options=df[selected_dimension].unique())
+                if selected_values:
+                    copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
-            st.dataframe(df_filtered, width=2000, height=520)
+            st.dataframe(copy_website_data, width=2000, height=520)
         
         with col2:
-            if 'Date' in df_filtered.columns:
-                df_graf = df_filtered.groupby('Date').agg({
+            if 'Date' in copy_website_data.columns:
+                df_graf = copy_website_data.groupby('Date').agg({
                     'Clicks': 'sum',
                     'Impressions': 'sum',
                     'CTR': 'mean',
