@@ -1343,7 +1343,7 @@ if st.session_state.data_loaded:
                 if selected_values:
                     copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
-            st.dataframe(copy_website_data, width=2000, height=520)
+            
         
         # Calcola le metriche in base ai dati filtrati
         total_clicks = copy_website_data['Clicks'].sum()
@@ -1364,52 +1364,55 @@ if st.session_state.data_loaded:
             st.metric(label="Average Position", value=f"{average_position:.2f}")
         with col5:
             st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
-        
-        # Creazione del grafico
-        if 'Date' in copy_website_data.columns:
-            df_graf = copy_website_data.groupby('Date').agg({
-                'Clicks': 'sum',
-                'Impressions': 'sum',
-                'CTR': 'mean',
-                'Position': 'mean'
-            }).reset_index()
-        
-            def traffic_report(df_graf):
-                df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
-                df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
-        
-                options = {
-                    "xAxis": {
-                        "type": "category",
-                        "data": df_graf['Date'].tolist(),
-                        "axisLabel": {"formatter": "{value}"}
-                    },
-                    "yAxis": {"type": "value", "name": ""},
-                    "grid": {"right": 20, "left": 65, "top": 45, "bottom": 50},
-                    "legend": {
-                        "show": True,
-                        "top": "top",
-                        "align": "auto",
-                        "selected": {"Clicks": True, "Impressions": True, "CTR": False, "Position": False}
-                    },
-                    "tooltip": {"trigger": "axis"},
-                    "series": [
-                        {"type": "line", "name": "Clicks", "data": df_graf['Clicks'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#D5A021"}, "showSymbol": True},
-                        {"type": "line", "name": "Impressions", "data": df_graf['Impressions'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#F06449"}, "showSymbol": False},
-                        {"type": "line", "name": "CTR", "data": df_graf['CTR'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#91C499"}, "showSymbol": False},
-                        {"type": "line", "name": "Position", "data": df_graf['Position'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#5BC3EB"}, "showSymbol": False, "yAxisIndex": 1, "axisLabel": {"show": "Position"}}
-                    ],
-                    "yAxis": [{"type": "value", "name": ""}, {"type": "value", "inverse": True, "show": False}],
-                    "backgroundColor": "#0a0e12",
-                    "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
-                }
-        
-                st_echarts(option=options, theme='chalk', height=500, width='100%')
-        
-            traffic_report(df_graf)
-        else:
-            st.write("### Traffic Trend")
-            st.warning("No graph available without date data.")
+        col1, col2=st.columns(2)
+        with col1:
+            st.dataframe(copy_website_data, width=2000, height=520)
+        with col2:
+            # Creazione del grafico
+            if 'Date' in copy_website_data.columns:
+                df_graf = copy_website_data.groupby('Date').agg({
+                    'Clicks': 'sum',
+                    'Impressions': 'sum',
+                    'CTR': 'mean',
+                    'Position': 'mean'
+                }).reset_index()
+            
+                def traffic_report(df_graf):
+                    df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
+                    df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
+            
+                    options = {
+                        "xAxis": {
+                            "type": "category",
+                            "data": df_graf['Date'].tolist(),
+                            "axisLabel": {"formatter": "{value}"}
+                        },
+                        "yAxis": {"type": "value", "name": ""},
+                        "grid": {"right": 20, "left": 65, "top": 45, "bottom": 50},
+                        "legend": {
+                            "show": True,
+                            "top": "top",
+                            "align": "auto",
+                            "selected": {"Clicks": True, "Impressions": True, "CTR": False, "Position": False}
+                        },
+                        "tooltip": {"trigger": "axis"},
+                        "series": [
+                            {"type": "line", "name": "Clicks", "data": df_graf['Clicks'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#D5A021"}, "showSymbol": True},
+                            {"type": "line", "name": "Impressions", "data": df_graf['Impressions'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#F06449"}, "showSymbol": False},
+                            {"type": "line", "name": "CTR", "data": df_graf['CTR'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#91C499"}, "showSymbol": False},
+                            {"type": "line", "name": "Position", "data": df_graf['Position'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#5BC3EB"}, "showSymbol": False, "yAxisIndex": 1, "axisLabel": {"show": "Position"}}
+                        ],
+                        "yAxis": [{"type": "value", "name": ""}, {"type": "value", "inverse": True, "show": False}],
+                        "backgroundColor": "#0a0e12",
+                        "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
+                    }
+            
+                    st_echarts(option=options, theme='chalk', height=500, width='100%')
+            
+                traffic_report(df_graf)
+            else:
+                st.write("### Traffic Trend")
+                st.warning("No graph available without date data.")
     
     tab1, tab2, tab3, tab4 = st.tabs(["QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
    
