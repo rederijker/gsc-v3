@@ -2012,7 +2012,7 @@ if st.session_state.data_loaded:
                                 with col6:
             
                                     # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                    show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
+                                    show_not_covered = st.checkbox("Only not covered queries", st.session_state.show_not_covered)
                                     st.session_state.show_not_covered = show_not_covered
             
                                 if show_not_covered:
