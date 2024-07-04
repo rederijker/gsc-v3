@@ -1972,7 +1972,7 @@ if st.session_state.data_loaded:
                                 st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                             else:
                                 col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
-                                with col1;
+                                with col1:
                                     # Gestione dello stato del filtro di ricerca per query
                                     search_query = st.text_input(
                                         label="",
