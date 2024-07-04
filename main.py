@@ -1956,80 +1956,74 @@ if st.session_state.data_loaded:
                             st.markdown(
                                 f"<h4>📄 {st.session_state.page_data['meta_title']} | <a href='{st.session_state.selected_page}'>Go to the page</a></h4>",
                                 unsafe_allow_html=True)
-                            
-                            
-                            # Visualizzare i warning se presenti
+                        
+                            # Display warnings if present
                             if 'warnings' in st.session_state.page_data:
                                 for warning in st.session_state.page_data['warnings']:
                                     st.warning(warning)
-            
+                        
                             keyword_presence = analyze_keywords(st.session_state.page_data, grouped_page_data)
                             keyword_df = pd.DataFrame(keyword_presence)
-
-                            
-                            # Controllo se 'Query' è presente nelle colonne
+                        
+                            # Check if 'Keyword' is present in the columns
                             if 'Keyword' not in keyword_df.columns:
                                 st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                             else:
                                 col1, col2, col3, col4, col5, col6 = st.columns([2, 1, 1, 1, 1, 2])
                                 with col1:
-                                    # Gestione dello stato del filtro di ricerca per query
+                                    # Manage search query filter state
                                     search_query = st.text_input(
                                         label="",
                                         placeholder="Filter queries containing:",
-                                        value=st.session_state.get('search_query', '')
+                                        value=st.session_state.search_query
                                     )
                                     st.session_state.search_query = search_query
                                     if search_query:
                                         keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
                                 with col2:
-                                    # Checkbox per mostrare/nascondere colonne
-                                    show_heading = st.checkbox("Show heading", st.session_state.show_heading)
+                                    # Checkbox to show/hide columns
+                                    st.session_state.show_heading = st.checkbox("Show heading", st.session_state.show_heading)
                                 with col3:
-                                    show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
+                                    st.session_state.show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
                                 with col4:
-                                    show_meta = st.checkbox("Show meta", st.session_state.show_meta)
+                                    st.session_state.show_meta = st.checkbox("Show meta", st.session_state.show_meta)
                                 with col5:
-                                    show_body_alt = st.checkbox("Show body/alt", st.session_state.show_body_alt)
+                                    st.session_state.show_body_alt = st.checkbox("Show body/alt", st.session_state.show_body_alt)
                                 with col6:
-                                    st.session_state.show_heading = show_heading
-                                    st.session_state.show_keyword_metrics = show_keyword_metrics
-                                    st.session_state.show_meta = show_meta
-                                    st.session_state.show_body_alt = show_body_alt
-                
-                                    # Creare la lista delle colonne da mostrare
-                                    columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
-                                    if show_keyword_metrics:
-                                        columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
-                                    if show_meta:
-                                        columns_to_show.extend(['Title', 'Meta Description'])
-                                    if show_heading:
-                                        columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
-                                    if show_body_alt:
-                                        columns_to_show.extend(['Body Content', 'Alt Tags'])
-                
-                                    keyword_df = keyword_df[columns_to_show]
-                
-                                    # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                    show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
-                                    st.session_state.show_not_covered = show_not_covered
-            
-                                if show_not_covered:
+                                    st.session_state.show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
+                        
+                                # Create the list of columns to show
+                                columns_to_show = ['Keyword']  # The 'Keyword' column must always be visible
+                                if st.session_state.show_keyword_metrics:
+                                    columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
+                                if st.session_state.show_meta:
+                                    columns_to_show.extend(['Title', 'Meta Description'])
+                                if st.session_state.show_heading:
+                                    columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
+                                if st.session_state.show_body_alt:
+                                    columns_to_show.extend(['Body Content', 'Alt Tags'])
+                        
+                                keyword_df = keyword_df[columns_to_show]
+                        
+                                if st.session_state.show_not_covered:
                                     keyword_df = keyword_df[(keyword_df['Title'] == False) &
                                                             (keyword_df['Meta Description'] == False) &
                                                             (keyword_df['H1'] == False) &
                                                             (keyword_df['H2'] == False) &
                                                             (keyword_df['H3'] == False) &
+                                                            (keyword_df['H4'] == False) &
+                                                            (keyword_df['H5'] == False) &
+                                                            (keyword_df['H6'] == False) &
                                                             (keyword_df['Body Content'] == False) &
                                                             (keyword_df['Alt Tags'] == False)]
-            
-                                # Ordina il dataframe per la colonna 'Body Content'
+                        
+                                # Sort the dataframe by the 'Body Content' column
                                 if 'Body Content' in keyword_df.columns:
                                     keyword_df_sorted = keyword_df.sort_values(by='Body Content', ascending=False)
                                 else:
                                     keyword_df_sorted = keyword_df.sort_values(by='Keyword', ascending=False)
-            
-                                # Visualizza il dataframe ordinato
+                        
+                                # Display the sorted dataframe
                                 st.dataframe(keyword_df_sorted)
             
                                 # Parole chiave con opportunità
