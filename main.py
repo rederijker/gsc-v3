@@ -143,7 +143,7 @@ def aggregate_queries(df):
 
 #TAB3 TOPIC CLUSTER K-MEAN
 
-def determine_optimal_clusters(X, max_clusters=20):
+def determine_optimal_clusters(X, max_clusters=50):
     distortions = []
     silhouette_scores = []
     K = range(2, min(max_clusters + 1, X.shape[0]))  # Assicurati che max_clusters non sia maggiore del numero di campioni
