@@ -1971,7 +1971,7 @@ if st.session_state.data_loaded:
                             if 'Keyword' not in keyword_df.columns:
                                 st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                             else:
-                                col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+                                col1, col2, col3, col4, col5, col6 = st.columns([2, 1, 1, 1, 1, 2])
                                 with col1:
                                     # Gestione dello stato del filtro di ricerca per query
                                     search_query = st.text_input(
@@ -1984,35 +1984,35 @@ if st.session_state.data_loaded:
                                         keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
                                 with col2:
                                     # Checkbox per mostrare/nascondere colonne
-                                    show_heading = st.checkbox("Show/hide heading", st.session_state.show_heading)
+                                    show_heading = st.checkbox("Show heading", st.session_state.show_heading)
                                 with col3:
-                                    show_keyword_metrics = st.checkbox("Show/hide keyword metrics", st.session_state.show_keyword_metrics)
+                                    show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
                                 with col4:
-                                    show_meta = st.checkbox("Show/hide meta", st.session_state.show_meta)
+                                    show_meta = st.checkbox("Show meta", st.session_state.show_meta)
                                 with col5:
-                                    show_body_alt = st.checkbox("Show/hide body alt", st.session_state.show_body_alt)
-            
-                                st.session_state.show_heading = show_heading
-                                st.session_state.show_keyword_metrics = show_keyword_metrics
-                                st.session_state.show_meta = show_meta
-                                st.session_state.show_body_alt = show_body_alt
-            
-                                # Creare la lista delle colonne da mostrare
-                                columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
-                                if show_keyword_metrics:
-                                    columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
-                                if show_meta:
-                                    columns_to_show.extend(['Title', 'Meta Description'])
-                                if show_heading:
-                                    columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
-                                if show_body_alt:
-                                    columns_to_show.extend(['Body Content', 'Alt Tags'])
-            
-                                keyword_df = keyword_df[columns_to_show]
-            
-                                # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
-                                st.session_state.show_not_covered = show_not_covered
+                                    show_body_alt = st.checkbox("Show body/alt", st.session_state.show_body_alt)
+                                with col6:
+                                    st.session_state.show_heading = show_heading
+                                    st.session_state.show_keyword_metrics = show_keyword_metrics
+                                    st.session_state.show_meta = show_meta
+                                    st.session_state.show_body_alt = show_body_alt
+                
+                                    # Creare la lista delle colonne da mostrare
+                                    columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
+                                    if show_keyword_metrics:
+                                        columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
+                                    if show_meta:
+                                        columns_to_show.extend(['Title', 'Meta Description'])
+                                    if show_heading:
+                                        columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
+                                    if show_body_alt:
+                                        columns_to_show.extend(['Body Content', 'Alt Tags'])
+                
+                                    keyword_df = keyword_df[columns_to_show]
+                
+                                    # Gestione dello stato del filtro per query non presenti in nessun elemento
+                                    show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
+                                    st.session_state.show_not_covered = show_not_covered
             
                                 if show_not_covered:
                                     keyword_df = keyword_df[(keyword_df['Title'] == False) &
