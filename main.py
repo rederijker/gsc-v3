@@ -1973,8 +1973,8 @@ if st.session_state.data_loaded:
                                 with col1:
                                     # Gestione dello stato del filtro di ricerca per query
                                     search_query = st.text_input(
-                                        label="",
-                                        placeholder="Filter queries containing:",
+                                        label="Filter queries containing",
+                                        placeholder="Insert a query",
                                         value=st.session_state.get('search_query', '')
                                     )
                                     st.session_state.search_query = search_query
