@@ -1969,21 +1969,27 @@ if st.session_state.data_loaded:
                             if 'Keyword' not in keyword_df.columns:
                                 st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                             else:
-                                # Gestione dello stato del filtro di ricerca per query
-                                search_query = st.text_input(
-                                    label="",
-                                    placeholder="Filter queries containing:",
-                                    value=st.session_state.get('search_query', '')
-                                )
-                                st.session_state.search_query = search_query
-                                if search_query:
-                                    keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
+                                col1, col2, col3, col4, col5 = st.columns(5)
+                                with col1:
+                                    # Gestione dello stato del filtro di ricerca per query
+                                    search_query = st.text_input(
+                                        label="",
+                                        placeholder="Filter queries containing:",
+                                        value=st.session_state.get('search_query', '')
+                                    )
+                                    st.session_state.search_query = search_query
+                                    if search_query:
+                                        keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
     
                                 # Checkbox per mostrare/nascondere colonne
-                                show_heading = st.checkbox("Show/hide heading", st.session_state.show_heading)
-                                show_keyword_metrics = st.checkbox("Show/hide keyword metrics", st.session_state.show_keyword_metrics)
-                                show_meta = st.checkbox("Show/hide meta", st.session_state.show_meta)
-                                show_body_alt = st.checkbox("Show/hide body alt", st.session_state.show_body_alt)
+                                with col2:
+                                    show_heading = st.checkbox("Show heading", st.session_state.show_heading)
+                                with col3:
+                                    show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
+                                with col4:
+                                    show_meta = st.checkbox("Show meta", st.session_state.show_meta)
+                                with col5:
+                                    show_body_alt = st.checkbox("Show body alt", st.session_state.show_body_alt)
             
                                 st.session_state.show_heading = show_heading
                                 st.session_state.show_keyword_metrics = show_keyword_metrics
