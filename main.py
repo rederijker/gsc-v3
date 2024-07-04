@@ -1229,17 +1229,17 @@ if credentials:
             
             # Funzione per calcolare la data di inizio in base all'opzione selezionata
             def get_start_date(option):
-                if option == 'Ultimi 7 giorni':
+                if option == 'Last 7 days':
                     return today - timedelta(days=7)
-                elif option == 'Ultimi 28 giorni':
+                elif option == 'Last 28 days':
                     return today - timedelta(days=28)
-                elif option == 'Ultimi 3 mesi':
+                elif option == 'Last 3 months':
                     return today - timedelta(days=90)
-                elif option == 'Ultimi 6 mesi':
+                elif option == 'Last 6 months':
                     return today - timedelta(days=180)
-                elif option == 'Ultimi 12 mesi':
+                elif option == 'Last 12 months':
                     return today - timedelta(days=365)
-                elif option == 'Ultimi 16 mesi':
+                elif option == 'Last 16 months':
                     return today - timedelta(days=480)
                 else:
                     return None
@@ -1248,10 +1248,10 @@ if credentials:
             selected_type = st.selectbox('CHANNEL', list(options_type.keys()))
             
             # Opzioni per il periodo di tempo
-            time_options = ['Custom', 'Ultimi 7 giorni', 'Ultimi 28 giorni', 'Ultimi 3 mesi', 'Ultimi 6 mesi', 'Ultimi 12 mesi', 'Ultimi 16 mesi']
-            selected_time_option = st.selectbox('Seleziona periodo', time_options)
+            time_options = ['Custom range', 'Ultimi 7 giorni', 'Ultimi 28 giorni', 'Ultimi 3 mesi', 'Ultimi 6 mesi', 'Ultimi 12 mesi', 'Ultimi 16 mesi']
+            selected_time_option = st.selectbox('Select range', time_options)
             
-            if selected_time_option == 'Custom':
+            if selected_time_option == 'Custom range':
                 # Input per date personalizzate
                 start_date = st.date_input('Start date', pd.to_datetime(today - timedelta(days=90)))
                 end_date = st.date_input('End date', pd.to_datetime(today))
