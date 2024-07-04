@@ -1221,13 +1221,44 @@ if credentials:
     with tab1:
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
+            # Opzioni per i tipi di dati
             options_type = {'Web': 'web', 'News': 'news', 'Discovery': 'discovery', 'Image': 'image', 'Video': 'video'}
+            
+            # Data di oggi
             today = datetime.now()
-            three_months_ago = today - timedelta(days=90)
-
+            
+            # Funzione per calcolare la data di inizio in base all'opzione selezionata
+            def get_start_date(option):
+                if option == 'Ultimi 7 giorni':
+                    return today - timedelta(days=7)
+                elif option == 'Ultimi 28 giorni':
+                    return today - timedelta(days=28)
+                elif option == 'Ultimi 3 mesi':
+                    return today - timedelta(days=90)
+                elif option == 'Ultimi 6 mesi':
+                    return today - timedelta(days=180)
+                elif option == 'Ultimi 12 mesi':
+                    return today - timedelta(days=365)
+                elif option == 'Ultimi 16 mesi':
+                    return today - timedelta(days=480)
+                else:
+                    return None
+            
+            # Selezione del tipo di canale
             selected_type = st.selectbox('CHANNEL', list(options_type.keys()))
-            start_date = st.date_input('Start date', pd.to_datetime(three_months_ago))
-            end_date = st.date_input('End date', pd.to_datetime(today))
+            
+            # Opzioni per il periodo di tempo
+            time_options = ['Custom', 'Ultimi 7 giorni', 'Ultimi 28 giorni', 'Ultimi 3 mesi', 'Ultimi 6 mesi', 'Ultimi 12 mesi', 'Ultimi 16 mesi']
+            selected_time_option = st.selectbox('Seleziona periodo', time_options)
+            
+            if selected_time_option == 'Custom':
+                # Input per date personalizzate
+                start_date = st.date_input('Start date', pd.to_datetime(today - timedelta(days=90)))
+                end_date = st.date_input('End date', pd.to_datetime(today))
+            else:
+                # Calcolo delle date basato sull'opzione selezionata
+                start_date = get_start_date(selected_time_option)
+                end_date = today
 
         with col2:
             selected_dimensions = st.multiselect('DIMENSIONS', ['Date', 'Page', 'Query', 'Device', 'Country'], default=['Date', 'Query', 'Page'])
