@@ -1248,7 +1248,7 @@ if credentials:
             selected_type = st.selectbox('CHANNEL', list(options_type.keys()))
             
             # Opzioni per il periodo di tempo
-            time_options = ['Custom range', 'Ultimi 7 giorni', 'Ultimi 28 giorni', 'Ultimi 3 mesi', 'Ultimi 6 mesi', 'Ultimi 12 mesi', 'Ultimi 16 mesi']
+            time_options = ['Custom range', 'Last 7 days', 'Last 28 days', 'Last 3 months, 'Last 6 months', 'Last 12 months', 'Last 16 months']
             selected_time_option = st.selectbox('Select range', time_options)
             
             if selected_time_option == 'Custom range':
