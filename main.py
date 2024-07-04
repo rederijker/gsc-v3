@@ -1969,7 +1969,7 @@ if st.session_state.data_loaded:
                             if 'Keyword' not in keyword_df.columns:
                                 st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                             else:
-                                col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
+                                col1, col2, col3, col4, col5, col6 = st.columns([3, 1, 1, 1, 1, 1])
                                 with col1:
                                     # Gestione dello stato del filtro di ricerca per query
                                     search_query = st.text_input(
@@ -2008,10 +2008,12 @@ if st.session_state.data_loaded:
                                     columns_to_show.extend(['Body Content', 'Alt Tags'])
             
                                 keyword_df = keyword_df[columns_to_show]
+
+                                with col6:
             
-                                # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
-                                st.session_state.show_not_covered = show_not_covered
+                                    # Gestione dello stato del filtro per query non presenti in nessun elemento
+                                    show_not_covered = st.checkbox("Show only queries not covered in any element", st.session_state.show_not_covered)
+                                    st.session_state.show_not_covered = show_not_covered
             
                                 if show_not_covered:
                                     keyword_df = keyword_df[(keyword_df['Title'] == False) &
