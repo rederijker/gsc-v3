@@ -2005,19 +2005,18 @@ if st.session_state.data_loaded:
                         
                                 keyword_df = keyword_df[columns_to_show]
                         
+                                # Check if 'show_not_covered' filter is enabled
                                 if st.session_state.show_not_covered:
-                                    keyword_df = keyword_df[(keyword_df['Title'] == False) &
-                                                            (keyword_df['Meta Description'] == False) &
-                                                            (keyword_df['H1'] == False) &
-                                                            (keyword_df['H2'] == False) &
-                                                            (keyword_df['H3'] == False) &
-                                                            (keyword_df['H4'] == False) &
-                                                            (keyword_df['H5'] == False) &
-                                                            (keyword_df['H6'] == False) &
-                                                            (keyword_df['Body Content'] == False) &
-                                                            (keyword_df['Alt Tags'] == False)]
+                                    not_covered_cols = [col for col in ['Title', 'Meta Description', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'Body Content', 'Alt Tags'] if col in keyword_df.columns]
+                                    if not_covered_cols:
+                                        keyword_df = keyword_df[(keyword_df[not_covered_cols] == False).all(axis=1)]
                         
-                                # Sort the dataframe by the 'Body Content' column
+                                # Ensure required columns are present after filtering
+                                for col in ['Title', 'Meta Description', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'Body Content', 'Alt Tags']:
+                                    if col not in keyword_df.columns:
+                                        keyword_df[col] = False
+                        
+                                # Sort the dataframe by the 'Body Content' column if it exists
                                 if 'Body Content' in keyword_df.columns:
                                     keyword_df_sorted = keyword_df.sort_values(by='Body Content', ascending=False)
                                 else:
