@@ -1335,144 +1335,149 @@ if st.session_state.data_loaded and st.session_state.download_ready:
     csv = st.session_state.df.to_csv(index=False).encode('utf-8')
     st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
 
-if st.session_state.data_loaded:
-    df = st.session_state.df
 
-    average_position = df['Position'].mean()
-    total_clicks = df['Clicks'].sum()
-    average_ctr = df['CTR'].mean() * 100
-    total_impressions = df['Impressions'].sum()                    
-    formatted_average_m= "{:.2f}".format(average_position)
-    total_clicks_m = df['Clicks'].sum()
-    average_ctr_m = df['CTR'].mean()
-    average_ctr_perc= average_ctr_m * 100
-    formatted_ctr_m = "{:.2f}%".format(average_ctr_perc)
-    total_impressions_m = df['Impressions'].sum()
-    with st.container(border=True):
-        copy_website_data = df.copy()
-        
-        # Rimuovi la colonna "Cleaned_Page" se esiste nella copia
-        if 'Cleaned_Page' in copy_website_data.columns:
-            copy_website_data = copy_website_data.drop(columns=['Cleaned_Page'])
-        
-        st.subheader("Website Data")
-        st.divider()      
-   
-     
-        
-        # Aggiornamento delle metriche
-        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
-        with col1:
-            st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
-            with st.popover("Filters"):
-                dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
-                selected_dimension = st.selectbox("Select Dimension", dimensions)
-        
-                if selected_dimension == 'Query':
-                    search_query = st.text_input("Enter Query (supports regex)")
-                    if search_query:
-                        copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False, regex=True)]
-                else:
-                    selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
-                    if selected_values:
-                        copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
-        
-                # Ensure that sliders have a valid range
-                if not copy_website_data.empty:
-                    min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
-                    min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
-                else:
-                    min_position, max_position = 0, 1
-                    min_ctr, max_ctr = 0.0, 1.0
-                
-                if min_position == max_position:
-                    min_position, max_position = 0, max_position + 1
-                
-                position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
-                
-                if min_ctr == max_ctr:
-                    min_ctr, max_ctr = 0.0, max_ctr + 1.0
-                
-                ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
-        
-                # Filter data based on position and CTR
-                if not copy_website_data.empty:
-                    copy_website_data = copy_website_data[
-                        (copy_website_data['Position'] >= position_range[0]) &
-                        (copy_website_data['Position'] <= position_range[1]) &
-                        (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
-                        (copy_website_data['CTR'] * 100 <= ctr_range[1])
-                    ]
-        
-            # Calculate metrics based on filtered data
-            total_clicks = copy_website_data['Clicks'].sum() if not copy_website_data.empty else 0
-            total_impressions = copy_website_data['Impressions'].sum() if not copy_website_data.empty else 0
-            average_position = copy_website_data['Position'].mean() if not copy_website_data.empty else 0
-            average_ctr = copy_website_data['CTR'].mean() * 100 if not copy_website_data.empty else 0
-        
-        with col2:
-            st.metric(label="Total Clicks", value=total_clicks)
-        with col3:
-            st.metric(label="Total Impressions", value=total_impressions)
-        with col4:
-            st.metric(label="Average Position", value=f"{average_position:.2f}")
-        with col5:
-            st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.dataframe(copy_website_data, width=2000, height=520)
-        with col2:
-            # Create the graph
-            if not copy_website_data.empty and 'Date' in copy_website_data.columns:
-                df_graf = copy_website_data.groupby('Date').agg({
-                    'Clicks': 'sum',
-                    'Impressions': 'sum',
-                    'CTR': 'mean',
-                    'Position': 'mean'
-                }).reset_index()
-        
-                def traffic_report(df_graf):
-                    df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
-                    df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
-        
-                    options = {
-                        "xAxis": {
-                            "type": "category",
-                            "data": df_graf['Date'].tolist(),
-                            "axisLabel": {"formatter": "{value}"}
-                        },
-                        "yAxis": {"type": "value", "name": ""},
-                        "grid": {"right": 20, "left": 65, "top": 45, "bottom": 50},
-                        "legend": {
-                            "show": True,
-                            "top": "top",
-                            "align": "auto",
-                            "selected": {"Clicks": True, "Impressions": True, "CTR": False, "Position": False}
-                        },
-                        "tooltip": {"trigger": "axis"},
-                        "series": [
-                            {"type": "line", "name": "Clicks", "data": df_graf['Clicks'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#D5A021"}, "showSymbol": True},
-                            {"type": "line", "name": "Impressions", "data": df_graf['Impressions'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#F06449"}, "showSymbol": False},
-                            {"type": "line", "name": "CTR", "data": df_graf['CTR'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#91C499"}, "showSymbol": False},
-                            {"type": "line", "name": "Position", "data": df_graf['Position'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#5BC3EB"}, "showSymbol": False, "yAxisIndex": 1, "axisLabel": {"show": "Position"}}
-                        ],
-                        "yAxis": [{"type": "value", "name": ""}, {"type": "value", "inverse": True, "show": False}],
-                        "backgroundColor": "#0a0e12",
-                        "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
-                    }
-        
-                    st_echarts(option=options, theme='chalk', height=500, width='100%')
-        
-                traffic_report(df_graf)
-            else:
-                st.write("### Traffic Trend")
-                st.warning("No graph available without date data.")
             
-    tab1, tab2, tab3, tab4 = st.tabs(["QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
-   
-    
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
+
     with tab1:
+
+        if st.session_state.data_loaded:
+            df = st.session_state.df
+        
+            average_position = df['Position'].mean()
+            total_clicks = df['Clicks'].sum()
+            average_ctr = df['CTR'].mean() * 100
+            total_impressions = df['Impressions'].sum()                    
+            formatted_average_m= "{:.2f}".format(average_position)
+            total_clicks_m = df['Clicks'].sum()
+            average_ctr_m = df['CTR'].mean()
+            average_ctr_perc= average_ctr_m * 100
+            formatted_ctr_m = "{:.2f}%".format(average_ctr_perc)
+            total_impressions_m = df['Impressions'].sum()
+            with st.container(border=True):
+                copy_website_data = df.copy()    
+                # Rimuovi la colonna "Cleaned_Page" se esiste nella copia
+                if 'Cleaned_Page' in copy_website_data.columns:
+                    copy_website_data = copy_website_data.drop(columns=['Cleaned_Page'])
+                
+                st.subheader("Website Data")
+                st.divider()      
+           
+             
+                
+                # Aggiornamento delle metriche
+                col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+                with col1:
+                    st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
+                    with st.popover("Filters"):
+                        dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
+                        selected_dimension = st.selectbox("Select Dimension", dimensions)
+                
+                        if selected_dimension == 'Query':
+                            search_query = st.text_input("Enter Query (supports regex)")
+                            if search_query:
+                                copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False, regex=True)]
+                        else:
+                            selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
+                            if selected_values:
+                                copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
+                
+                        # Ensure that sliders have a valid range
+                        if not copy_website_data.empty:
+                            min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
+                            min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
+                        else:
+                            min_position, max_position = 0, 1
+                            min_ctr, max_ctr = 0.0, 1.0
+                        
+                        if min_position == max_position:
+                            min_position, max_position = 0, max_position + 1
+                        
+                        position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
+                        
+                        if min_ctr == max_ctr:
+                            min_ctr, max_ctr = 0.0, max_ctr + 1.0
+                        
+                        ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
+                
+                        # Filter data based on position and CTR
+                        if not copy_website_data.empty:
+                            copy_website_data = copy_website_data[
+                                (copy_website_data['Position'] >= position_range[0]) &
+                                (copy_website_data['Position'] <= position_range[1]) &
+                                (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
+                                (copy_website_data['CTR'] * 100 <= ctr_range[1])
+                            ]
+                
+                    # Calculate metrics based on filtered data
+                    total_clicks = copy_website_data['Clicks'].sum() if not copy_website_data.empty else 0
+                    total_impressions = copy_website_data['Impressions'].sum() if not copy_website_data.empty else 0
+                    average_position = copy_website_data['Position'].mean() if not copy_website_data.empty else 0
+                    average_ctr = copy_website_data['CTR'].mean() * 100 if not copy_website_data.empty else 0
+                
+                with col2:
+                    st.metric(label="Total Clicks", value=total_clicks)
+                with col3:
+                    st.metric(label="Total Impressions", value=total_impressions)
+                with col4:
+                    st.metric(label="Average Position", value=f"{average_position:.2f}")
+                with col5:
+                    st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.dataframe(copy_website_data, width=2000, height=520)
+                with col2:
+                    # Create the graph
+                    if not copy_website_data.empty and 'Date' in copy_website_data.columns:
+                        df_graf = copy_website_data.groupby('Date').agg({
+                            'Clicks': 'sum',
+                            'Impressions': 'sum',
+                            'CTR': 'mean',
+                            'Position': 'mean'
+                        }).reset_index()
+                
+                        def traffic_report(df_graf):
+                            df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
+                            df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
+                
+                            options = {
+                                "xAxis": {
+                                    "type": "category",
+                                    "data": df_graf['Date'].tolist(),
+                                    "axisLabel": {"formatter": "{value}"}
+                                },
+                                "yAxis": {"type": "value", "name": ""},
+                                "grid": {"right": 20, "left": 65, "top": 45, "bottom": 50},
+                                "legend": {
+                                    "show": True,
+                                    "top": "top",
+                                    "align": "auto",
+                                    "selected": {"Clicks": True, "Impressions": True, "CTR": False, "Position": False}
+                                },
+                                "tooltip": {"trigger": "axis"},
+                                "series": [
+                                    {"type": "line", "name": "Clicks", "data": df_graf['Clicks'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#D5A021"}, "showSymbol": True},
+                                    {"type": "line", "name": "Impressions", "data": df_graf['Impressions'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#F06449"}, "showSymbol": False},
+                                    {"type": "line", "name": "CTR", "data": df_graf['CTR'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#91C499"}, "showSymbol": False},
+                                    {"type": "line", "name": "Position", "data": df_graf['Position'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#5BC3EB"}, "showSymbol": False, "yAxisIndex": 1, "axisLabel": {"show": "Position"}}
+                                ],
+                                "yAxis": [{"type": "value", "name": ""}, {"type": "value", "inverse": True, "show": False}],
+                                "backgroundColor": "#0a0e12",
+                                "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
+                            }
+                
+                            st_echarts(option=options, theme='chalk', height=500, width='100%')
+                
+                        traffic_report(df_graf)
+                    else:
+                        st.write("### Traffic Trend")
+                        st.warning("No graph available without date data.")
+
+
+    
+    
+    with tab2:
             with st.container(border=True):
                 st.subheader("1. Queries Performance Report")
                 st.divider()
@@ -1836,7 +1841,7 @@ if st.session_state.data_loaded:
         
         
     
-    with tab2:
+    with tab3:
        # Supponiamo che `df` sia già definito e contenga i dati necessari
         try:
             # Raggruppamento dei dati
@@ -1966,7 +1971,7 @@ if st.session_state.data_loaded:
  
 
 
-        with tab3:
+        with tab4:
             with st.container():
                 st.subheader("1. Queries Coverage Analysis")
                 st.divider()
@@ -2115,7 +2120,7 @@ if st.session_state.data_loaded:
                     st.write("")
            
     
-        with tab4:
+        with tab5:
             st.subheader("Queries Grouper")        
             col1, col2 = st.columns(2)
             with col1:
