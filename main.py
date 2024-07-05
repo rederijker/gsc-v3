@@ -1662,10 +1662,8 @@ if st.session_state.data_loaded:
                             else:
                                 return 'Beyond Page 10'
             
-                        # Assicurati che il DataFrame contenga una colonna 'Position'
-                        df_query_page_serp = df.copy()
-            
                         # Calcolare la posizione media per ogni query
+                        df_query_page_serp = df.copy()
                         df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
                         df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
             
@@ -1717,10 +1715,9 @@ if st.session_state.data_loaded:
                     
                     # Visualizzare i dettagli delle query per la pagina selezionata
                     st.write(f"Query details for {selected_page}")
-                    st.dataframe(df_filtered[['Query', 'Avg_Position']])
-            
+                    st.dataframe(df_filtered[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
             else:
-                st.warning("Add 'Query' or 'Page' dimension to generate the 2. Queries distribution on SERP Pages Report")
+                st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
         
             try:
                 # Controllo se la colonna 'Page' è presente
