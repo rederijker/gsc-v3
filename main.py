@@ -1690,7 +1690,7 @@ if st.session_state.data_loaded:
                         fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
             
                         # Rimuovere la legenda
-                        fig_bar.update_layout(showlegend=False,paper_bgcolor='rgb(10,14,18)',plot_bgcolor='rgb(10,14,18)' )          
+                        fig_bar.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)')
                         # Visualizzare il grafico utilizzando Streamlit
                         st.plotly_chart(fig_bar)
             
