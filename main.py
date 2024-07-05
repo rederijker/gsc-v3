@@ -1156,6 +1156,9 @@ st.markdown("""
 
 	.stTabs [data-baseweb="tab-list"] {
 		gap: 2px;
+  		position:sticky;
+    		left:0;
+		z-index:1;
     }
 
 	.stTabs [data-baseweb="tab"] {
