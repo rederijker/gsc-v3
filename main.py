@@ -1663,7 +1663,16 @@ if st.session_state.data_loaded:
             
                         # Assicurati che il DataFrame contenga una colonna 'Position'
                         df_query_page_serp = df.copy()
-                        df_query_page_serp['SERP_Page'] = df_query_page_serp['Position'].apply(assign_page)
+            
+                        # Calcolare la posizione media per ogni query
+                        df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
+                        df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
+            
+                        # Unire la posizione media di nuovo con il DataFrame originale
+                        df_query_page_serp = pd.merge(df_query_page_serp, df_query_avg_position, on='Query', how='left')
+            
+                        # Assegnare la pagina SERP basata sulla posizione media
+                        df_query_page_serp['SERP_Page'] = df_query_page_serp['Avg_Position'].apply(assign_page)
             
                         # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
                         df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
@@ -1672,7 +1681,8 @@ if st.session_state.data_loaded:
                         total_unique_queries = df_query_performance_unique['Query'].nunique()
             
                         # Raggruppa per pagina e conta il numero di query uniche
-                        page_distribution = df_query_performance_unique.groupby('SERP_Page').size().reset_index(name='Num_Queries')
+                        page_distribution = df_query_performance_unique.groupby('SERP_Page').agg({'Query': 'nunique'}).reset_index()
+                        page_distribution.rename(columns={'Query': 'Num_Queries'}, inplace=True)
             
                         # Calcola la percentuale del totale
                         page_distribution['Percentage_of_Total'] = (page_distribution['Num_Queries'] / total_unique_queries) * 100
