@@ -1153,6 +1153,26 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
 
 st.markdown("""
     <style>
+
+	.stTabs [data-baseweb="tab-list"] {
+		gap: 2px;
+    }
+
+	.stTabs [data-baseweb="tab"] {
+		height: 50px;
+        white-space: pre-wrap;
+		background-color: #F0F2F6;
+		border-radius: 4px 4px 0px 0px;
+		gap: 1px;
+		padding-top: 10px;
+		padding-bottom: 10px;
+    }
+
+	.stTabs [aria-selected="true"] {
+  		background-color: #FFFFFF;
+	}
+
+
 .st-emotion-cache-qcpnpn {
     border: 2px solid rgb(3 169 244 / 50%);
     border-radius: 0.5rem;
