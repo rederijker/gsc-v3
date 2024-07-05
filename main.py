@@ -1363,45 +1363,46 @@ if st.session_state.data_loaded:
         # Aggiornamento delle metriche
         col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
         with col1:
-            st.write(f" Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
+            st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
             dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
             selected_dimension = st.selectbox("Select Dimension", dimensions)
         
-            if selected_dimension == 'Query':
-                search_query = st.text_input("Enter Query (supports regex)")
-                if search_query:
-                    copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False, regex=True)]
-            else:
-                selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
-                if selected_values:
-                    copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
+            with st.expander("Filter Options"):
+                if selected_dimension == 'Query':
+                    search_query = st.text_input("Enter Query (supports regex)")
+                    if search_query:
+                        copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False, regex=True)]
+                else:
+                    selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
+                    if selected_values:
+                        copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
-            # Ensure that sliders have a valid range
-            if not copy_website_data.empty:
-                min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
-                min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
-            else:
-                min_position, max_position = 0, 1
-                min_ctr, max_ctr = 0.0, 1.0
-            
-            if min_position == max_position:
-                min_position, max_position = 0, max_position + 1
-            
-            position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
-            
-            if min_ctr == max_ctr:
-                min_ctr, max_ctr = 0.0, max_ctr + 1.0
-            
-            ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
+                # Ensure that sliders have a valid range
+                if not copy_website_data.empty:
+                    min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
+                    min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
+                else:
+                    min_position, max_position = 0, 1
+                    min_ctr, max_ctr = 0.0, 1.0
+                
+                if min_position == max_position:
+                    min_position, max_position = 0, max_position + 1
+                
+                position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
+                
+                if min_ctr == max_ctr:
+                    min_ctr, max_ctr = 0.0, max_ctr + 1.0
+                
+                ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
         
-            # Filter data based on position and CTR
-            if not copy_website_data.empty:
-                copy_website_data = copy_website_data[
-                    (copy_website_data['Position'] >= position_range[0]) &
-                    (copy_website_data['Position'] <= position_range[1]) &
-                    (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
-                    (copy_website_data['CTR'] * 100 <= ctr_range[1])
-                ]
+                # Filter data based on position and CTR
+                if not copy_website_data.empty:
+                    copy_website_data = copy_website_data[
+                        (copy_website_data['Position'] >= position_range[0]) &
+                        (copy_website_data['Position'] <= position_range[1]) &
+                        (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
+                        (copy_website_data['CTR'] * 100 <= ctr_range[1])
+                    ]
         
             # Calculate metrics based on filtered data
             total_clicks = copy_website_data['Clicks'].sum() if not copy_website_data.empty else 0
