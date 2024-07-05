@@ -1629,6 +1629,7 @@ if st.session_state.data_loaded:
 
 
             # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+            # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
             if 'Query' in df.columns and 'Page' in df.columns:
                 with st.container(border=True):
                     st.subheader("2. Queries distribution on SERP Pages Report")
@@ -1707,6 +1708,17 @@ if st.session_state.data_loaded:
                     with col2:
                         # Visualizza il DataFrame
                         st.dataframe(page_distribution)
+                    
+                    # Selezionare la pagina per vedere i dettagli delle query
+                    selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
+                    
+                    # Filtrare il DataFrame per la pagina selezionata
+                    df_filtered = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
+                    
+                    # Visualizzare i dettagli delle query per la pagina selezionata
+                    st.write(f"Query details for {selected_page}")
+                    st.dataframe(df_filtered[['Query', 'Avg_Position']])
+            
             else:
                 st.warning("Add 'Query' or 'Page' dimension to generate the 2. Queries distribution on SERP Pages Report")
         
