@@ -1376,9 +1376,18 @@ if st.session_state.data_loaded:
                 if selected_values:
                     copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
-            # Slider for position and CTR
-            position_range = st.slider('Select Position Range', min_value=1, max_value=int(copy_website_data['Position'].max()), value=(1, int(copy_website_data['Position'].max())))
-            ctr_range = st.slider('Select CTR Range (%)', min_value=0.0, max_value=float(copy_website_data['CTR'].max() * 100), value=(0.0, float(copy_website_data['CTR'].max() * 100)))
+            # Ensure that sliders have a valid range
+            min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
+            if min_position == max_position:
+                min_position, max_position = 0, max_position + 1
+            
+            position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
+            
+            min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
+            if min_ctr == max_ctr:
+                min_ctr, max_ctr = 0.0, max_ctr + 1.0
+            
+            ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
         
             # Filter data based on position and CTR
             copy_website_data = copy_website_data[
