@@ -1154,7 +1154,21 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
 st.markdown("""
     <style>
 
-
+#root > div:nth-child(1) > div.withScreencast > div > div > div > section > div.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(7) > div > div:nth-child(1) > div {
+    position: fixed;
+    background: #673AB7;
+    border: solid 1px #673ab7;
+    /* top: 0; */
+    padding: 7px;
+    bottom: 92%;
+    /* font-size: 12px !important; */
+    width: 100%;
+    z-index: 999999;
+    left: 0%;
+    justify-content: space-evenly;
+    align-items: baseline;
+    align-content: space-evenly;
+}
 
 
 .st-emotion-cache-qcpnpn {
