@@ -1377,31 +1377,37 @@ if st.session_state.data_loaded:
                     copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
             # Ensure that sliders have a valid range
-            min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
+            if not copy_website_data.empty:
+                min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
+                min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
+            else:
+                min_position, max_position = 0, 1
+                min_ctr, max_ctr = 0.0, 1.0
+            
             if min_position == max_position:
                 min_position, max_position = 0, max_position + 1
             
             position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
             
-            min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
             if min_ctr == max_ctr:
                 min_ctr, max_ctr = 0.0, max_ctr + 1.0
             
             ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
         
             # Filter data based on position and CTR
-            copy_website_data = copy_website_data[
-                (copy_website_data['Position'] >= position_range[0]) &
-                (copy_website_data['Position'] <= position_range[1]) &
-                (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
-                (copy_website_data['CTR'] * 100 <= ctr_range[1])
-            ]
+            if not copy_website_data.empty:
+                copy_website_data = copy_website_data[
+                    (copy_website_data['Position'] >= position_range[0]) &
+                    (copy_website_data['Position'] <= position_range[1]) &
+                    (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
+                    (copy_website_data['CTR'] * 100 <= ctr_range[1])
+                ]
         
             # Calculate metrics based on filtered data
-            total_clicks = copy_website_data['Clicks'].sum()
-            total_impressions = copy_website_data['Impressions'].sum()
-            average_position = copy_website_data['Position'].mean()
-            average_ctr = copy_website_data['CTR'].mean() * 100
+            total_clicks = copy_website_data['Clicks'].sum() if not copy_website_data.empty else 0
+            total_impressions = copy_website_data['Impressions'].sum() if not copy_website_data.empty else 0
+            average_position = copy_website_data['Position'].mean() if not copy_website_data.empty else 0
+            average_ctr = copy_website_data['CTR'].mean() * 100 if not copy_website_data.empty else 0
         
         with col2:
             st.metric(label="Total Clicks", value=total_clicks)
@@ -1417,7 +1423,7 @@ if st.session_state.data_loaded:
             st.dataframe(copy_website_data, width=2000, height=520)
         with col2:
             # Create the graph
-            if 'Date' in copy_website_data.columns:
+            if not copy_website_data.empty and 'Date' in copy_website_data.columns:
                 df_graf = copy_website_data.groupby('Date').agg({
                     'Clicks': 'sum',
                     'Impressions': 'sum',
@@ -1461,7 +1467,7 @@ if st.session_state.data_loaded:
             else:
                 st.write("### Traffic Trend")
                 st.warning("No graph available without date data.")
-    
+            
     tab1, tab2, tab3, tab4 = st.tabs(["QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
    
     
