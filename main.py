@@ -1368,17 +1368,27 @@ if st.session_state.data_loaded:
             selected_dimension = st.selectbox("Select Dimension", dimensions)
         
             if selected_dimension == 'Query':
-                search_query = st.text_input("Enter Query")
+                search_query = st.text_input("Enter Query (supports regex)")
                 if search_query:
-                    copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False)]
+                    copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False, regex=True)]
             else:
                 selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
                 if selected_values:
                     copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
         
-            
-            
-            # Calcola le metriche in base ai dati filtrati
+            # Slider for position and CTR
+            position_range = st.slider('Select Position Range', min_value=1, max_value=int(copy_website_data['Position'].max()), value=(1, int(copy_website_data['Position'].max())))
+            ctr_range = st.slider('Select CTR Range (%)', min_value=0.0, max_value=float(copy_website_data['CTR'].max() * 100), value=(0.0, float(copy_website_data['CTR'].max() * 100)))
+        
+            # Filter data based on position and CTR
+            copy_website_data = copy_website_data[
+                (copy_website_data['Position'] >= position_range[0]) &
+                (copy_website_data['Position'] <= position_range[1]) &
+                (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
+                (copy_website_data['CTR'] * 100 <= ctr_range[1])
+            ]
+        
+            # Calculate metrics based on filtered data
             total_clicks = copy_website_data['Clicks'].sum()
             total_impressions = copy_website_data['Impressions'].sum()
             average_position = copy_website_data['Position'].mean()
@@ -1392,11 +1402,12 @@ if st.session_state.data_loaded:
             st.metric(label="Average Position", value=f"{average_position:.2f}")
         with col5:
             st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
-        col1, col2=st.columns(2)
+        
+        col1, col2 = st.columns(2)
         with col1:
             st.dataframe(copy_website_data, width=2000, height=520)
         with col2:
-            # Creazione del grafico
+            # Create the graph
             if 'Date' in copy_website_data.columns:
                 df_graf = copy_website_data.groupby('Date').agg({
                     'Clicks': 'sum',
@@ -1404,11 +1415,11 @@ if st.session_state.data_loaded:
                     'CTR': 'mean',
                     'Position': 'mean'
                 }).reset_index()
-            
+        
                 def traffic_report(df_graf):
                     df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
                     df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
-            
+        
                     options = {
                         "xAxis": {
                             "type": "category",
@@ -1434,9 +1445,9 @@ if st.session_state.data_loaded:
                         "backgroundColor": "#0a0e12",
                         "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
                     }
-            
+        
                     st_echarts(option=options, theme='chalk', height=500, width='100%')
-            
+        
                 traffic_report(df_graf)
             else:
                 st.write("### Traffic Trend")
