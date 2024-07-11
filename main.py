@@ -604,7 +604,7 @@ def analyze_query_performance(df):
     df_query_performance_analysis = df.copy()
     
     # Assicurati che il DataFrame contenga una colonna "Date"
-    if 'Date' not in df_query_performance_analysis.columns:
+    if 'Date' and 'Query' not in df_query_performance_analysis.columns:
         st.warning("Add 'Date' and 'Query' to dimensions to show 4. Queries Traffic Changes Report")
         return
     
@@ -1169,7 +1169,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Intestazione dell'app
 
 
 # Carica e visualizza l'immagine del logo
