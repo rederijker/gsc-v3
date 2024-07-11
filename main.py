@@ -875,10 +875,9 @@ def analyze_query_position_changes(df):
     df_position_analysis = df.copy()
     
     # Assicurati che il DataFrame contenga una colonna "Date"
-    if 'Date' not in df_position_analysis.columns:
+    if 'Date' and 'Query' not in df_position_analysis.columns:
         st.warning("Add 'Date' and 'Query' to dimensions to show 5. Query Position Changes Report")
-    else:
-    
+    else:    
         # Conversione della colonna 'Date' in datetime
         df_position_analysis['Date'] = pd.to_datetime(df_position_analysis['Date'])
         
