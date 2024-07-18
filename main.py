@@ -1187,7 +1187,6 @@ if credentials:
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
     with tab2:        
-        # Funzione per ispezionare un singolo URL
         def inspect_url(url_to_inspect, selected_site):
             request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
             response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
@@ -1196,12 +1195,24 @@ if credentials:
             index_status_result = inspection_result.get('indexStatusResult', {})
             mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
             rich_results_result = inspection_result.get('richResultsResult', {})
-        
+            
+            # Estrazione dei dati richiesti
             return {
                 'url': url_to_inspect,
-                'index_status': index_status_result,
-                'mobile_usability': mobile_usability_result,
-                'rich_results': rich_results_result,
+                'index_status_verdict': index_status_result.get('verdict', 'N/A'),
+                'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
+                'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
+                'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
+                'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
+                'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
+                'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
+                'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
+                'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
+                'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
+                'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
+                'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
+                'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
+                'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
                 'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
                 'response': response
             }
@@ -1217,27 +1228,15 @@ if credentials:
                     for url in urls:
                         result = inspect_url(url, st.session_state.selected_site)
                         results.append(result)
-        
-                    # Visualizzazione dei risultati
+                    
+                    # Creazione e visualizzazione del DataFrame
+                    df = pd.DataFrame(results)
                     st.write("### Results")
+                    st.dataframe(df.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                    
+                    # Mostrare le risposte complete come espansione
                     for result in results:
                         st.write(f"#### URL: {result['url']}")
-                        
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.write("🤖 INDEX STATE")
-                            st.write(f"Verdict: {result['index_status'].get('verdict', 'N/A')}")
-                            st.write(f"Coverage State: {result['index_status'].get('coverageState', 'N/A')}")
-                            st.write(f"Robots.txt State: {result['index_status'].get('robotsTxtState', 'N/A')}")
-                        
-                        with col2:
-                            st.write("📱 MOBILE USABILITY")
-                            st.write(f"Verdict: {result['mobile_usability'].get('verdict', 'N/A')}")
-                        
-                        with col3:
-                            st.write("⭐ RICH RESULTS")
-                            st.write(f"Verdict: {result['rich_results'].get('verdict', 'N/A')}")
-                        
                         st.write(result['inspection_result_link'])
                         with st.expander("Complete response for this URL"):
                             st.write(f'Response: {result["response"]}')
