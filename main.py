@@ -1237,7 +1237,6 @@ if credentials:
         st.write("")
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
-        
     with tab2:
         # Input dell'utente per una lista di URL, uno per riga
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
@@ -1247,16 +1246,48 @@ if credentials:
                 results = []
                 total_urls = len(urls)
                 
+                # Creazione di un placeholder per l'aggiornamento dinamico
+                progress_placeholder = st.empty()
+                
+                start_time = time.time()  # Inizio del timer
+    
                 with st.spinner("Inspecting URLs..."):
                     for idx, url in enumerate(urls):
-                        st.write(f"Processing URL {idx + 1} of {total_urls}...")
+                        url_start_time = time.time()  # Tempo di inizio per URL specifico
                         result = inspect_url(url, st.session_state.selected_site)
                         results.append(result)
+                        
+                        # Calcolo del tempo trascorso e stimato
+                        elapsed_time = time.time() - start_time
+                        avg_time_per_url = elapsed_time / (idx + 1)
+                        remaining_urls = total_urls - (idx + 1)
+                        estimated_time_remaining = avg_time_per_url * remaining_urls
+                        
+                        # Formattazione del tempo stimato
+                        estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
+                        
+                        # Aggiornamento del placeholder con il progresso e il tempo stimato
+                        progress_placeholder.write(
+                            f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
+                        )
+                        
+                        # Aggiungi un breve ritardo per migliorare la visualizzazione del progresso
+                        time.sleep(0.1)
                     
                     # Creazione e visualizzazione del DataFrame
                     index_results = pd.DataFrame(results)
                     st.write("### Results")
                     st.dataframe(index_results.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                    
+                    # Mostrare le risposte complete come espansione
+                    for result in results:
+                        st.write(f"#### URL: {result['url']}")
+                        st.write(result['inspection_result_link'])
+                        with st.expander("Complete response for this URL"):
+                            st.write(f'Response: {result["response"]}')
+                
+                # Cancellazione del placeholder dopo aver completato l'ispezione
+                progress_placeholder.empty()
                 
                     
    
