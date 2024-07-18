@@ -1206,11 +1206,11 @@ if credentials:
                 'response': response
             }
         
-        # Input dell'utente per una lista di URL
-        urls_to_inspect = st.text_input("Insert URLs to inspect (comma separated):")
+        # Input dell'utente per una lista di URL, uno per riga
+        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
-                urls = [url.strip() for url in urls_to_inspect.split(',')]
+                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                 results = []
                 
                 with st.spinner("Inspecting URLs..."):
