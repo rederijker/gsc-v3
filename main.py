@@ -1237,7 +1237,7 @@ if credentials:
         st.write("")
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
-    with tab2:         
+    with tab2:
         
         # Input dell'utente per una lista di URL, uno per riga
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
@@ -1256,13 +1256,7 @@ if credentials:
                     st.write("### Results")
                     st.dataframe(index_status_df.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
                     
-                    # Mostrare le risposte complete come espansione
-                    for result in results:
-                        st.write(f"#### URL: {result['url']}")
-                        st.write(result['inspection_result_link'])
-                        with st.expander("Complete response for this URL"):
-                            st.write(f'Response: {result["response"]}')
-
+   
     with tab1:
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
