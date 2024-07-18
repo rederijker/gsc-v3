@@ -1187,35 +1187,46 @@ if credentials:
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
     with tab2:
-        url_to_inspect = st.text_input("Insert URL to inspect:")
-        if st.button('URL INSPECTION 🕵️‍♂️'):
-            with st.spinner("Inspecting URL..."):
-                if st.session_state.selected_site:
-                    request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': st.session_state.selected_site}
-                    response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
-
-                    inspection_result = response.get('inspectionResult', {})
+        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):")
+        if st.button('INSPECT URLS 🕵️‍♂️'):
+            with st.spinner("Inspecting URLs..."):
+                url_list = urls_to_inspect.splitlines()
+                selected_site = st.session_state.get('selected_site', 'https://your-selected-site.com')  # Usa il sito selezionato
+    
+                results = []
+                for url in url_list:
+                    if url.strip():
+                        request_body = {'inspectionUrl': url.strip(), 'siteUrl': selected_site}
+                        try:
+                            response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
+                            inspection_result = response.get('inspectionResult', {})
+                            results.append((url, inspection_result))
+                        except Exception as e:
+                            st.error(f"Error inspecting URL {url.strip()}: {e}")
+    
+                st.write("### Results")
+                for url, inspection_result in results:
                     index_status_result = inspection_result.get('indexStatusResult', {})
                     mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
                     rich_results_result = inspection_result.get('richResultsResult', {})
-
-                    st.write("### Result")
+    
+                    st.write(f"#### URL: {url}")
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.write("🤖INDEX STATE")
+                        st.write("🤖 INDEX STATE")
                         st.write(f"Verdict: {index_status_result.get('verdict', 'N/A')}")
                         st.write(f"Coverage State: {index_status_result.get('coverageState', 'N/A')}")
                         st.write(f"Robots.txt State: {index_status_result.get('robotsTxtState', 'N/A')}")
                     with col2:
-                        st.write("📱MOBILE USABILTY")
+                        st.write("📱 MOBILE USABILITY")
                         st.write(f"Verdict: {mobile_usability_result.get('verdict', 'N/A')}")
                     with col3:
-                        st.write("⭐RICH RESULTS")
+                        st.write("⭐ RICH RESULTS")
                         st.write(f"Verdict: {rich_results_result.get('verdict', 'N/A')}")
-
-                    st.write(inspection_result.get('inspectionResultLink', 'N/A'))
+    
+                    st.write(f"[Inspection Result Link]({inspection_result.get('inspectionResultLink', 'N/A')})")
                     with st.expander("Complete response"):
-                        st.write(f'Response: {response}')
+                        st.write(f'Response: {inspection_result}')
 
     with tab1:
         col1, col2, col3 = st.columns([1,2,1])
