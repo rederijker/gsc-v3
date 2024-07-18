@@ -1230,9 +1230,9 @@ if credentials:
                         results.append(result)
                     
                     # Creazione e visualizzazione del DataFrame
-                    df = pd.DataFrame(results)
+                    index_status_df = pd.DataFrame(results)
                     st.write("### Results")
-                    st.dataframe(df.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                    st.dataframe(index_status_df.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
                     
                     # Mostrare le risposte complete come espansione
                     for result in results:
