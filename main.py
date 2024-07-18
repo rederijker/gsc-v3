@@ -1088,6 +1088,27 @@ def inspect_url(url_to_inspect, selected_site):
             'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
             'response': response
         }
+    except HttpError as err:
+        st.error(f"HTTP error occurred: {err}")
+        return {
+            'url': url_to_inspect,
+            'index_status_verdict': 'ERROR',
+            'index_status_coverage_state': 'ERROR',
+            'index_status_robots_txt_state': 'ERROR',
+            'index_status_indexing_state': 'ERROR',
+            'index_status_last_crawl_time': 'ERROR',
+            'index_status_page_fetch_state': 'ERROR',
+            'index_status_google_canonical': 'ERROR',
+            'index_status_user_canonical': 'ERROR',
+            'index_status_sitemap': 'ERROR',
+            'index_status_referring_urls': 'ERROR',
+            'index_status_crawled_as': 'ERROR',
+            'mobile_usability_verdict': 'ERROR',
+            'rich_results_verdict': 'ERROR',
+            'rich_results_detected_items': 'ERROR',
+            'inspection_result_link': 'ERROR',
+            'response': str(err)
+        }
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
