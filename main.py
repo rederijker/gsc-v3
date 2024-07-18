@@ -1237,24 +1237,27 @@ if credentials:
         st.write("")
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
-    with tab2:
         
+    with tab2:
         # Input dell'utente per una lista di URL, uno per riga
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                 results = []
+                total_urls = len(urls)
                 
                 with st.spinner("Inspecting URLs..."):
-                    for url in urls:
+                    for idx, url in enumerate(urls):
+                        st.write(f"Processing URL {idx + 1} of {total_urls}...")
                         result = inspect_url(url, st.session_state.selected_site)
                         results.append(result)
                     
                     # Creazione e visualizzazione del DataFrame
-                    index_status_df = pd.DataFrame(results)
+                    index_results = pd.DataFrame(results)
                     st.write("### Results")
-                    st.dataframe(index_status_df.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                    st.dataframe(index_results.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                
                     
    
     with tab1:
