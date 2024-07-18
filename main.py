@@ -1057,7 +1057,37 @@ def analyze_query_position_changes(df):
                     'Clicks_First_Half': '{:.0f}',
                     'Impressions_First_Half': '{:.0f}'
                 }))
-
+# Funzione per ispezionare un singolo URL
+def inspect_url(url_to_inspect, selected_site):
+    request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
+    try:
+        response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
+        
+        inspection_result = response.get('inspectionResult', {})
+        index_status_result = inspection_result.get('indexStatusResult', {})
+        mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
+        rich_results_result = inspection_result.get('richResultsResult', {})
+        
+        # Estrazione dei dati richiesti
+        return {
+            'url': url_to_inspect,
+            'index_status_verdict': index_status_result.get('verdict', 'N/A'),
+            'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
+            'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
+            'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
+            'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
+            'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
+            'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
+            'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
+            'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
+            'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
+            'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
+            'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
+            'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
+            'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
+            'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
+            'response': response
+        }
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
@@ -1186,36 +1216,7 @@ if credentials:
         st.write("")
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
-    with tab2:        
-        def inspect_url(url_to_inspect, selected_site):
-            request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
-            response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
-            
-            inspection_result = response.get('inspectionResult', {})
-            index_status_result = inspection_result.get('indexStatusResult', {})
-            mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
-            rich_results_result = inspection_result.get('richResultsResult', {})
-            
-            # Estrazione dei dati richiesti
-            return {
-                'url': url_to_inspect,
-                'index_status_verdict': index_status_result.get('verdict', 'N/A'),
-                'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
-                'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
-                'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
-                'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
-                'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
-                'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
-                'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
-                'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
-                'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
-                'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
-                'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
-                'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
-                'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
-                'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
-                'response': response
-            }
+    with tab2:         
         
         # Input dell'utente per una lista di URL, uno per riga
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
