@@ -27,6 +27,7 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 #inspect url
+from googleapiclient.errors import HttpError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 #PAGE CONFIGURATION
