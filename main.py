@@ -26,6 +26,8 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
+#inspect url
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 #PAGE CONFIGURATION
 st.set_page_config(
@@ -1057,7 +1059,10 @@ def analyze_query_position_changes(df):
                     'Clicks_First_Half': '{:.0f}',
                     'Impressions_First_Half': '{:.0f}'
                 }))
-# Funzione per ispezionare un singolo URL
+# Impostazioni
+MAX_REQUESTS_PER_MINUTE = 600  # Adatta questo valore per evitare di superare i limiti
+REQUEST_INTERVAL = 60 / MAX_REQUESTS_PER_MINUTE  # Intervallo tra le richieste in secondi
+
 def inspect_url(url_to_inspect, selected_site):
     request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
     try:
@@ -1065,10 +1070,7 @@ def inspect_url(url_to_inspect, selected_site):
         
         inspection_result = response.get('inspectionResult', {})
         index_status_result = inspection_result.get('indexStatusResult', {})
-        mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
-        rich_results_result = inspection_result.get('richResultsResult', {})
         
-        # Estrazione dei dati richiesti
         return {
             'url': url_to_inspect,
             'index_status_verdict': index_status_result.get('verdict', 'N/A'),
@@ -1082,10 +1084,6 @@ def inspect_url(url_to_inspect, selected_site):
             'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
             'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
             'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
-            #'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
-            #'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
-            #'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
-            #'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
             'response': response
         }
     except HttpError as err:
@@ -1103,12 +1101,52 @@ def inspect_url(url_to_inspect, selected_site):
             'index_status_sitemap': 'ERROR',
             'index_status_referring_urls': 'ERROR',
             'index_status_crawled_as': 'ERROR',
-            #'mobile_usability_verdict': 'ERROR',
-            #'rich_results_verdict': 'ERROR',
-            #'rich_results_detected_items': 'ERROR',
-            #'inspection_result_link': 'ERROR',
             'response': str(err)
         }
+
+def rate_limited_inspect(urls, selected_site):
+    results = []
+    total_urls = len(urls)
+    start_time = time.time()
+    
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_url = {executor.submit(inspect_url, url, selected_site): url for url in urls}
+        for idx, future in enumerate(as_completed(future_to_url)):
+            url = future_to_url[future]
+            try:
+                result = future.result()
+                results.append(result)
+            except Exception as exc:
+                st.error(f"URL {url} generated an exception: {exc}")
+                results.append({
+                    'url': url,
+                    'index_status_verdict': 'ERROR',
+                    'index_status_coverage_state': 'ERROR',
+                    'index_status_robots_txt_state': 'ERROR',
+                    'index_status_indexing_state': 'ERROR',
+                    'index_status_last_crawl_time': 'ERROR',
+                    'index_status_page_fetch_state': 'ERROR',
+                    'index_status_google_canonical': 'ERROR',
+                    'index_status_user_canonical': 'ERROR',
+                    'index_status_sitemap': 'ERROR',
+                    'index_status_referring_urls': 'ERROR',
+                    'index_status_crawled_as': 'ERROR',
+                    'response': 'ERROR'
+                })
+            
+            elapsed_time = time.time() - start_time
+            avg_time_per_url = elapsed_time / (idx + 1)
+            remaining_urls = total_urls - (idx + 1)
+            estimated_time_remaining = avg_time_per_url * remaining_urls
+            estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
+            st.write(f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}")
+
+            # Introduci un ritardo per rispettare il limite di richieste per minuto
+            if (idx + 1) % MAX_REQUESTS_PER_MINUTE == 0:
+                st.write("Rate limit reached. Pausing...")
+                time.sleep(60)  # Aspetta un minuto prima di continuare
+
+    return results
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
@@ -1238,56 +1276,22 @@ if credentials:
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
     with tab2:
-        # Input dell'utente per una lista di URL, uno per riga
+    with tab2:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
-                results = []
-                total_urls = len(urls)
+                results = rate_limited_inspect(urls, st.session_state.selected_site)
                 
-                # Creazione di un placeholder per l'aggiornamento dinamico
-                progress_placeholder = st.empty()
+                index_results = pd.DataFrame(results)
+                st.write("### Results")
+                st.dataframe(index_results.drop(columns=['response']))
                 
-                start_time = time.time()  # Inizio del timer
-    
-                with st.spinner("Inspecting URLs..."):
-                    for idx, url in enumerate(urls):
-                        url_start_time = time.time()  # Tempo di inizio per URL specifico
-                        result = inspect_url(url, st.session_state.selected_site)
-                        results.append(result)
-                        
-                        # Calcolo del tempo trascorso e stimato
-                        elapsed_time = time.time() - start_time
-                        avg_time_per_url = elapsed_time / (idx + 1)
-                        remaining_urls = total_urls - (idx + 1)
-                        estimated_time_remaining = avg_time_per_url * remaining_urls
-                        
-                        # Formattazione del tempo stimato
-                        estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
-                        
-                        # Aggiornamento del placeholder con il progresso e il tempo stimato
-                        progress_placeholder.write(
-                            f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
-                        )
-                        
-                        # Aggiungi un breve ritardo per migliorare la visualizzazione del progresso
-                        time.sleep(0.1)
-                    
-                    # Creazione e visualizzazione del DataFrame
-                    index_results = pd.DataFrame(results)
-                    st.write("### Results")
-                    st.dataframe(index_results.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
-                    
-                    # Mostrare le risposte complete come espansione
-                    for result in results:
-                        st.write(f"#### URL: {result['url']}")
-                        st.write(result['inspection_result_link'])
-                        with st.expander("Complete response for this URL"):
-                            st.write(f'Response: {result["response"]}')
-                
-                # Cancellazione del placeholder dopo aver completato l'ispezione
-                progress_placeholder.empty()
+                for result in results:
+                    st.write(f"#### URL: {result['url']}")
+                    st.write(result['inspection_result_link'])
+                    with st.expander("Complete response for this URL"):
+                        st.write(f'Response: {result["response"]}')
                 
                     
    
