@@ -27,8 +27,9 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 #inspect url
-from googleapiclient.errors import HttpError
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from googleapiclient.errors import HttpError
+from tenacity import retry, wait_fixed, stop_after_attempt
 
 #PAGE CONFIGURATION
 st.set_page_config(
@@ -1060,14 +1061,16 @@ def analyze_query_position_changes(df):
                     'Clicks_First_Half': '{:.0f}',
                     'Impressions_First_Half': '{:.0f}'
                 }))
-# Impostazioni
-MAX_REQUESTS_PER_MINUTE = 600  # Adatta questo valore per evitare di superare i limiti
-REQUEST_INTERVAL = 60 / MAX_REQUESTS_PER_MINUTE  # Intervallo tra le richieste in secondi
+# Configura il timeout e il retry
+TIMEOUT_SECONDS = 120
+MAX_REQUESTS_PER_MINUTE = 50  # Aggiorna in base alle tue esigenze
 
+@retry(wait=wait_fixed(5), stop=stop_after_attempt(3))
 def inspect_url(url_to_inspect, selected_site):
     request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
     try:
-        response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
+        request = webmasters_service.urlInspection().index().inspect(body=request_body)
+        response = request.execute(timeout=TIMEOUT_SECONDS)
         
         inspection_result = response.get('inspectionResult', {})
         index_status_result = inspection_result.get('indexStatusResult', {})
@@ -1104,6 +1107,23 @@ def inspect_url(url_to_inspect, selected_site):
             'index_status_crawled_as': 'ERROR',
             'response': str(err)
         }
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
+        return {
+            'url': url_to_inspect,
+            'index_status_verdict': 'ERROR',
+            'index_status_coverage_state': 'ERROR',
+            'index_status_robots_txt_state': 'ERROR',
+            'index_status_indexing_state': 'ERROR',
+            'index_status_last_crawl_time': 'ERROR',
+            'index_status_page_fetch_state': 'ERROR',
+            'index_status_google_canonical': 'ERROR',
+            'index_status_user_canonical': 'ERROR',
+            'index_status_sitemap': 'ERROR',
+            'index_status_referring_urls': 'ERROR',
+            'index_status_crawled_as': 'ERROR',
+            'response': str(e)
+        }
 
 def rate_limited_inspect(urls, selected_site):
     results = []
@@ -1112,6 +1132,10 @@ def rate_limited_inspect(urls, selected_site):
     
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_to_url = {executor.submit(inspect_url, url, selected_site): url for url in urls}
+        
+        # Placeholder per il progresso
+        progress_placeholder = st.empty()
+        
         for idx, future in enumerate(as_completed(future_to_url)):
             url = future_to_url[future]
             try:
@@ -1140,13 +1164,17 @@ def rate_limited_inspect(urls, selected_site):
             remaining_urls = total_urls - (idx + 1)
             estimated_time_remaining = avg_time_per_url * remaining_urls
             estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
-            st.write(f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}")
-
+            
+            # Aggiornamento del placeholder con il progresso e il tempo stimato
+            progress_placeholder.write(
+                f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
+            )
+            
             # Introduci un ritardo per rispettare il limite di richieste per minuto
             if (idx + 1) % MAX_REQUESTS_PER_MINUTE == 0:
                 st.write("Rate limit reached. Pausing...")
                 time.sleep(60)  # Aspetta un minuto prima di continuare
-
+    
     return results
 
 #AUTH APP
@@ -1276,6 +1304,7 @@ if credentials:
         st.write("")
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
 
+    with tab2:
     with tab2:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
