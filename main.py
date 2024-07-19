@@ -26,8 +26,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
-
- import streamlit as st
 import streamlit.components.v1 as components
 
 # Definizione del codice HTML e JavaScript
