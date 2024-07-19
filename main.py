@@ -42,22 +42,6 @@ st.set_page_config(
     layout="wide"
 )
 
-html_code = """
-
-        <script type="text/javascript">
-            // Funzione per aggiungere un tag all'head
-            function addMetaTag() {
-                var meta = document.createElement('meta');
-                meta.name = "robots";
-                meta.content = "index, follow";
-                document.getElementsByTagName('head')[0].appendChild(meta);
-            }
-
-            // Esegui la funzione quando la pagina è caricata
-            window.onload = addMetaTag;
-        </script>
-
-        """
 
 # Initialize session state
 if 'credentials' not in st.session_state:
