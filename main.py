@@ -28,6 +28,7 @@ from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 import streamlit.components.v1 as components
 
+from streamlit_javascript import st_javascript
 
 
 #PAGE CONFIGURATION
@@ -36,6 +37,17 @@ st.set_page_config(
     page_icon="🔍",
     layout="wide"
 )
+
+# JavaScript per aggiungere il meta tag di verifica di Google
+js_code = """
+const meta = document.createElement('meta');
+meta.name = "google-site-verification";
+meta.content = "jEKGfJd5zGkI1gfCptt5kDGbpzL42mmPvsKSW-SJzK4";
+document.getElementsByTagName('head')[0].appendChild(meta);
+"""
+
+# Esegui il codice JavaScript
+st_javascript(js_code)
 
 
 # Initialize session state
