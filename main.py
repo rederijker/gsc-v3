@@ -1300,11 +1300,7 @@ if credentials:
                 st.write("### Final Results")
                 st.dataframe(index_results.drop(columns=['response']))
                 
-                # Mostrare le risposte complete come espansione
-                for result in results:
-                    st.write(f"#### URL: {result['url']}")
-                    with st.expander("Complete response for this URL"):
-                        st.write(f'Response: {result["response"]}')
+      
                 
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
