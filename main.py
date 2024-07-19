@@ -40,10 +40,13 @@ st.set_page_config(
 
 # JavaScript per aggiungere il meta tag di verifica di Google
 js_code = """
-const meta = document.createElement('meta');
-meta.name = "google-site-verification";
-meta.content = "jEKGfJd5zGkI1gfCptt5kDGbpzL42mmPvsKSW-SJzK4";
-document.getElementsByTagName('head')[0].appendChild(meta);
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NF4DR3VB');</script>
+<!-- End Google Tag Manager -->
 """
 
 # Esegui il codice JavaScript
