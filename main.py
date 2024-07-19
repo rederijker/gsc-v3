@@ -33,18 +33,7 @@ html_code = """
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="text/javascript">
-            // Funzione per aggiungere un tag all'head
-            function addMetaTag() {
-                var meta = document.createElement('meta');
-                meta.name = "viewport";
-                meta.content = "width=device-width, initial-scale=1.0";
-                document.getElementsByTagName('head')[0].appendChild(meta);
-            }
-
-            // Esegui la funzione quando la pagina è caricata
-            window.onload = addMetaTag;
-        </script>
+        <meta name="google-site-verification" content="jEKGfJd5zGkI1gfCptt5kDGbpzL42mmPvsKSW-SJzK4" />
     </head>
     <body>
         <h1>Hello, Streamlit!</h1>
