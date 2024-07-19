@@ -1082,9 +1082,9 @@ def inspect_url(url_to_inspect, selected_site):
             'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
             'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
             'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
-            'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
-            'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
-            'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
+            #'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
+            #'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
+            #'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
             'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
             'response': response
         }
@@ -1103,9 +1103,9 @@ def inspect_url(url_to_inspect, selected_site):
             'index_status_sitemap': 'ERROR',
             'index_status_referring_urls': 'ERROR',
             'index_status_crawled_as': 'ERROR',
-            'mobile_usability_verdict': 'ERROR',
-            'rich_results_verdict': 'ERROR',
-            'rich_results_detected_items': 'ERROR',
+            #'mobile_usability_verdict': 'ERROR',
+            #'rich_results_verdict': 'ERROR',
+            #'rich_results_detected_items': 'ERROR',
             'inspection_result_link': 'ERROR',
             'response': str(err)
         }
