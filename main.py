@@ -27,11 +27,36 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 
+ import streamlit as st
+import streamlit.components.v1 as components
 
+# Definizione del codice HTML e JavaScript
+html_code = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript">
+            // Funzione per aggiungere un tag all'head
+            function addMetaTag() {
+                var meta = document.createElement('meta');
+                meta.name = "viewport";
+                meta.content = "width=device-width, initial-scale=1.0";
+                document.getElementsByTagName('head')[0].appendChild(meta);
+            }
 
+            // Esegui la funzione quando la pagina è caricata
+            window.onload = addMetaTag;
+        </script>
+    </head>
+    <body>
+        <h1>Hello, Streamlit!</h1>
+    </body>
+</html>
+"""
 
 # Utilizzare Streamlit components per includere HTML e JS
 components.html(html_code, height=600)
+
 
 #PAGE CONFIGURATION
 st.set_page_config(
