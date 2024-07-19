@@ -16,4 +16,4 @@ pycharts
 altair
 bs4
 scikit-learn
-
+streamlit-javascript
