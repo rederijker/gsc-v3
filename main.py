@@ -1267,7 +1267,7 @@ if credentials:
     
                 with st.spinner("Inspecting URLs..."):
                     # Uso di ThreadPoolExecutor per l'esecuzione concorrente
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                         future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
                         for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
                             url = future_to_url[future]
