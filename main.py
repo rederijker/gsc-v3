@@ -1263,11 +1263,13 @@ if credentials:
                 results = []
     
                 progress_placeholder = st.empty()
+                table_placeholder = st.empty()  # Placeholder per la tabella
+    
                 start_time = time.time()  # Inizio del timer
     
                 with st.spinner("Inspecting URLs..."):
                     # Uso di ThreadPoolExecutor per l'esecuzione concorrente
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:  # Limita a 1 worker thread
                         future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
                         for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
                             url = future_to_url[future]
@@ -1288,10 +1290,10 @@ if credentials:
                                 f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
                             )
     
-                            # Aggiornare il DataFrame parziale
+                            # Aggiornamento della tabella parziale nel placeholder
                             index_results_partial = pd.DataFrame(results)
-                            st.write("### Partial Results")
-                            st.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                            table_placeholder.write("### Partial Results")
+                            table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
                 
                 # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
@@ -1306,6 +1308,7 @@ if credentials:
                 
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
+                table_placeholder.empty()  # Pulisce la tabella parziale finale
                     
                     
    
