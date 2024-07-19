@@ -27,6 +27,34 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 
+import streamlit as st
+import streamlit.components.v1 as components
+# HTML e JavaScript per aggiungere un tag all'head
+html_code = """
+<html>
+    <head>
+        <script type="text/javascript">
+            // Funzione per aggiungere un tag all'head
+            function addMetaTag() {
+                var meta = document.createElement('meta');
+                meta.name = "robots";
+                meta.content = "index, follow";
+                document.getElementsByTagName('head')[0].appendChild(meta);
+            }
+
+            // Esegui la funzione quando la pagina è caricata
+            window.onload = addMetaTag;
+        </script>
+    </head>
+    <body>
+        <h1>Hello, Streamlit!</h1>
+    </body>
+</html>
+"""
+
+# Utilizzare Streamlit components per includere HTML e JS
+components.html(html_code, height=600)
+
 #PAGE CONFIGURATION
 st.set_page_config(
     page_title="SEO Gnosis: Master Search Console Data Like a Pro-by Cristiano Caggiula",
