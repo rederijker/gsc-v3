@@ -1101,14 +1101,9 @@ def inspect_url(url_to_inspect, selected_site):
             'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
             'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
             'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
-            'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
-            'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
-            'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
-            'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
             'response': response
         }
     except HttpError as err:
-        st.error(f"HTTP error occurred: {err}")
         return {
             'url': url_to_inspect,
             'index_status_verdict': 'ERROR',
@@ -1122,10 +1117,6 @@ def inspect_url(url_to_inspect, selected_site):
             'index_status_sitemap': 'ERROR',
             'index_status_referring_urls': 'ERROR',
             'index_status_crawled_as': 'ERROR',
-            'mobile_usability_verdict': 'ERROR',
-            'rich_results_verdict': 'ERROR',
-            'rich_results_detected_items': 'ERROR',
-            'inspection_result_link': 'ERROR',
             'response': str(err)
         }
 
@@ -1258,55 +1249,47 @@ if credentials:
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])
 
     with tab1:
-        # Input dell'utente per una lista di URL, uno per riga
+
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
-                results = []
                 total_urls = len(urls)
-                
-                # Creazione di un placeholder per l'aggiornamento dinamico
+                results = []
+    
                 progress_placeholder = st.empty()
-                
                 start_time = time.time()  # Inizio del timer
     
                 with st.spinner("Inspecting URLs..."):
-                    for idx, url in enumerate(urls):
-                        url_start_time = time.time()  # Tempo di inizio per URL specifico
-                        result = inspect_url(url, st.session_state.selected_site)
-                        results.append(result)
-                        
-                        # Calcolo del tempo trascorso e stimato
-                        elapsed_time = time.time() - start_time
-                        avg_time_per_url = elapsed_time / (idx + 1)
-                        remaining_urls = total_urls - (idx + 1)
-                        estimated_time_remaining = avg_time_per_url * remaining_urls
-                        
-                        # Formattazione del tempo stimato
-                        estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
-                        
-                        # Aggiornamento del placeholder con il progresso e il tempo stimato
-                        progress_placeholder.write(
-                            f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
-                        )
-                        
-                        # Aggiungi un breve ritardo per migliorare la visualizzazione del progresso
-                        time.sleep(0.1)
-                    
-                    # Creazione e visualizzazione del DataFrame
-                    index_results = pd.DataFrame(results)
-                    st.write("### Results")
-                    st.dataframe(index_results.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
-                    
-                    # Mostrare le risposte complete come espansione
-                    for result in results:
-                        st.write(f"#### URL: {result['url']}")
-                        st.write(result['inspection_result_link'])
-                        with st.expander("Complete response for this URL"):
-                            st.write(f'Response: {result["response"]}')
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                        future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
+                        for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
+                            url = future_to_url[future]
+                            try:
+                                result = future.result()
+                                results.append(result)
+                            except Exception as e:
+                                results.append({'url': url, 'response': str(e)})
+    
+                            elapsed_time = time.time() - start_time
+                            avg_time_per_url = elapsed_time / (idx + 1)
+                            remaining_urls = total_urls - (idx + 1)
+                            estimated_time_remaining = avg_time_per_url * remaining_urls
+                            estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
+    
+                            progress_placeholder.write(
+                                f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
+                            )
                 
-                # Cancellazione del placeholder dopo aver completato l'ispezione
+                index_results = pd.DataFrame(results)
+                st.write("### Results")
+                st.dataframe(index_results.drop(columns=['response']))
+                
+                for result in results:
+                    st.write(f"#### URL: {result['url']}")
+                    with st.expander("Complete response for this URL"):
+                        st.write(f'Response: {result["response"]}')
+                
                 progress_placeholder.empty()
                 
                     
