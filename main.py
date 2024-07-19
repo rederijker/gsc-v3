@@ -57,7 +57,7 @@ html_code = """
             window.onload = addMetaTag;
         </script>
 
-"""
+        """
 
 # Initialize session state
 if 'credentials' not in st.session_state:
