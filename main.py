@@ -1072,6 +1072,8 @@ def inspect_url(url_to_inspect, selected_site):
         request = webmasters_service.urlInspection().index().inspect(body=request_body)
         response = request.execute(timeout=TIMEOUT_SECONDS)
         
+        st.write(f"Full API Response: {response}")  # Stampa la risposta completa
+        
         inspection_result = response.get('inspectionResult', {})
         index_status_result = inspection_result.get('indexStatusResult', {})
         
@@ -1092,6 +1094,8 @@ def inspect_url(url_to_inspect, selected_site):
         }
     except HttpError as err:
         st.error(f"HTTP error occurred: {err}")
+        st.write(f"Full HTTP error details: {err.resp}")
+        st.write(f"Error content: {err.content}")
         return {
             'url': url_to_inspect,
             'index_status_verdict': 'ERROR',
