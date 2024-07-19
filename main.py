@@ -30,6 +30,18 @@ from urllib.parse import urlparse, parse_qs
 import streamlit as st
 import streamlit.components.v1 as components
 # HTML e JavaScript per aggiungere un tag all'head
+
+
+# Utilizzare Streamlit components per includere HTML e JS
+components.html(html_code, height=600)
+
+#PAGE CONFIGURATION
+st.set_page_config(
+    page_title="SEO Gnosis: Master Search Console Data Like a Pro-by Cristiano Caggiula",
+    page_icon="🔍",
+    layout="wide"
+)
+
 html_code = """
 <html>
     <head>
@@ -51,16 +63,6 @@ html_code = """
     </body>
 </html>
 """
-
-# Utilizzare Streamlit components per includere HTML e JS
-components.html(html_code, height=600)
-
-#PAGE CONFIGURATION
-st.set_page_config(
-    page_title="SEO Gnosis: Master Search Console Data Like a Pro-by Cristiano Caggiula",
-    page_icon="🔍",
-    layout="wide"
-)
 
 # Initialize session state
 if 'credentials' not in st.session_state:
