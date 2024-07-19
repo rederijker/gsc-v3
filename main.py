@@ -1254,9 +1254,10 @@ if credentials:
         st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
     with col2:
         st.write("")
-    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
+        
+    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])
 
-    with tab2:
+    with tab1:
         # Input dell'utente per una lista di URL, uno per riga
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
@@ -1310,7 +1311,7 @@ if credentials:
                 
                     
    
-    with tab1:
+    with tab2:
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
