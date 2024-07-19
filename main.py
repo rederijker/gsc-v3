@@ -28,21 +28,6 @@ from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 import streamlit.components.v1 as components
 
-# Definizione del codice HTML e JavaScript
-html_code = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta name="google-site-verification" content="jEKGfJd5zGkI1gfCptt5kDGbpzL42mmPvsKSW-SJzK4" />
-    </head>
-    <body>
-        <h1>Hello, Streamlit!</h1>
-    </body>
-</html>
-"""
-
-# Utilizzare Streamlit components per includere HTML e JS
-components.html(html_code, height=600)
 
 
 #PAGE CONFIGURATION
