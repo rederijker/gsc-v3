@@ -1077,48 +1077,53 @@ def analyze_query_position_changes(df):
                     'Impressions_First_Half': '{:.0f}'
                 }))
 # Funzione per ispezionare un singolo URL
-def inspect_url(url_to_inspect, selected_site):
+# Funzione per ispezionare un singolo URL con retry
+def inspect_url(url_to_inspect, selected_site, retries=3):
     request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
-    try:
-        response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
-        
-        inspection_result = response.get('inspectionResult', {})
-        index_status_result = inspection_result.get('indexStatusResult', {})
-        mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
-        rich_results_result = inspection_result.get('richResultsResult', {})
-        
-        # Estrazione dei dati richiesti
-        return {
-            'url': url_to_inspect,
-            'index_status_verdict': index_status_result.get('verdict', 'N/A'),
-            'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
-            'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
-            'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
-            'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
-            'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
-            'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
-            'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
-            'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
-            'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
-            'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
-            'response': response
-        }
-    except HttpError as err:
-        return {
-            'url': url_to_inspect,
-            'index_status_verdict': 'ERROR',
-            'index_status_coverage_state': 'ERROR',
-            'index_status_robots_txt_state': 'ERROR',
-            'index_status_indexing_state': 'ERROR',
-            'index_status_last_crawl_time': 'ERROR',
-            'index_status_page_fetch_state': 'ERROR',
-            'index_status_google_canonical': 'ERROR',
-            'index_status_user_canonical': 'ERROR',
-            'index_status_sitemap': 'ERROR',
-            'index_status_referring_urls': 'ERROR',
-            'index_status_crawled_as': 'ERROR',
-            'response': str(err)
-        }
+    for attempt in range(retries):
+        try:
+            response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
+            
+            inspection_result = response.get('inspectionResult', {})
+            index_status_result = inspection_result.get('indexStatusResult', {})
+            mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
+            rich_results_result = inspection_result.get('richResultsResult', {})
+            
+            # Estrazione dei dati richiesti
+            return {
+                'url': url_to_inspect,
+                'index_status_verdict': index_status_result.get('verdict', 'N/A'),
+                'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
+                'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
+                'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
+                'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
+                'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
+                'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
+                'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
+                'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
+                'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
+                'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
+                'response': response
+            }
+        except HttpError as err:
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)  # Esponenziale backoff
+            else:
+                return {
+                    'url': url_to_inspect,
+                    'index_status_verdict': 'ERROR',
+                    'index_status_coverage_state': 'ERROR',
+                    'index_status_robots_txt_state': 'ERROR',
+                    'index_status_indexing_state': 'ERROR',
+                    'index_status_last_crawl_time': 'ERROR',
+                    'index_status_page_fetch_state': 'ERROR',
+                    'index_status_google_canonical': 'ERROR',
+                    'index_status_user_canonical': 'ERROR',
+                    'index_status_sitemap': 'ERROR',
+                    'index_status_referring_urls': 'ERROR',
+                    'index_status_crawled_as': 'ERROR',
+                    'response': str(err)
+                }
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
@@ -1249,7 +1254,7 @@ if credentials:
     tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])
 
     with tab1:
-
+    with tab2:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
@@ -1261,7 +1266,8 @@ if credentials:
                 start_time = time.time()  # Inizio del timer
     
                 with st.spinner("Inspecting URLs..."):
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                    # Uso di ThreadPoolExecutor per l'esecuzione concorrente
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                         future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
                         for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
                             url = future_to_url[future]
@@ -1277,21 +1283,30 @@ if credentials:
                             estimated_time_remaining = avg_time_per_url * remaining_urls
                             estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
     
+                            # Aggiornamento del placeholder con il progresso e il tempo stimato
                             progress_placeholder.write(
                                 f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
                             )
+    
+                            # Aggiornare il DataFrame parziale
+                            index_results_partial = pd.DataFrame(results)
+                            st.write("### Partial Results")
+                            st.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
                 
+                # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
-                st.write("### Results")
+                st.write("### Final Results")
                 st.dataframe(index_results.drop(columns=['response']))
                 
+                # Mostrare le risposte complete come espansione
                 for result in results:
                     st.write(f"#### URL: {result['url']}")
                     with st.expander("Complete response for this URL"):
                         st.write(f'Response: {result["response"]}')
                 
+                # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
-                
+                    
                     
    
     with tab2:
