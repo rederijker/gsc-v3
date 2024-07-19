@@ -1255,9 +1255,7 @@ if credentials:
     with col2:
         st.write("")
         
-    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])
-
-                   
+    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])                 
    
     with tab1:
         col1, col2, col3 = st.columns([1,2,1])
@@ -1376,7 +1374,7 @@ if credentials:
         csv = st.session_state.df.to_csv(index=False).encode('utf-8')
         st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
 
-    with tab1:
+    with tab2:
         # Input dell'utente per una lista di URL, uno per riga
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
