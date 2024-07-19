@@ -43,8 +43,7 @@ st.set_page_config(
 )
 
 html_code = """
-<html>
-    <head>
+
         <script type="text/javascript">
             // Funzione per aggiungere un tag all'head
             function addMetaTag() {
@@ -57,11 +56,7 @@ html_code = """
             // Esegui la funzione quando la pagina è caricata
             window.onload = addMetaTag;
         </script>
-    </head>
-    <body>
-        <h1>Hello, Streamlit!</h1>
-    </body>
-</html>
+
 """
 
 # Initialize session state
