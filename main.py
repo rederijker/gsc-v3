@@ -2247,30 +2247,42 @@ if credentials:
                                 data = []
 
                                 for group, total_clicks in sorted_groups:
+                                    # Ottieni la lista delle keyword per il gruppo corrente
                                     keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
                                     
-                                    for idx, row in keyword_clicks_df.iterrows():
+                                    # Filtra il DataFrame per ottenere solo le righe che contengono le keyword del gruppo corrente
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)]
+                                    
+                                    # Aggrega i clic per ogni keyword e calcola il totale per il gruppo
+                                    keyword_aggregates = keyword_clicks_df.groupby(keyword_column)[clicks_column].sum().reset_index()
+                                    
+                                    # Aggiungi una riga per ogni keyword con il totale dei clic per il gruppo
+                                    for idx, row in keyword_aggregates.iterrows():
                                         data.append({
                                             'group': group,
                                             'total click group': total_clicks,
                                             'keyword': row[keyword_column],
                                             'keyword click': row[clicks_column]
                                         })
-                
+                                
                                 # Creiamo il DataFrame finale
                                 final_df = pd.DataFrame(data)
+                                
                                 # Visualizziamo il DataFrame
                                 st.write(final_df)
+                                
+                                # Specifica le colonne di dettaglio
                                 detailColumns = ["keyword", "keyword click", "total click group"]
                                 detailColNum = 2
                                 detailsHeader = "Details"
                                 
+                                # Rinomina le colonne per la visualizzazione
                                 for col in detailColumns:
                                     final_df.rename(columns={col: f"<b>{col}</b>"}, inplace=True)
                                 
                                 detailColumns = [f"<b>{col}</b>" for col in detailColumns]
-                
+                                
+                                # Visualizza la tabella con le colonne di dettaglio
                                 st_mui_table(final_df, key="table4", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
                 
                             except KeyError as e:
