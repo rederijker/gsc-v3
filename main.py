@@ -2233,7 +2233,9 @@ if credentials:
                                     keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
                                     keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
                                     
+                                    # Aggiungi le righe per il gruppo
                                     combined_data.append({'group': group, 'total click group': total_clicks, 'keyword': '', 'keyword click': ''})
+                                    # Aggiungi le righe per le keyword
                                     for idx, row in keyword_clicks_df.iterrows():
                                         combined_data.append({'group': group, 'total click group': '', 'keyword': row[keyword_column], 'keyword click': row[clicks_column]})
                                 
@@ -2244,10 +2246,16 @@ if credentials:
                         except Exception as e:
                             st.error(f"An error occurred: {e}")
                 
-                    if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
-                        # Visualizzazione della tabella finale combinata
-                        st_mui_table(final_df, key="table2", detailColumns=["keyword", "keyword click"], detailColNum=2, detailsHeader="<b>Details</b>")
-
+                    if 'keyword_groups' in st.session_state and 'click_totals' in st.session_state:
+                        # Mostra i dettagli della tabella
+                        detailColumns = ["keyword", "keyword click"]
+                        detailColNum = len(detailColumns)
+                        detailsHeader = "<b>Details</b>"
+                        
+                        # Applicazione della visualizzazione della tabella
+                        with st.container():
+                            st.subheader("🔑 Groups and Details")
+                            st_mui_table(final_df, key="table2", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
 
 
 
