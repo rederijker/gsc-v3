@@ -1254,12 +1254,12 @@ if credentials:
         st.write("")
         
     component1 = TabBar(
-    tabs=["Tab1", "Tab2"],
+    tabs=["Serch Analytics", "URLs Bulk Inspection Tool"],
     default=0,
     background="aliceblue",
     color="black",
     activeColor="#545fc3",
-    fontSize="20px",
+    fontSize="17px",
     )                    
                     
    
