@@ -2341,7 +2341,7 @@ if credentials:
                 # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
                 st.write("### Final Results")
-                st.dataframe(index_results.drop(columns=['response'])         
+                st.dataframe(index_results.drop(columns=['response'])) 
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
