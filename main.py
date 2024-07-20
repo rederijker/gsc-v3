@@ -1077,54 +1077,7 @@ def analyze_query_position_changes(df):
                     'Clicks_First_Half': '{:.0f}',
                     'Impressions_First_Half': '{:.0f}'
                 }))
-# Funzione per ispezionare un singolo URL
-# Funzione per ispezionare un singolo URL con retry
-def inspect_url(url_to_inspect, selected_site, retries=3):
-    request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
-    for attempt in range(retries):
-        try:
-            response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
-            
-            inspection_result = response.get('inspectionResult', {})
-            index_status_result = inspection_result.get('indexStatusResult', {})
-            mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
-            rich_results_result = inspection_result.get('richResultsResult', {})
-            
-            # Estrazione dei dati richiesti
-            return {
-                'url': url_to_inspect,
-                'index_status_verdict': index_status_result.get('verdict', 'N/A'),
-                'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
-                'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
-                'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
-                'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
-                'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
-                'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
-                'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
-                'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
-                'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
-                'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
-                'response': response
-            }
-        except HttpError as err:
-            if attempt < retries - 1:
-                time.sleep(2 ** attempt)  # Esponenziale backoff
-            else:
-                return {
-                    'url': url_to_inspect,
-                    'index_status_verdict': 'ERROR',
-                    'index_status_coverage_state': 'ERROR',
-                    'index_status_robots_txt_state': 'ERROR',
-                    'index_status_indexing_state': 'ERROR',
-                    'index_status_last_crawl_time': 'ERROR',
-                    'index_status_page_fetch_state': 'ERROR',
-                    'index_status_google_canonical': 'ERROR',
-                    'index_status_user_canonical': 'ERROR',
-                    'index_status_sitemap': 'ERROR',
-                    'index_status_referring_urls': 'ERROR',
-                    'index_status_crawled_as': 'ERROR',
-                    'response': str(err)
-                }
+
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
