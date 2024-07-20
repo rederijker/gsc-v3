@@ -2243,8 +2243,29 @@ if credentials:
                                         keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
                                         keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
                                         st.write(keyword_clicks_df)
+
+                                data = []
+
+                                for group, total_clicks in sorted_groups:
+                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                    
+                                    for idx, row in keyword_clicks_df.iterrows():
+                                        data.append({
+                                            'group': group,
+                                            'total click group': total_clicks,
+                                            'keyword': row[keyword_column],
+                                            'keyword click': row[clicks_column]
+                                        })
+                
+                                # Creiamo il DataFrame finale
+                                final_df = pd.DataFrame(data)
+                                # Visualizziamo il DataFrame
+                                st.write(final_df)
                             except KeyError as e:
                                 st.warning(str(e))
+                
+
         
                         with tab2:
                             top_groups_clicks = [click for group, click in top_groups]
