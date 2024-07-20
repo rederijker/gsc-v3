@@ -2247,6 +2247,7 @@ if credentials:
 
 
                                  
+                                
                                 group_data = []
                                 
                                 for group, total_clicks in sorted_groups:
@@ -2274,7 +2275,7 @@ if credentials:
                                         function(params) {
                                             var keywords = params.value;
                                             if (Array.isArray(keywords)) {
-                                                return keywords.map(item => `<div>${item[keyword_column]}: ${item[clicks_column]}</div>`).join("");
+                                                return keywords.map(item => `<div>${item['keyword_column']}: ${item['clicks_column']}</div>`).join("");
                                             }
                                             return "";
                                         }
@@ -2300,7 +2301,7 @@ if credentials:
                                 if selected_rows:
                                     st.write("**Dettagli selezionati**")
                                     st.write(pd.DataFrame(selected_rows))
-                                                
+                                                                                
                             except KeyError as e:
                                 st.warning(str(e))
                 
