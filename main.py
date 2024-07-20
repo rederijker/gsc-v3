@@ -31,7 +31,7 @@ import concurrent.futures
 from googleapiclient.errors import HttpError
 from streamlit_javascript import st_javascript
 from st_tabs import TabBar
-component1=  TabBar(tabs=["Tab1","Tab2"],default=0,background = "red",color="grey",activeColor="blue",fontSize="20px")
+
 
 
 #PAGE CONFIGURATION
@@ -40,7 +40,7 @@ st.set_page_config(
     page_icon="🔍",
     layout="wide"
 )
-
+component1=  TabBar(tabs=["Tab1","Tab2"],default=0,background = "red",color="grey",activeColor="blue",fontSize="20px")
 # JavaScript per aggiungere il meta tag di verifica di Google
 js_code = """
 <!-- Google Tag Manager -->
