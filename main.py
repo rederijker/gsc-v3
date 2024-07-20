@@ -2262,7 +2262,7 @@ if credentials:
                                 final_df = pd.DataFrame(data)
                                 # Visualizziamo il DataFrame
                                 st.write(final_df)
-                                detailColumns = ["keyword", "keyword click"])
+                                detailColumns = ["keyword", "keyword click"]
                                 detailColNum = 2
                                 detailsHeader = "Details"
                                 
