@@ -18,3 +18,4 @@ bs4
 scikit-learn
 streamlit-javascript
 tenacity
+st_tabs
