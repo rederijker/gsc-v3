@@ -2221,45 +2221,57 @@ if credentials:
                             if keyword_column in df.columns and clicks_column in df.columns:
                                 # Remove duplicates and sum clicks
                                 df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
-                                
                                 # Group keywords
                                 st.session_state.keyword_groups = group_keywords(df_cleaned, None, None, None, keyword_column=keyword_column)
-                                
                                 # Calculate click totals
-                                click_totals_df = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
-                                st.session_state.click_totals = click_totals_df.set_index('Group').to_dict()['Total Clicks']
-                                
-                                # Creiamo il DataFrame finale combinato
-                                combined_data = []
-                                for group, total_clicks in st.session_state.click_totals.items():
-                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
-                                    
-                                    # Aggiungi le righe per il gruppo
-                                    combined_data.append({'group': group, 'total click group': total_clicks, 'keyword': '', 'keyword click': ''})
-                                    # Aggiungi le righe per le keyword
-                                    for idx, row in keyword_clicks_df.iterrows():
-                                        combined_data.append({'group': group, 'total click group': '', 'keyword': row[keyword_column], 'keyword click': row[clicks_column]})
-                                
-                                final_df = pd.DataFrame(combined_data)
-                                
-                                # Mostra i dettagli della tabella
-                                detailColumns = ["keyword", "keyword click"]
-                                detailColNum = len(detailColumns)
-                                detailsHeader = "<b>Details</b>"
-                
-                                # Applicazione della visualizzazione della tabella
-                                with st.container():
-                                    st.subheader("🔑 Groups and Details")
-                                    if not final_df.empty:
-                                        st_mui_table(final_df, key="table2", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
-                                    else:
-                                        st.warning("No data available to display.")
-                                
+                                st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
                             else:
                                 st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
                         except Exception as e:
                             st.error(f"An error occurred: {e}")
+                
+                    if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
+                        sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
+                        top_groups = sorted_groups[:5]
+                        tab1, tab2 = st.columns([2, 2])
+                        with tab1:
+                            try:
+                                st.subheader("🔑 Groups")
+                                
+                                # Inizializziamo una lista per raccogliere le righe del nuovo DataFrame
+                                data = []
+                
+                                for group, total_clicks in sorted_groups:
+                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                    
+                                    for idx, row in keyword_clicks_df.iterrows():
+                                        data.append({
+                                            'group': group,
+                                            'total click group': total_clicks,
+                                            'keyword': row[keyword_column],
+                                            'keyword click': row[clicks_column]
+                                        })
+                
+                                # Creiamo il DataFrame finale
+                                final_df = pd.DataFrame(data)
+                
+                                # Visualizziamo il DataFrame utilizzando st_mui_table
+                                st_mui_table(final_df, key="table2")
+                                
+                                detailColumns = st.multiselect("**Detail Columns**", df.columns, default=["Query", "Clicks"])
+                                detailColNum = st.slider("**Number of Detail Columns**", min_value=0, max_value=len(detailColumns), value=1)
+                                detailsHeader = st.text_input("**Details Header**", value="<b>Details</b>")
+                                
+                                for col in detailColumns:
+                                    final_df.rename(columns={col: f"<b>{col}</b>"}, inplace=True)
+                                
+                                detailColumns = [f"<b>{col}</b>" for col in detailColumns]
+                
+                                st_mui_table(final_df, key="table4", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
+                                
+                            except KeyError as e:
+                                st.warning(str(e))
 
         
                         with col2:
