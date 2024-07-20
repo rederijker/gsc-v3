@@ -2306,7 +2306,7 @@ if credentials:
                             ax.set_title('Top 5 Groups by Clicks')
                             st.pyplot(fig)
     else:
-        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
+        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=80)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
