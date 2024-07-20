@@ -2248,6 +2248,7 @@ if credentials:
 
                                  
                                 
+                                # Step 1: Preparare i dati
                                 group_data = []
                                 
                                 for group, total_clicks in sorted_groups:
@@ -2266,7 +2267,6 @@ if credentials:
                                 
                                 # Converti i dati in DataFrame
                                 group_df = pd.DataFrame(group_data)
-                                
                                 # Step 2: Creare la tabella espandibile
                                 gb = GridOptionsBuilder.from_dataframe(group_df)
                                 gb.configure_column("keywords", cellRenderer='agGroupCellRenderer', cellRendererParams={
@@ -2275,7 +2275,7 @@ if credentials:
                                         function(params) {
                                             var keywords = params.value;
                                             if (Array.isArray(keywords)) {
-                                                return keywords.map(item => `<div>${item['keyword_column']}: ${item['clicks_column']}</div>`).join("");
+                                                return keywords.map(item => `<div>${item['keyword']}: ${item['clicks']}</div>`).join("");
                                             }
                                             return "";
                                         }
