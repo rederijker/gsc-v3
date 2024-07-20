@@ -33,26 +33,6 @@ from streamlit_javascript import st_javascript
 from st_tabs import TabBar
 
 
-#PAGE CONFIGURATION
-st.set_page_config(
-    page_title="Google SEO Tools with Search Console Data Like-by Cristiano Caggiula",
-    page_icon="🔍",
-    layout="wide"
-)
-
-# JavaScript per aggiungere il meta tag di verifica di Google
-js_code = """
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-NF4DR3VB');</script>
-<!-- End Google Tag Manager -->
-"""
-
-# Esegui il codice JavaScript
-st_javascript(js_code)
 
 
 # Initialize session state
@@ -94,6 +74,28 @@ if 'show_body_alt' not in st.session_state:
     st.session_state.show_body_alt = True
 if 'show_not_covered' not in st.session_state:
     st.session_state.show_not_covered = False
+
+#PAGE CONFIGURATION
+st.set_page_config(
+    page_title="Google SEO Tools with Search Console Data Like-by Cristiano Caggiula",
+    page_icon="🔍",
+    layout="wide"
+)
+
+# JavaScript per aggiungere il meta tag di verifica di Google
+js_code = """
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NF4DR3VB');</script>
+<!-- End Google Tag Manager -->
+"""
+
+# Esegui il codice JavaScript
+st_javascript(js_code)
+
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 # Funzione per ispezionare un singolo URL
 # Funzione per ispezionare un singolo URL con retry
