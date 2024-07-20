@@ -2235,7 +2235,7 @@ if credentials:
                     if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
                         sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
                         top_groups = sorted_groups[:5]
-                        tab1, tab2 = st.columns([2, 2])
+                        tab1, tab2 = st.columns([9, 1])
                         with tab1:
                             try:
                                 st.subheader("🔑 Groups")
