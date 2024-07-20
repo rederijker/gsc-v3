@@ -2224,52 +2224,45 @@ if credentials:
                                 
                                 # Group keywords
                                 st.session_state.keyword_groups = group_keywords(df_cleaned, None, None, None, keyword_column=keyword_column)
+                                
                                 # Calculate click totals
                                 click_totals_df = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
                                 st.session_state.click_totals = click_totals_df.set_index('Group').to_dict()['Total Clicks']
                                 
                                 # Creiamo il DataFrame finale combinato
                                 combined_data = []
-                                if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
-                                    for group, total_clicks in st.session_state.click_totals.items():
-                                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
-                                        
-                                        # Aggiungi le righe per il gruppo
-                                        combined_data.append({'group': group, 'total click group': total_clicks, 'keyword': '', 'keyword click': ''})
-                                        # Aggiungi le righe per le keyword
-                                        for idx, row in keyword_clicks_df.iterrows():
-                                            combined_data.append({'group': group, 'total click group': '', 'keyword': row[keyword_column], 'keyword click': row[clicks_column]})
+                                for group, total_clicks in st.session_state.click_totals.items():
+                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
                                     
-                                    final_df = pd.DataFrame(combined_data)
-                                else:
-                                    st.warning("Data is not available for display.")
+                                    # Aggiungi le righe per il gruppo
+                                    combined_data.append({'group': group, 'total click group': total_clicks, 'keyword': '', 'keyword click': ''})
+                                    # Aggiungi le righe per le keyword
+                                    for idx, row in keyword_clicks_df.iterrows():
+                                        combined_data.append({'group': group, 'total click group': '', 'keyword': row[keyword_column], 'keyword click': row[clicks_column]})
+                                
+                                final_df = pd.DataFrame(combined_data)
+                                
+                                # Mostra i dettagli della tabella
+                                detailColumns = ["keyword", "keyword click"]
+                                detailColNum = len(detailColumns)
+                                detailsHeader = "<b>Details</b>"
+                
+                                # Applicazione della visualizzazione della tabella
+                                with st.container():
+                                    st.subheader("🔑 Groups and Details")
+                                    if not final_df.empty:
+                                        st_mui_table(final_df, key="table2", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
+                                    else:
+                                        st.warning("No data available to display.")
+                                
                             else:
                                 st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
                         except Exception as e:
                             st.error(f"An error occurred: {e}")
-                
-                    if 'keyword_groups' in st.session_state and 'click_totals' in st.session_state:
-                        # Mostra i dettagli della tabella
-                        detailColumns = ["keyword", "keyword click"]
-                        detailColNum = len(detailColumns)
-                        detailsHeader = "<b>Details</b>"
-                        
-                        # Applicazione della visualizzazione della tabella
-                        with st.container():
-                            st.subheader("🔑 Groups and Details")
-                            if 'final_df' in locals() and not final_df.empty:
-                                st_mui_table(final_df, key="table2", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
-                            else:
-                                st.warning("No data available to display.")
-
-
-
-
-                
 
         
-                        with tab2:
+                        with col2:
                             top_groups_clicks = [click for group, click in top_groups]
                             top_group_names = [group for group, click in top_groups]
                     
