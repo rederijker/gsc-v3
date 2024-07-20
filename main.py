@@ -2261,7 +2261,22 @@ if credentials:
                                 # Creiamo il DataFrame finale
                                 final_df = pd.DataFrame(data)
                                 # Visualizziamo il DataFrame
-                                st.write(final_df)
+                                detailColumns = st.multiselect("**Detail Columns**", df.columns, default=["Query", "Clicks"])
+                                detailColNum = st.slider("**Number of Detail Columns**", min_value=0, max_value=len(detailColumns), value=1)
+                                detailsHeader = st.text_input("**Details Header**", value="<b>Details</b>")
+                                
+                                for col in detailColumns:
+                                    final_df.rename(columns={col: f"<b>{col}</b>"}, inplace=True)
+                                
+                                detailColumns = [f"<b>{col}</b>" for col in detailColumns]
+                
+                                st_mui_table(final_df, key="table4", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
+
+
+
+
+
+
                             except KeyError as e:
                                 st.warning(str(e))
                 
@@ -2306,7 +2321,7 @@ if credentials:
                             st.warning(str(e))
 
                         
-                    st_mui_table(group_details_df,key="table2")
+                    
                     # Grafico dei Top 5 gruppi per clic
                     st.subheader("📊 Top 5 Groups by Clicks")
                     top_groups_clicks = [click for group, click in top_groups]
