@@ -2246,21 +2246,21 @@ if credentials:
                                         st.write(keyword_clicks_df)
 
 
+                                 
                                 group_data = []
-                                
                                 
                                 for group, total_clicks in sorted_groups:
                                     keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
                                     keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)]
                                     
-                                    # Trasforma i dati delle keyword in una lista di stringhe formattate
-                                    keywords_formatted = [f"{row[keyword_column]}: {row[clicks_column]}" for _, row in keyword_clicks_df.iterrows()]
+                                    # Trasforma i dati delle keyword in una lista di dizionari
+                                    keywords_formatted = keyword_clicks_df[[keyword_column, clicks_column]].to_dict('records')
                                     
                                     # Aggiungi una riga per il gruppo
                                     group_data.append({
                                         'group': group,
                                         'total click group': total_clicks,
-                                        'keywords': keywords_formatted  # Lista di stringhe
+                                        'keywords': keywords_formatted  # Lista di dizionari
                                     })
                                 
                                 # Converti i dati in DataFrame
@@ -2269,6 +2269,17 @@ if credentials:
                                 # Step 2: Creare la tabella espandibile
                                 gb = GridOptionsBuilder.from_dataframe(group_df)
                                 gb.configure_column("keywords", cellRenderer='agGroupCellRenderer', cellRendererParams={
+                                    'innerRenderer': {
+                                        'function': '''
+                                        function(params) {
+                                            var keywords = params.value;
+                                            if (Array.isArray(keywords)) {
+                                                return keywords.map(item => `<div>${item[keyword_column]}: ${item[clicks_column]}</div>`).join("");
+                                            }
+                                            return "";
+                                        }
+                                        '''
+                                    },
                                     'suppressCount': True
                                 })
                                 grid_options = gb.build()
@@ -2289,8 +2300,7 @@ if credentials:
                                 if selected_rows:
                                     st.write("**Dettagli selezionati**")
                                     st.write(pd.DataFrame(selected_rows))
-
-                
+                                                
                             except KeyError as e:
                                 st.warning(str(e))
                 
