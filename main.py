@@ -2244,46 +2244,51 @@ if credentials:
                                         keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
                                         st.write(keyword_clicks_df)
 
-                                data = []
 
+                                group_data = []
+                                
                                 for group, total_clicks in sorted_groups:
-                                    # Ottieni la lista delle keyword per il gruppo corrente
                                     keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                    
-                                    # Filtra il DataFrame per ottenere solo le righe che contengono le keyword del gruppo corrente
                                     keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)]
                                     
-                                    # Aggrega i clic per ogni keyword e calcola il totale per il gruppo
-                                    keyword_aggregates = keyword_clicks_df.groupby(keyword_column)[clicks_column].sum().reset_index()
-                                    
-                                    # Aggiungi una riga per ogni keyword con il totale dei clic per il gruppo
-                                    for idx, row in keyword_aggregates.iterrows():
-                                        data.append({
-                                            'group': group,
-                                            'total click group': total_clicks,
-                                            'keyword': row[keyword_column],
-                                            'keyword click': row[clicks_column]
-                                        })
+                                    # Aggiungi una riga per il gruppo
+                                    group_data.append({
+                                        'group': group,
+                                        'total click group': total_clicks,
+                                        'keywords': keyword_clicks_df[[keyword_column, clicks_column]].to_dict('records')
+                                    })
                                 
-                                # Creiamo il DataFrame finale
-                                final_df = pd.DataFrame(data)
+                                # Converti i dati in DataFrame
+                                group_df = pd.DataFrame(group_data)
                                 
-                                # Visualizziamo il DataFrame
-                                st.write(final_df)
+                                # Step 2: Creare la tabella espandibile
+                                # Configura le opzioni della tabella
+                                gb = GridOptionsBuilder.from_dataframe(group_df)
+                                gb.configure_column("keywords", cellRenderer='agGroupCellRenderer', cellRendererParams={
+                                    'suppressCount': True,
+                                    'innerRenderer': {
+                                        'function': 'function(params) { return params.value.map(item => `<div>${item[keyword_column]}: ${item[clicks_column]}</div>`).join("") }'
+                                    }
+                                })
+                                grid_options = gb.build()
                                 
-                                # Specifica le colonne di dettaglio
-                                detailColumns = ["keyword", "keyword click", "total click group"]
-                                detailColNum = 2
-                                detailsHeader = "Details"
+                                # Visualizza la tabella espandibile in Streamlit
+                                st.write("**Dettagli per Gruppo**")
+                                grid_response = AgGrid(
+                                    group_df,
+                                    gridOptions=grid_options,
+                                    update_mode=GridUpdateMode.SELECTION_CHANGED,
+                                    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+                                    allow_unsafe_jscode=True,  # Necessario per l'uso di codice JS personalizzato
+                                    fit_columns_on_grid_load=True
+                                )
                                 
-                                # Rinomina le colonne per la visualizzazione
-                                for col in detailColumns:
-                                    final_df.rename(columns={col: f"<b>{col}</b>"}, inplace=True)
-                                
-                                detailColumns = [f"<b>{col}</b>" for col in detailColumns]
-                                
-                                # Visualizza la tabella con le colonne di dettaglio
-                                st_mui_table(final_df, key="table4", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
+                                # Mostra dettagli della riga selezionata, se necessario
+                                selected_rows = grid_response['selected_rows']
+                                if selected_rows:
+                                    st.write("**Dettagli selezionati**")
+                                    st.write(pd.DataFrame(selected_rows))
+
                 
                             except KeyError as e:
                                 st.warning(str(e))
