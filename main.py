@@ -2215,6 +2215,7 @@ if credentials:
                 
                 keyword_column = 'Query'
                 clicks_column = 'Clicks'
+                
                 if st.button("Group Keywords with Clicks ✨"):
                     with st.spinner("Grouping..."):
                         try:
@@ -2222,7 +2223,7 @@ if credentials:
                                 # Remove duplicates and sum clicks
                                 df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
                                 # Group keywords
-                                st.session_state.keyword_groups = group_keywords(df_cleaned, None, None, None, keyword_column=keyword_column)
+                                st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
                                 # Calculate click totals
                                 st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
                             else:
@@ -2237,10 +2238,14 @@ if credentials:
                         with tab1:
                             try:
                                 st.subheader("🔑 Groups")
-                                
-                                # Inizializziamo una lista per raccogliere le righe del nuovo DataFrame
+                                for group, total_clicks in sorted_groups:
+                                    with st.expander(f"{group} - Total Clicks: {total_clicks}"):
+                                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                        st.write(keyword_clicks_df)
+
                                 data = []
-                
+
                                 for group, total_clicks in sorted_groups:
                                     keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
                                     keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
@@ -2255,26 +2260,14 @@ if credentials:
                 
                                 # Creiamo il DataFrame finale
                                 final_df = pd.DataFrame(data)
-                
-                                # Visualizziamo il DataFrame utilizzando st_mui_table
-                                st_mui_table(final_df, key="table2")
-                                
-                                detailColumns = st.multiselect("**Detail Columns**", df.columns, default=["Query", "Clicks"])
-                                detailColNum = st.slider("**Number of Detail Columns**", min_value=0, max_value=len(detailColumns), value=1)
-                                detailsHeader = st.text_input("**Details Header**", value="<b>Details</b>")
-                                
-                                for col in detailColumns:
-                                    final_df.rename(columns={col: f"<b>{col}</b>"}, inplace=True)
-                                
-                                detailColumns = [f"<b>{col}</b>" for col in detailColumns]
-                
-                                st_mui_table(final_df, key="table4", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
-                                
+                                # Visualizziamo il DataFrame
+                                st.write(final_df)
                             except KeyError as e:
                                 st.warning(str(e))
+                
 
         
-                        with col2:
+                        with tab2:
                             top_groups_clicks = [click for group, click in top_groups]
                             top_group_names = [group for group, click in top_groups]
                     
@@ -2313,7 +2306,7 @@ if credentials:
                             st.warning(str(e))
 
                         
-                    
+                    st_mui_table(group_details_df,key="table2")
                     # Grafico dei Top 5 gruppi per clic
                     st.subheader("📊 Top 5 Groups by Clicks")
                     top_groups_clicks = [click for group, click in top_groups]
