@@ -2262,14 +2262,13 @@ if credentials:
                                 final_df = pd.DataFrame(data)
                                 # Visualizziamo il DataFrame
                              
-                                detailColNum = st.slider("**Number of Detail Columns**", min_value=0, max_value=len(detailColumns), value=1)
                                 detailsHeader = "OVERVIEW"
                                 
                         
                                 
                                 detailColumns = ["keyword", "keyword click"]
                 
-                                st_mui_table(final_df, key="table4", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
+                                st_mui_table(final_df, key="table4", detailColumns=detailColumns, detailColNum=2, detailsHeader=detailsHeader)
 
 
 
