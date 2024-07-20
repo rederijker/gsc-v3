@@ -31,8 +31,7 @@ import concurrent.futures
 from googleapiclient.errors import HttpError
 from streamlit_javascript import st_javascript
 from st_tabs import TabBar
-
-
+from st_mui_table import st_mui_table
 
 #PAGE CONFIGURATION
 st.set_page_config(
@@ -2284,7 +2283,9 @@ if credentials:
                             st.dataframe(keyword_clicks_df)
                         except KeyError as e:
                             st.warning(str(e))
-                
+
+                        
+                    st_mui_table(group_details_df,key="table2")
                     # Grafico dei Top 5 gruppi per clic
                     st.subheader("📊 Top 5 Groups by Clicks")
                     top_groups_clicks = [click for group, click in top_groups]
