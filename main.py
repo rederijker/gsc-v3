@@ -957,11 +957,11 @@ def analyze_query_position_changes(df):
         position_score_percentage_change = -position_percentage_change
         
         # Filtro a toggle per includere/escludere query con dati mancanti
-        st.markdown("### Filters")
-        include_missing_data = st.checkbox("Include queries with missing data in one of the periods", value=True)
+       # st.markdown("### Filters")
+        #include_missing_data = st.checkbox("Include queries with missing data in one of the periods", value=True)
         
-        if not include_missing_data:
-            performance_df_position_analysis = performance_df_position_analysis.dropna(subset=['Position_First_Half', 'Position_Second_Half'])
+        #if not include_missing_data:
+          #  performance_df_position_analysis = performance_df_position_analysis.dropna(subset=['Position_First_Half', 'Position_Second_Half'])
     
         with st.container(border=True):
             st.subheader("5. Query Position Changes Report")
@@ -2341,10 +2341,7 @@ if credentials:
                 # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
                 st.write("### Final Results")
-                st.dataframe(index_results.drop(columns=['response']))
-                
-      
-                
+                st.dataframe(index_results.drop(columns=['response'])         
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
