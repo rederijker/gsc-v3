@@ -1785,18 +1785,19 @@ if credentials:
                             # Visualizzare i dettagli delle query per la pagina selezionata
                             st.write(f"Query details for {selected_page}")
                             st.dataframe(df_filtered[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
+                            
+
+        
                     else:
                         st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
                 
                     try:
                         # Controllo se la colonna 'Page' è presente
                         if 'Page' in df.columns:
-                            df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
-                    
+                            df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])                    
                             with st.container(border=True):
                                 st.subheader("3. Queries Cannibalization Report")            
-                                st.divider()
-                                
+                                st.divider()                                
                                 # Group by the cleaned page and query, and calculate the metrics
                                 query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
                                     'Position': 'mean',
@@ -1858,21 +1859,18 @@ if credentials:
                                     
                                     # Display the filtered DataFrame
                                     st.write(f"Metrics for the selected Query: {query_selected}")
-                                    st.dataframe(filtered_report)
-                    
-        
-                            
-                    
+                                    st.dataframe(filtered_report)                                   
                         else:
                             # Mostra un messaggio di avviso se la colonna 'Page' non è presente
                             st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
                     except Exception as e:
                         st.error(f"Si è verificato un errore: {e}")
-                    
+
                     analyze_query_performance(df)
         
                     analyze_query_position_changes(df)
-        
+                    
+
                         
         
                 
