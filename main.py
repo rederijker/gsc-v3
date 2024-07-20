@@ -32,7 +32,6 @@ from googleapiclient.errors import HttpError
 from streamlit_javascript import st_javascript
 from st_tabs import TabBar
 from st_mui_table import st_mui_table
-from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, DataReturnMode
 
 #PAGE CONFIGURATION
 st.set_page_config(
@@ -2267,40 +2266,9 @@ if credentials:
                                 
                                 # Converti i dati in DataFrame
                                 group_df = pd.DataFrame(group_data)
-                                # Step 2: Creare la tabella espandibile
-                                gb = GridOptionsBuilder.from_dataframe(group_df)
-                                gb.configure_column("keywords", cellRenderer='agGroupCellRenderer', cellRendererParams={
-                                    'innerRenderer': {
-                                        'function': '''
-                                        function(params) {
-                                            var keywords = params.value;
-                                            if (Array.isArray(keywords)) {
-                                                return keywords.map(item => `<div>${item['keyword']}: ${item['clicks']}</div>`).join("");
-                                            }
-                                            return "";
-                                        }
-                                        '''
-                                    },
-                                    'suppressCount': True
-                                })
-                                grid_options = gb.build()
-                                
-                                # Visualizza la tabella espandibile in Streamlit
-                                st.write("**Dettagli per Gruppo**")
-                                grid_response = AgGrid(
-                                    group_df,
-                                    gridOptions=grid_options,
-                                    update_mode=GridUpdateMode.SELECTION_CHANGED,
-                                    data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-                                    allow_unsafe_jscode=True,  # Necessario per il codice JS personalizzato
-                                    fit_columns_on_grid_load=True
-                                )
-                                
-                                # Mostra dettagli della riga selezionata, se necessario
-                                selected_rows = grid_response['selected_rows']
-                                if selected_rows:
-                                    st.write("**Dettagli selezionati**")
-                                    st.write(pd.DataFrame(selected_rows))
+                                st_mui_table(group_df,key="table2")
+
+                            
                                                                                 
                             except KeyError as e:
                                 st.warning(str(e))
@@ -2346,19 +2314,7 @@ if credentials:
                             st.warning(str(e))
 
                         
-                    st_mui_table(group_details_df,key="table2")
-                    # Grafico dei Top 5 gruppi per clic
-                    st.subheader("📊 Top 5 Groups by Clicks")
-                    top_groups_clicks = [click for group, click in top_groups]
-                    top_group_names = [group for group, click in top_groups]
-                
-                    if len(top_groups) > 0:
-                        fig, ax = plt.subplots()
-                        ax.barh(top_group_names, top_groups_clicks)
-                        ax.set_xlabel('Total Clicks')
-                        ax.set_ylabel('Group Name')
-                        ax.set_title('Top 5 Groups by Clicks')
-                        st.pyplot(fig)
+                   
 
     else:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
