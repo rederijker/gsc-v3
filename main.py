@@ -1253,7 +1253,7 @@ if credentials:
     with col2:
         st.write("")
         
-    component1=  TabBar(tabs=["Tab1","Tab2"],default=0,background = "red",color="grey",activeColor="blue",fontSize="20px")                    
+    component1=  TabBar(tabs=["Search Analytics","Bulk inspection tool"],default=0,background = "black",color="grey",activeColor="blue",fontSize="20px")                    
                     
    
     if(component1 == 0):
