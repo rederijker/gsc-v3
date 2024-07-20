@@ -2251,7 +2251,7 @@ if credentials:
                         detailColumns = ["keyword", "keyword click"]
                         detailColNum = len(detailColumns)
                         detailsHeader = "<b>Details</b>"
-                        
+                        final_df = pd.DataFrame(combined_data)
                         # Applicazione della visualizzazione della tabella
                         with st.container():
                             st.subheader("🔑 Groups and Details")
