@@ -1252,63 +1252,10 @@ if credentials:
     with col2:
         st.write("")
         
-    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])
-
-    with tab1:
-        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
-        if st.button('URL INSPECTION 🕵️‍♂️'):
-            if st.session_state.selected_site:
-                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
-                total_urls = len(urls)
-                results = []
-    
-                progress_placeholder = st.empty()
-                table_placeholder = st.empty()  # Placeholder per la tabella
-    
-                start_time = time.time()  # Inizio del timer
-    
-                with st.spinner("Inspecting URLs..."):
-                    # Uso di ThreadPoolExecutor per l'esecuzione concorrente
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
-                        future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
-                        for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
-                            url = future_to_url[future]
-                            try:
-                                result = future.result()
-                                results.append(result)
-                            except Exception as e:
-                                results.append({'url': url, 'response': str(e)})
-    
-                            elapsed_time = time.time() - start_time
-                            avg_time_per_url = elapsed_time / (idx + 1)
-                            remaining_urls = total_urls - (idx + 1)
-                            estimated_time_remaining = avg_time_per_url * remaining_urls
-                            estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
-    
-                            # Aggiornamento del placeholder con il progresso e il tempo stimato
-                            progress_placeholder.write(
-                                f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
-                            )
-    
-                            # Aggiornamento della tabella parziale nel placeholder
-                            index_results_partial = pd.DataFrame(results)
-                            table_placeholder.write("### Partial Results")
-                            table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
-                
-                # Creazione e visualizzazione del DataFrame finale
-                index_results = pd.DataFrame(results)
-                st.write("### Final Results")
-                st.dataframe(index_results.drop(columns=['response']))
-                
-      
-                
-                # Cancellazione del placeholder dopo aver completato l'ispezione
-                progress_placeholder.empty()
-                table_placeholder.empty()  # Pulisce la tabella parziale finale
-                    
+    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])                    
                     
    
-    with tab2:
+    with tab1:
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
@@ -2352,3 +2299,54 @@ if credentials:
                             ax.set_ylabel('Group Name')
                             ax.set_title('Top 5 Groups by Clicks')
                             st.pyplot(fig)
+    with tab2:
+        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
+        if st.button('URL INSPECTION 🕵️‍♂️'):
+            if st.session_state.selected_site:
+                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
+                total_urls = len(urls)
+                results = []
+    
+                progress_placeholder = st.empty()
+                table_placeholder = st.empty()  # Placeholder per la tabella
+    
+                start_time = time.time()  # Inizio del timer
+    
+                with st.spinner("Inspecting URLs..."):
+                    # Uso di ThreadPoolExecutor per l'esecuzione concorrente
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
+                        future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
+                        for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
+                            url = future_to_url[future]
+                            try:
+                                result = future.result()
+                                results.append(result)
+                            except Exception as e:
+                                results.append({'url': url, 'response': str(e)})
+    
+                            elapsed_time = time.time() - start_time
+                            avg_time_per_url = elapsed_time / (idx + 1)
+                            remaining_urls = total_urls - (idx + 1)
+                            estimated_time_remaining = avg_time_per_url * remaining_urls
+                            estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
+    
+                            # Aggiornamento del placeholder con il progresso e il tempo stimato
+                            progress_placeholder.write(
+                                f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
+                            )
+    
+                            # Aggiornamento della tabella parziale nel placeholder
+                            index_results_partial = pd.DataFrame(results)
+                            table_placeholder.write("### Partial Results")
+                            table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                
+                # Creazione e visualizzazione del DataFrame finale
+                index_results = pd.DataFrame(results)
+                st.write("### Final Results")
+                st.dataframe(index_results.drop(columns=['response']))
+                
+      
+                
+                # Cancellazione del placeholder dopo aver completato l'ispezione
+                progress_placeholder.empty()
+                table_placeholder.empty()  # Pulisce la tabella parziale finale
