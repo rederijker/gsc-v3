@@ -2248,28 +2248,28 @@ if credentials:
 
                                 group_data = []
                                 
+                                
                                 for group, total_clicks in sorted_groups:
                                     keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
                                     keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)]
+                                    
+                                    # Trasforma i dati delle keyword in una lista di stringhe formattate
+                                    keywords_formatted = [f"{row[keyword_column]}: {row[clicks_column]}" for _, row in keyword_clicks_df.iterrows()]
                                     
                                     # Aggiungi una riga per il gruppo
                                     group_data.append({
                                         'group': group,
                                         'total click group': total_clicks,
-                                        'keywords': keyword_clicks_df[[keyword_column, clicks_column]].to_dict('records')
+                                        'keywords': keywords_formatted  # Lista di stringhe
                                     })
                                 
                                 # Converti i dati in DataFrame
                                 group_df = pd.DataFrame(group_data)
                                 
                                 # Step 2: Creare la tabella espandibile
-                                # Configura le opzioni della tabella
                                 gb = GridOptionsBuilder.from_dataframe(group_df)
                                 gb.configure_column("keywords", cellRenderer='agGroupCellRenderer', cellRendererParams={
-                                    'suppressCount': True,
-                                    'innerRenderer': {
-                                        'function': 'function(params) { return params.value.map(item => `<div>${item[keyword_column]}: ${item[clicks_column]}</div>`).join("") }'
-                                    }
+                                    'suppressCount': True
                                 })
                                 grid_options = gb.build()
                                 
@@ -2280,7 +2280,7 @@ if credentials:
                                     gridOptions=grid_options,
                                     update_mode=GridUpdateMode.SELECTION_CHANGED,
                                     data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-                                    allow_unsafe_jscode=True,  # Necessario per l'uso di codice JS personalizzato
+                                    allow_unsafe_jscode=True,  # Necessario per il codice JS personalizzato
                                     fit_columns_on_grid_load=True
                                 )
                                 
