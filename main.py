@@ -1514,362 +1514,362 @@ if credentials:
         
             
             
-                with tab2:
-                    with st.container(border=True):
-                        st.subheader("1. Queries Performance Report")
-                        st.divider()
-                       
+            with tab2:
+                with st.container(border=True):
+                    st.subheader("1. Queries Performance Report")
+                    st.divider()
+                   
+                    
+                    if all(dim in selected_dimensions for dim in ['Query']):
+                        query_funcs = {
+                            'Impressions': 'sum',
+                            'Clicks': 'sum',
+                            'CTR': 'mean',
+                            'Position': 'mean'
+                        }
+                        # Raggruppiamo df per query per il bubble chart
+                        df_query_performance = df.groupby('Query').agg(query_funcs).reset_index()
                         
-                        if all(dim in selected_dimensions for dim in ['Query']):
-                            query_funcs = {
-                                'Impressions': 'sum',
-                                'Clicks': 'sum',
-                                'CTR': 'mean',
-                                'Position': 'mean'
-                            }
-                            # Raggruppiamo df per query per il bubble chart
-                            df_query_performance = df.groupby('Query').agg(query_funcs).reset_index()
-                            
-                            # Converti il CTR in percentuale
-                            df_query_performance['CTR'] = df_query_performance['CTR'] * 100
-                            
-                            # Calcola i valori minimi e massimi per il grafico
-                            min_ctr = df_query_performance['CTR'].min()
-                            max_ctr = df_query_performance['CTR'].max()
-                            min_position = df_query_performance['Position'].min()
-                            max_position = df_query_performance['Position'].max()
-                            
-                            # Calcola i valori medi di CTR e Posizione solo per le query selezionate
-                            average_ctr = df_query_performance['CTR'].mean()
-                            average_position = df_query_performance['Position'].mean()
-                            
-                            # Arrotonda la posizione media a due cifre decimali
-                            df_query_performance['Position'] = df_query_performance['Position'].round(2)
-                            
-                            # Crea il grafico a bolle con Plotly utilizzando il DataFrame filtrato
-                            fig = px.scatter(
-                                df_query_performance, 
-                                x='CTR', 
-                                y='Position', 
-                                size='Clicks', 
-                                hover_data={'Query': True, 'CTR': ':.2f%', 'Position': ':.2f', 'Clicks': True},
-                                custom_data=['Query']
-                            )
-                            
-                            # Configura gli assi
-                            fig.update_yaxes(autorange="reversed")
-                            fig.update_yaxes(range=[min_position, max_position])
-                            fig.update_xaxes(range=[min_ctr, max_ctr], tickformat=".2f%%") # Formatta l'asse X come percentuale
-                            
-                            # Aggiungi rettangoli colorati per i quadranti
-                            fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=min_position, y1=average_position,
-                                          fillcolor='rgba(0, 0, 255, 0.2)', line=dict(width=0), layer='below')  # Bottom left quadrant - blue
-                            fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=min_position, y1=average_position,
-                                          fillcolor='rgba(0, 255, 0, 0.2)', line=dict(width=0), layer='below')  # top right quadrant - green
-                            fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=average_position, y1=max_position,
-                                          fillcolor='rgba(255, 0, 0, 0.2)', line=dict(width=0), layer='below')  # Top left quadrant - red
-                            fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=average_position, y1=max_position,
-                                          fillcolor='rgba(255, 255, 0, 0.2)', line=dict(width=0), layer='below')  # bottom right quadrant - yellow
-                            
-                            # Aggiungi linee di riferimento per la media di CTR e posizione
-                            fig.add_shape(type='line', x0=average_ctr, x1=average_ctr, y0=min_position, y1=max_position, line=dict(color='red', dash='dash'))
-                            fig.add_annotation(x=average_ctr, y=max_position, text="Average", showarrow=False, yshift=10, font=dict(color='white'))
-                            
-                            fig.add_shape(type='line', x0=min_ctr, x1=max_ctr, y0=average_position, y1=average_position, line=dict(color='red', dash='dash'))
-                            fig.add_annotation(x=max_ctr, y=average_position, text="Average", showarrow=False, xshift=10, font=dict(color='white'))
+                        # Converti il CTR in percentuale
+                        df_query_performance['CTR'] = df_query_performance['CTR'] * 100
                         
-                            # Aggiorna le tracce delle bolle
-                            fig.update_traces(marker=dict(sizemin=4), hovertemplate='<b>Query:</b> %{customdata[0]}<br><b>CTR:</b> %{x:.2f}%<br><b>Position:</b> %{y:.2f}<br><b>Clicks:</b> %{marker.size}')
-                                 
+                        # Calcola i valori minimi e massimi per il grafico
+                        min_ctr = df_query_performance['CTR'].min()
+                        max_ctr = df_query_performance['CTR'].max()
+                        min_position = df_query_performance['Position'].min()
+                        max_position = df_query_performance['Position'].max()
+                        
+                        # Calcola i valori medi di CTR e Posizione solo per le query selezionate
+                        average_ctr = df_query_performance['CTR'].mean()
+                        average_position = df_query_performance['Position'].mean()
+                        
+                        # Arrotonda la posizione media a due cifre decimali
+                        df_query_performance['Position'] = df_query_performance['Position'].round(2)
+                        
+                        # Crea il grafico a bolle con Plotly utilizzando il DataFrame filtrato
+                        fig = px.scatter(
+                            df_query_performance, 
+                            x='CTR', 
+                            y='Position', 
+                            size='Clicks', 
+                            hover_data={'Query': True, 'CTR': ':.2f%', 'Position': ':.2f', 'Clicks': True},
+                            custom_data=['Query']
+                        )
+                        
+                        # Configura gli assi
+                        fig.update_yaxes(autorange="reversed")
+                        fig.update_yaxes(range=[min_position, max_position])
+                        fig.update_xaxes(range=[min_ctr, max_ctr], tickformat=".2f%%") # Formatta l'asse X come percentuale
+                        
+                        # Aggiungi rettangoli colorati per i quadranti
+                        fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=min_position, y1=average_position,
+                                      fillcolor='rgba(0, 0, 255, 0.2)', line=dict(width=0), layer='below')  # Bottom left quadrant - blue
+                        fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=min_position, y1=average_position,
+                                      fillcolor='rgba(0, 255, 0, 0.2)', line=dict(width=0), layer='below')  # top right quadrant - green
+                        fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=average_position, y1=max_position,
+                                      fillcolor='rgba(255, 0, 0, 0.2)', line=dict(width=0), layer='below')  # Top left quadrant - red
+                        fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=average_position, y1=max_position,
+                                      fillcolor='rgba(255, 255, 0, 0.2)', line=dict(width=0), layer='below')  # bottom right quadrant - yellow
+                        
+                        # Aggiungi linee di riferimento per la media di CTR e posizione
+                        fig.add_shape(type='line', x0=average_ctr, x1=average_ctr, y0=min_position, y1=max_position, line=dict(color='red', dash='dash'))
+                        fig.add_annotation(x=average_ctr, y=max_position, text="Average", showarrow=False, yshift=10, font=dict(color='white'))
+                        
+                        fig.add_shape(type='line', x0=min_ctr, x1=max_ctr, y0=average_position, y1=average_position, line=dict(color='red', dash='dash'))
+                        fig.add_annotation(x=max_ctr, y=average_position, text="Average", showarrow=False, xshift=10, font=dict(color='white'))
+                    
+                        # Aggiorna le tracce delle bolle
+                        fig.update_traces(marker=dict(sizemin=4), hovertemplate='<b>Query:</b> %{customdata[0]}<br><b>CTR:</b> %{x:.2f}%<br><b>Position:</b> %{y:.2f}<br><b>Clicks:</b> %{marker.size}')
+                             
+                        
+                        # Aggiungi titolo
+                        fig.update_layout(
+                            title="Query Performance Bubble Chart",
+                            paper_bgcolor='rgb(10,14,18)',  
+                            plot_bgcolor='rgb(10,14,18)' 
+                        )
+                        
+                        # Aggiungi la mappa di colori per la dimensione delle bolle
+                     
+                        # Mostra il grafico interattivo
+                        col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                        with col1:
+                            st.write("This section provides a visual representation of how different search queries are performing. It analyzes and displays metrics such as the position of queries in search results and their click-through rates (CTR). By comparing these metrics to overall averages, it helps identify which queries are performing well and which need improvement.")
+    
+                        with col2:
+                            unique_query_count_metric = df_query_performance['Query'].nunique()
+                            st.metric("Queries", f"{unique_query_count_metric}")
+                        with col3:                      
+                            st.metric("AVG. CTR", f"{average_ctr_perc:.2f}%")
+                        with col4:                                             
+                            st.metric("AVG. Position", f"{average_position:.2f}")
                             
-                            # Aggiungi titolo
-                            fig.update_layout(
-                                title="Query Performance Bubble Chart",
-                                paper_bgcolor='rgb(10,14,18)',  
-                                plot_bgcolor='rgb(10,14,18)' 
-                            )
-                            
-                            # Aggiungi la mappa di colori per la dimensione delle bolle
-                         
-                            # Mostra il grafico interattivo
-                            col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
-                            with col1:
-                                st.write("This section provides a visual representation of how different search queries are performing. It analyzes and displays metrics such as the position of queries in search results and their click-through rates (CTR). By comparing these metrics to overall averages, it helps identify which queries are performing well and which need improvement.")
-        
-                            with col2:
-                                unique_query_count_metric = df_query_performance['Query'].nunique()
-                                st.metric("Queries", f"{unique_query_count_metric}")
-                            with col3:                      
-                                st.metric("AVG. CTR", f"{average_ctr_perc:.2f}%")
-                            with col4:                                             
-                                st.metric("AVG. Position", f"{average_position:.2f}")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write("")
+                            with st.popover("How to read the graph?🤔"):
+                                st.markdown("""                            
                                 
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.write("")
-                                with st.popover("How to read the graph?🤔"):
-                                    st.markdown("""                            
-                                    
-                                    #### Chart Elements
-                                    - **Bubbles:** Each bubble represents a single search query.
-                                    - **Axes:** 
-                                      - **X-Axis (CTR):** Positions the bubbles based on the click-through rate (CTR) of the queries.
-                                      - **Y-Axis (Average Position):** Positions the bubbles based on the average position in search results.
-                                    - **Bubble Size:** Indicates the number of clicks received by the query. The larger the bubble, the more clicks it has received.
-                                    - **Dashed Lines:** Represent the average values of CTR and position. The vertical dashed line indicates the average CTR, while the horizontal dashed line indicates the average position.
-                                    
-                                    #### Quadrant Interpretation
-                                    - **Green Quadrant (Top Right):** Queries with CTR and position equal to or above the average. These queries have excellent visibility and attract many clicks.
-                                    - **Yellow Quadrant (Bottom Right):** Queries with above-average CTR but low position. These indicate user interest despite less favorable ranking.
-                                    - **Blue Quadrant (Top Left):** Queries with equal to or above-average position but below-average CTR. These queries are visible but receive fewer clicks.
-                                    - **Red Quadrant (Bottom Left):** Queries with below-average CTR and position. These queries have poor visibility and attract few clicks.
-                                    
-                                    This structure helps quickly identify where queries stand relative to the overall average, facilitating the identification of areas for improvement and optimization opportunities.
-                                    """)                            
-                              
-                                st.plotly_chart(fig, use_container_width=False)
-                                fig.show()
-                            with col2:
-                                # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                                upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
-                                lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
-                                lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
-                                upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
-                            
-                                def unique_pages(series):
-                                    return ', '.join(series.unique())
-                            
-                                try:
-                                    agg_funcs2 = {
-                                        'Impressions': 'sum',
-                                        'Clicks': 'sum',
-                                        'CTR': 'mean',
-                                        'Position': 'mean',
-                                        'Page': unique_pages
-                                    }
-                            
-                                    # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-                                    df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                    df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                    df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                    df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                            
-                                    # Mostrare df
-                                    st.markdown("<br><br>", unsafe_allow_html=True)
-                                    st.markdown("<br><br>", unsafe_allow_html=True)
-                                    with st.expander(":green[GREEN QUADRANT: Queries with Above-Average Position and CTR]"):
-                                        st.write("Queries with CTR and position equal or grather then the average")
-                                        st.write(df_upper_high_ctr)    
-                                        
-                                    with st.expander(":orange[YELLO QUADRANT: Queries with Below-Average Position and Above-Average CTR]"):
-                                        st.write("""
-                                            Those queries appear to be highly relevant to users. They achieve a high click-through rate (CTR) even when they rank lower than the average query on your website. If the average position of these queries improves, it could significantly impact your website's performance. It's advisable to focus on enhancing the SEO for these queries. For instance, consider a prominent query in quadrant 2 for a gardening website, such as "how to build a wooden shed." Check if you already have a dedicated page for this topic and proceed in two ways:
-                            
-                                            - If you don't have a dedicated page, think about creating one to consolidate all the information on your website related to this subject.
-                            
-                                            - If you already have a page, contemplate adding more content to better address the needs of users searching for this query.
-                                        """)
-                                        st.write(df_lower_high_ctr)
-                
-                                    with st.expander(":blue[BLUE QUADRANT: Top position and low CTR Queries]"):
-                                        st.write("""
-                                            These queries might have a low click-through rate (CTR) for various reasons. Check the largest bubbles to find signs of the following:
-                            
-                                            Your competitors may be using structured data markup and appearing with rich results, attracting users to click on their results instead of yours. Consider optimizing for the most common visual elements in Google Search.
-                            
-                                            You may have optimized, or be "accidentally" ranking for a query that users are not interested in relation to your site. This might not be an issue for you, in which case you can ignore those queries. If you prefer people not to find you through those queries (for example, they contain offensive words), try to fine-tune your content to remove mentions that could be seen as synonyms or related queries to the one bringing traffic.
-                            
-                                            People may have already found the information they needed, for example, your company's opening hours, address, or phone number. Check the queries that were used and the URLs that contained the information. If one of your website goals is to drive people to your stores, this is working as intended; if you believe that people should visit your website for extra information, you could try to optimize your titles and descriptions to make that clear. See the next section for more details.
-                                        """)
-                                        st.write(df_upper_low_ctr)
-                                    with st.expander(":red[RED QUADRANT: Low position and low CTR Queries]"):
-                                        st.write("""
-                                            When looking at queries with low CTR (both with low and top position), it's especially interesting to look at the bubble sizes to understand which queries have a low CTR but are still driving significant traffic. While the queries in this quadrant might seem unworthy of your effort, they can be divided into two main groups:
-                                            
-                                            **Related queries**: If the query in question is important to you, it's a good start to have it appearing in Search already. Prioritize these queries over queries that are not appearing in Search results at all, as they'll be easier to optimize.
-                                            
-                                            **Unrelated queries**: If your site doesn't cover content related to this query, maybe it's a good opportunity to fine tune your content or focus on queries that will bring relevant traffic.
-                                        """)
-                                        st.write(df_lower_low_ctr)
-                                except KeyError as e:
-                                    st.warning("To obtain insights on both queries and pages, consider adding 'Page' to the dimensions in your analysis.")
-             
+                                #### Chart Elements
+                                - **Bubbles:** Each bubble represents a single search query.
+                                - **Axes:** 
+                                  - **X-Axis (CTR):** Positions the bubbles based on the click-through rate (CTR) of the queries.
+                                  - **Y-Axis (Average Position):** Positions the bubbles based on the average position in search results.
+                                - **Bubble Size:** Indicates the number of clicks received by the query. The larger the bubble, the more clicks it has received.
+                                - **Dashed Lines:** Represent the average values of CTR and position. The vertical dashed line indicates the average CTR, while the horizontal dashed line indicates the average position.
+                                
+                                #### Quadrant Interpretation
+                                - **Green Quadrant (Top Right):** Queries with CTR and position equal to or above the average. These queries have excellent visibility and attract many clicks.
+                                - **Yellow Quadrant (Bottom Right):** Queries with above-average CTR but low position. These indicate user interest despite less favorable ranking.
+                                - **Blue Quadrant (Top Left):** Queries with equal to or above-average position but below-average CTR. These queries are visible but receive fewer clicks.
+                                - **Red Quadrant (Bottom Left):** Queries with below-average CTR and position. These queries have poor visibility and attract few clicks.
+                                
+                                This structure helps quickly identify where queries stand relative to the overall average, facilitating the identification of areas for improvement and optimization opportunities.
+                                """)                            
+                          
+                            st.plotly_chart(fig, use_container_width=False)
+                            fig.show()
+                        with col2:
+                            # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
+                            upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
+                            lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
+                            lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
+                            upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
                         
-        
-        
-                    # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
-                    # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
-                    if 'Query' in df.columns and 'Page' in df.columns:
-                        with st.container(border=True):
-                            st.subheader("2. Queries distribution on SERP Pages Report")
-                            st.divider()
-                            col1, col2 = st.columns([2, 1])
-                            with col1:
-                                st.write("")
-                    
-                                def assign_page(position):
-                                    if position <= 10:
-                                        return 'Page 1'
-                                    elif position <= 20:
-                                        return 'Page 2'
-                                    elif position <= 30:
-                                        return 'Page 3'
-                                    elif position <= 40:
-                                        return 'Page 4'
-                                    elif position <= 50:
-                                        return 'Page 5'
-                                    elif position <= 60:
-                                        return 'Page 6'
-                                    elif position <= 70:
-                                        return 'Page 7'
-                                    elif position <= 80:
-                                        return 'Page 8'
-                                    elif position <= 90:
-                                        return 'Page 9'
-                                    elif position <= 100:
-                                        return 'Page 10'
-                                    else:
-                                        return 'Beyond Page 10'
-                    
-                                # Calcolare la posizione media per ogni query
-                                df_query_page_serp = df.copy()
-                                df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
-                                df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
-                    
-                                # Unire la posizione media di nuovo con il DataFrame originale
-                                df_query_page_serp = pd.merge(df_query_page_serp, df_query_avg_position, on='Query', how='left')
-                    
-                                # Assegnare la pagina SERP basata sulla posizione media
-                                df_query_page_serp['SERP_Page'] = df_query_page_serp['Avg_Position'].apply(assign_page)
-                    
-                                # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
-                                df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
-                    
-                                # Conta il numero totale di query uniche
-                                total_unique_queries = df_query_performance_unique['Query'].nunique()
-                    
-                                # Raggruppa per pagina e conta il numero di query uniche
-                                page_distribution = df_query_performance_unique.groupby('SERP_Page').agg({'Query': 'nunique'}).reset_index()
-                                page_distribution.rename(columns={'Query': 'Num_Queries'}, inplace=True)
-                    
-                                # Calcola la percentuale del totale
-                                page_distribution['Percentage_of_Total'] = (page_distribution['Num_Queries'] / total_unique_queries) * 100
-                    
-                                # Ordina il DataFrame per pagina
-                                page_order = ['Page 1', 'Page 2', 'Page 3', 'Page 4', 'Page 5', 'Page 6', 'Page 7', 'Page 8', 'Page 9', 'Page 10', 'Beyond Page 10']
-                                page_distribution['SERP_Page'] = pd.Categorical(page_distribution['SERP_Page'], categories=page_order, ordered=True)
-                                page_distribution = page_distribution.sort_values('SERP_Page')
-                    
-                                # Visualizza il numero totale di query uniche
-                                st.write(f"Total Unique Queries: {total_unique_queries}")
-                    
-                                # Creare il grafico a barre
-                                fig_bar = px.bar(page_distribution, x='SERP_Page', y='Num_Queries', title='Number of Queries per Google SERP Page', text='Percentage_of_Total', color='SERP_Page', category_orders={'SERP_Page': page_order})
-                                fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
-                    
-                                # Rimuovere la legenda
-                                fig_bar.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)')
-                                # Visualizzare il grafico utilizzando Streamlit
-                                st.plotly_chart(fig_bar)
-                    
-                            with col2:
-                                # Visualizza il DataFrame
-                                st.dataframe(page_distribution)
-                            
-                            # Selezionare la pagina per vedere i dettagli delle query
-                            selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
-                            
-                            # Filtrare il DataFrame per la pagina selezionata
-                            df_filtered = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
-                            
-                            # Visualizzare i dettagli delle query per la pagina selezionata
-                            st.write(f"Query details for {selected_page}")
-                            st.dataframe(df_filtered[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
-                            
-
-        
-                    else:
-                        st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
-                
-                    try:
-                        # Controllo se la colonna 'Page' è presente
-                        if 'Page' in df.columns:
-                            df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])                    
-                            with st.container(border=True):
-                                st.subheader("3. Queries Cannibalization Report")            
-                                st.divider()                                
-                                # Group by the cleaned page and query, and calculate the metrics
-                                query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
-                                    'Position': 'mean',
-                                    'CTR': 'mean',
+                            def unique_pages(series):
+                                return ', '.join(series.unique())
+                        
+                            try:
+                                agg_funcs2 = {
+                                    'Impressions': 'sum',
                                     'Clicks': 'sum',
-                                    'Impressions': 'sum'
-                                }).reset_index()
-                                
-                                # Group queries by page
-                                query_page_group = query_page_metrics.groupby('Query')['Cleaned_Page'].apply(lambda pages: list(set(pages))).reset_index()
-                                query_page_group.columns = ['Query', 'Pages']
-                                
-                                # Identify cannibalized queries
-                                cannibalized_queries = query_page_group[query_page_group['Pages'].apply(lambda x: len(x) > 1)]
-                                
-                                # Create a cannibalization report
-                                cannibalization_report = cannibalized_queries.explode('Pages').merge(query_page_metrics, left_on=['Query', 'Pages'], right_on=['Query', 'Cleaned_Page']).drop(columns=['Pages'])
-                                
-                                # Count unique cannibalized queries
-                                num_unique_queries = cannibalized_queries['Query'].nunique()
-                                
-                                # Count the number of pages that are cannibalizing queries
-                                num_cannibalizing_pages = cannibalization_report['Cleaned_Page'].nunique()
-                                
-                                # Calculate the average number of pages cannibalizing each query
-                                num_pages_per_query = cannibalization_report.groupby('Query')['Cleaned_Page'].nunique()
-                                average_pages_per_query = num_pages_per_query.mean()
-                            
-                                # Create a DataFrame with the columns 'Query' and 'Number of Pages'
-                                cannibalized_queries['Cannibals Pages'] = cannibalized_queries['Pages'].apply(len)
-                                cannibalized_query_page_counts = cannibalized_queries[['Query', 'Cannibals Pages']]      
-                                cannibalized_query_page_counts_ordered = cannibalized_query_page_counts.sort_values('Cannibals Pages', ascending=False)
-                            
-                                # Display the report
-                                col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-                                with col1:
-                                    st.write("It shows queries appearing on multiple pages and the number of pages per query. Select a query to see detailed metrics for each page (CTR, clicks, position, impressions) aiding in resolving cannibalization issues.")
+                                    'CTR': 'mean',
+                                    'Position': 'mean',
+                                    'Page': unique_pages
+                                }
+                        
+                                # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
+                                df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                        
+                                # Mostrare df
+                                st.markdown("<br><br>", unsafe_allow_html=True)
+                                st.markdown("<br><br>", unsafe_allow_html=True)
+                                with st.expander(":green[GREEN QUADRANT: Queries with Above-Average Position and CTR]"):
+                                    st.write("Queries with CTR and position equal or grather then the average")
+                                    st.write(df_upper_high_ctr)    
                                     
-                                    def convert_cannibalization_report_to_csv(cannibalization_report):
-                                        return cannibalization_report.to_csv(index=False).encode('utf-8')
-                                    
-                                    csvcann = convert_cannibalization_report_to_csv(cannibalization_report)
-                                    st.download_button(label="Download cannibalization report CSV", data=csvcann, file_name='cannibalization_report.csv', mime='text/csv')
-                                
-                                with col2:
-                                    st.metric("Unique cannibalized queries", f"{num_unique_queries}")
-                                with col3:
-                                    st.metric("Pages cannibalizing queries", f"{num_cannibalizing_pages}")
-                                with col4:
-                                    st.metric("AVG n° of pages cannibalizing each query", f"{average_pages_per_query:.2f}")
-                            
-                                col1, col2 = st.columns([1, 2])
-                                with col1:
-                                    st.dataframe(cannibalized_query_page_counts_ordered)
-                                with col2:
-                                    query_selected = st.selectbox("Select a cannibalized Query", cannibalized_queries['Query'])
-                                    # Filter the report based on the selected query
-                                    filtered_report = cannibalization_report[cannibalization_report['Query'] == query_selected]
-                                    
-                                    # Display the filtered DataFrame
-                                    st.write(f"Metrics for the selected Query: {query_selected}")
-                                    st.dataframe(filtered_report)                                   
-                        else:
-                            # Mostra un messaggio di avviso se la colonna 'Page' non è presente
-                            st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
-                    except Exception as e:
-                        st.error(f"Si è verificato un errore: {e}")
-
-                    analyze_query_performance(df)
-        
-                    analyze_query_position_changes(df)
+                                with st.expander(":orange[YELLO QUADRANT: Queries with Below-Average Position and Above-Average CTR]"):
+                                    st.write("""
+                                        Those queries appear to be highly relevant to users. They achieve a high click-through rate (CTR) even when they rank lower than the average query on your website. If the average position of these queries improves, it could significantly impact your website's performance. It's advisable to focus on enhancing the SEO for these queries. For instance, consider a prominent query in quadrant 2 for a gardening website, such as "how to build a wooden shed." Check if you already have a dedicated page for this topic and proceed in two ways:
+                        
+                                        - If you don't have a dedicated page, think about creating one to consolidate all the information on your website related to this subject.
+                        
+                                        - If you already have a page, contemplate adding more content to better address the needs of users searching for this query.
+                                    """)
+                                    st.write(df_lower_high_ctr)
+            
+                                with st.expander(":blue[BLUE QUADRANT: Top position and low CTR Queries]"):
+                                    st.write("""
+                                        These queries might have a low click-through rate (CTR) for various reasons. Check the largest bubbles to find signs of the following:
+                        
+                                        Your competitors may be using structured data markup and appearing with rich results, attracting users to click on their results instead of yours. Consider optimizing for the most common visual elements in Google Search.
+                        
+                                        You may have optimized, or be "accidentally" ranking for a query that users are not interested in relation to your site. This might not be an issue for you, in which case you can ignore those queries. If you prefer people not to find you through those queries (for example, they contain offensive words), try to fine-tune your content to remove mentions that could be seen as synonyms or related queries to the one bringing traffic.
+                        
+                                        People may have already found the information they needed, for example, your company's opening hours, address, or phone number. Check the queries that were used and the URLs that contained the information. If one of your website goals is to drive people to your stores, this is working as intended; if you believe that people should visit your website for extra information, you could try to optimize your titles and descriptions to make that clear. See the next section for more details.
+                                    """)
+                                    st.write(df_upper_low_ctr)
+                                with st.expander(":red[RED QUADRANT: Low position and low CTR Queries]"):
+                                    st.write("""
+                                        When looking at queries with low CTR (both with low and top position), it's especially interesting to look at the bubble sizes to understand which queries have a low CTR but are still driving significant traffic. While the queries in this quadrant might seem unworthy of your effort, they can be divided into two main groups:
+                                        
+                                        **Related queries**: If the query in question is important to you, it's a good start to have it appearing in Search already. Prioritize these queries over queries that are not appearing in Search results at all, as they'll be easier to optimize.
+                                        
+                                        **Unrelated queries**: If your site doesn't cover content related to this query, maybe it's a good opportunity to fine tune your content or focus on queries that will bring relevant traffic.
+                                    """)
+                                    st.write(df_lower_low_ctr)
+                            except KeyError as e:
+                                st.warning("To obtain insights on both queries and pages, consider adding 'Page' to the dimensions in your analysis.")
+         
                     
+    
+    
+                # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+                # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+                if 'Query' in df.columns and 'Page' in df.columns:
+                    with st.container(border=True):
+                        st.subheader("2. Queries distribution on SERP Pages Report")
+                        st.divider()
+                        col1, col2 = st.columns([2, 1])
+                        with col1:
+                            st.write("")
+                
+                            def assign_page(position):
+                                if position <= 10:
+                                    return 'Page 1'
+                                elif position <= 20:
+                                    return 'Page 2'
+                                elif position <= 30:
+                                    return 'Page 3'
+                                elif position <= 40:
+                                    return 'Page 4'
+                                elif position <= 50:
+                                    return 'Page 5'
+                                elif position <= 60:
+                                    return 'Page 6'
+                                elif position <= 70:
+                                    return 'Page 7'
+                                elif position <= 80:
+                                    return 'Page 8'
+                                elif position <= 90:
+                                    return 'Page 9'
+                                elif position <= 100:
+                                    return 'Page 10'
+                                else:
+                                    return 'Beyond Page 10'
+                
+                            # Calcolare la posizione media per ogni query
+                            df_query_page_serp = df.copy()
+                            df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
+                            df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
+                
+                            # Unire la posizione media di nuovo con il DataFrame originale
+                            df_query_page_serp = pd.merge(df_query_page_serp, df_query_avg_position, on='Query', how='left')
+                
+                            # Assegnare la pagina SERP basata sulla posizione media
+                            df_query_page_serp['SERP_Page'] = df_query_page_serp['Avg_Position'].apply(assign_page)
+                
+                            # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
+                            df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
+                
+                            # Conta il numero totale di query uniche
+                            total_unique_queries = df_query_performance_unique['Query'].nunique()
+                
+                            # Raggruppa per pagina e conta il numero di query uniche
+                            page_distribution = df_query_performance_unique.groupby('SERP_Page').agg({'Query': 'nunique'}).reset_index()
+                            page_distribution.rename(columns={'Query': 'Num_Queries'}, inplace=True)
+                
+                            # Calcola la percentuale del totale
+                            page_distribution['Percentage_of_Total'] = (page_distribution['Num_Queries'] / total_unique_queries) * 100
+                
+                            # Ordina il DataFrame per pagina
+                            page_order = ['Page 1', 'Page 2', 'Page 3', 'Page 4', 'Page 5', 'Page 6', 'Page 7', 'Page 8', 'Page 9', 'Page 10', 'Beyond Page 10']
+                            page_distribution['SERP_Page'] = pd.Categorical(page_distribution['SERP_Page'], categories=page_order, ordered=True)
+                            page_distribution = page_distribution.sort_values('SERP_Page')
+                
+                            # Visualizza il numero totale di query uniche
+                            st.write(f"Total Unique Queries: {total_unique_queries}")
+                
+                            # Creare il grafico a barre
+                            fig_bar = px.bar(page_distribution, x='SERP_Page', y='Num_Queries', title='Number of Queries per Google SERP Page', text='Percentage_of_Total', color='SERP_Page', category_orders={'SERP_Page': page_order})
+                            fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
+                
+                            # Rimuovere la legenda
+                            fig_bar.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)')
+                            # Visualizzare il grafico utilizzando Streamlit
+                            st.plotly_chart(fig_bar)
+                
+                        with col2:
+                            # Visualizza il DataFrame
+                            st.dataframe(page_distribution)
+                        
+                        # Selezionare la pagina per vedere i dettagli delle query
+                        selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
+                        
+                        # Filtrare il DataFrame per la pagina selezionata
+                        df_filtered = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
+                        
+                        # Visualizzare i dettagli delle query per la pagina selezionata
+                        st.write(f"Query details for {selected_page}")
+                        st.dataframe(df_filtered[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
+                        
+
+    
+                else:
+                    st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
+            
+                try:
+                    # Controllo se la colonna 'Page' è presente
+                    if 'Page' in df.columns:
+                        df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])                    
+                        with st.container(border=True):
+                            st.subheader("3. Queries Cannibalization Report")            
+                            st.divider()                                
+                            # Group by the cleaned page and query, and calculate the metrics
+                            query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
+                                'Position': 'mean',
+                                'CTR': 'mean',
+                                'Clicks': 'sum',
+                                'Impressions': 'sum'
+                            }).reset_index()
+                            
+                            # Group queries by page
+                            query_page_group = query_page_metrics.groupby('Query')['Cleaned_Page'].apply(lambda pages: list(set(pages))).reset_index()
+                            query_page_group.columns = ['Query', 'Pages']
+                            
+                            # Identify cannibalized queries
+                            cannibalized_queries = query_page_group[query_page_group['Pages'].apply(lambda x: len(x) > 1)]
+                            
+                            # Create a cannibalization report
+                            cannibalization_report = cannibalized_queries.explode('Pages').merge(query_page_metrics, left_on=['Query', 'Pages'], right_on=['Query', 'Cleaned_Page']).drop(columns=['Pages'])
+                            
+                            # Count unique cannibalized queries
+                            num_unique_queries = cannibalized_queries['Query'].nunique()
+                            
+                            # Count the number of pages that are cannibalizing queries
+                            num_cannibalizing_pages = cannibalization_report['Cleaned_Page'].nunique()
+                            
+                            # Calculate the average number of pages cannibalizing each query
+                            num_pages_per_query = cannibalization_report.groupby('Query')['Cleaned_Page'].nunique()
+                            average_pages_per_query = num_pages_per_query.mean()
+                        
+                            # Create a DataFrame with the columns 'Query' and 'Number of Pages'
+                            cannibalized_queries['Cannibals Pages'] = cannibalized_queries['Pages'].apply(len)
+                            cannibalized_query_page_counts = cannibalized_queries[['Query', 'Cannibals Pages']]      
+                            cannibalized_query_page_counts_ordered = cannibalized_query_page_counts.sort_values('Cannibals Pages', ascending=False)
+                        
+                            # Display the report
+                            col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+                            with col1:
+                                st.write("It shows queries appearing on multiple pages and the number of pages per query. Select a query to see detailed metrics for each page (CTR, clicks, position, impressions) aiding in resolving cannibalization issues.")
+                                
+                                def convert_cannibalization_report_to_csv(cannibalization_report):
+                                    return cannibalization_report.to_csv(index=False).encode('utf-8')
+                                
+                                csvcann = convert_cannibalization_report_to_csv(cannibalization_report)
+                                st.download_button(label="Download cannibalization report CSV", data=csvcann, file_name='cannibalization_report.csv', mime='text/csv')
+                            
+                            with col2:
+                                st.metric("Unique cannibalized queries", f"{num_unique_queries}")
+                            with col3:
+                                st.metric("Pages cannibalizing queries", f"{num_cannibalizing_pages}")
+                            with col4:
+                                st.metric("AVG n° of pages cannibalizing each query", f"{average_pages_per_query:.2f}")
+                        
+                            col1, col2 = st.columns([1, 2])
+                            with col1:
+                                st.dataframe(cannibalized_query_page_counts_ordered)
+                            with col2:
+                                query_selected = st.selectbox("Select a cannibalized Query", cannibalized_queries['Query'])
+                                # Filter the report based on the selected query
+                                filtered_report = cannibalization_report[cannibalization_report['Query'] == query_selected]
+                                
+                                # Display the filtered DataFrame
+                                st.write(f"Metrics for the selected Query: {query_selected}")
+                                st.dataframe(filtered_report)                                   
+                    else:
+                        # Mostra un messaggio di avviso se la colonna 'Page' non è presente
+                        st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
+                except Exception as e:
+                    st.error(f"Si è verificato un errore: {e}")
+
+                analyze_query_performance(df)
+    
+                analyze_query_position_changes(df)
+                
 
                         
         
