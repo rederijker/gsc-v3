@@ -2252,9 +2252,6 @@ if credentials:
 
 
 
-
-                            except KeyError as e:
-                                st.warning(str(e))
                 
 
         
