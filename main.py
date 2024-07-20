@@ -30,6 +30,8 @@ import streamlit.components.v1 as components
 import concurrent.futures 
 from googleapiclient.errors import HttpError
 from streamlit_javascript import st_javascript
+from st_tabs import TabBar
+component1=  TabBar(tabs=["Tab1","Tab2"],default=0,background = "red",color="grey",activeColor="blue",fontSize="20px")
 
 
 #PAGE CONFIGURATION
@@ -1257,7 +1259,7 @@ if credentials:
                     
                     
    
-    with tab1:
+    if(component1 == 0):
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
@@ -2302,7 +2304,7 @@ if credentials:
                             ax.set_title('Top 5 Groups by Clicks')
                             st.pyplot(fig)
 
-    with tab2:
+    else:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
