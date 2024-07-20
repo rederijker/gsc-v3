@@ -1874,9 +1874,6 @@ if credentials:
 
                     analyze_query_position_changes(df)
 
-                        
-
-                
                 
             
             with tab3:
@@ -2009,297 +2006,297 @@ if credentials:
         
 
 
-                with tab4:
-                    with st.container():
-                        st.subheader("1. Queries Coverage Analysis")
-                        st.divider()
-                    
-                        col1, col2 = st.columns([1, 2])
-                        with col1:
-                            st.write(
-                                "This report checks if Google's considered queries are present in various webpage elements such as the title, meta description, headings, body content, and ALT tags. This helps you identify gaps by finding missing important keywords.")
-                    
-                        with col2:
-                            if st.session_state.df is not None and 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
-                                selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
-                                scan_button = st.button("Analyze Page🤖", key='scan_button')
-                            else:
-                                st.warning("To use this feature, ensure that the dimensions contains the 'Page' and 'Query'.")
-                                scan_button = False
-            
-                        if scan_button or st.session_state.scan_started:
-                            if scan_button:
-                                st.session_state.scan_started = True
-                            if selected_page and (selected_page != st.session_state.get('selected_page', None)):
-                                st.session_state.selected_page = selected_page
-                                with st.spinner("Fetching page data..."):
-                                    st.session_state.page_data = fetch_page_data(selected_page)
-                                st.session_state.keyword_analysis = None
-                    
-                            if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                                page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
-                                grouped_page_data = aggregate_queries(page_data)
-                        
-                                # Analisi della copertura delle parole chiave
-                                with st.container():
-                                    st.markdown(
-                                        f"<h4>📄 {st.session_state.page_data['meta_title']} | <a href='{st.session_state.selected_page}'>Go to the page</a></h4>",
-                                        unsafe_allow_html=True)
-                    
-                                    # Visualizzare i warning se presenti
-                                    if 'warnings' in st.session_state.page_data:
-                                        for warning in st.session_state.page_data['warnings']:
-                                            st.warning(warning)
-                    
-                                    keyword_presence = analyze_keywords(st.session_state.page_data, grouped_page_data)
-                                    keyword_df = pd.DataFrame(keyword_presence)
-                    
-                                    # Controllo se 'Query' è presente nelle colonne
-                                    if 'Keyword' not in keyword_df.columns:
-                                        st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
-                                    else:
-                                        col1, col2, col3, col4, col5, col6 = st.columns([3, 1, 1, 1, 1, 1])
-                                        with col1:
-                                            # Gestione dello stato del filtro di ricerca per query
-                                            search_query = st.text_input(
-                                                label="Filter queries containing",
-                                                placeholder="Insert a query",
-                                                value=st.session_state.get('search_query', '')
-                                            )
-                                            st.session_state.search_query = search_query
-                                            if search_query:
-                                                keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
-            
-                                        # Checkbox per mostrare/nascondere colonne
-                                        with col2:
-                                            show_heading = st.checkbox("Show heading", st.session_state.show_heading)
-                                        with col3:
-                                            show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
-                                        with col4:
-                                            show_meta = st.checkbox("Show meta", st.session_state.show_meta)
-                                        with col5:
-                                            show_body_alt = st.checkbox("Show body alt", st.session_state.show_body_alt)
-                    
-                                        st.session_state.show_heading = show_heading
-                                        st.session_state.show_keyword_metrics = show_keyword_metrics
-                                        st.session_state.show_meta = show_meta
-                                        st.session_state.show_body_alt = show_body_alt
-                    
-                                        # Creare la lista delle colonne da mostrare
-                                        columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
-                                        if show_keyword_metrics:
-                                            columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
-                                        if show_meta:
-                                            columns_to_show.extend(['Title', 'Meta Description'])
-                                        if show_heading:
-                                            columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
-                                        if show_body_alt:
-                                            columns_to_show.extend(['Body Content', 'Alt Tags'])
-                    
-                                        keyword_df = keyword_df[columns_to_show]
-
-                                        with col6:
-                    
-                                            # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                            show_not_covered = st.checkbox("Only not covered queries", st.session_state.show_not_covered)
-                                            st.session_state.show_not_covered = show_not_covered
-                    
-                                        if show_not_covered:
-                                            keyword_df = keyword_df[(keyword_df['Title'] == False) &
-                                                                    (keyword_df['Meta Description'] == False) &
-                                                                    (keyword_df['H1'] == False) &
-                                                                    (keyword_df['H2'] == False) &
-                                                                    (keyword_df['H3'] == False) &
-                                                                    (keyword_df['Body Content'] == False) &
-                                                                    (keyword_df['Alt Tags'] == False)]
-                    
-                                        # Ordina il dataframe per la colonna 'Body Content'
-                                        if 'Body Content' in keyword_df.columns:
-                                            keyword_df_sorted = keyword_df.sort_values(by='Body Content', ascending=False)
-                                        else:
-                                            keyword_df_sorted = keyword_df.sort_values(by='Keyword', ascending=False)
-                    
-                                        # Visualizza il dataframe ordinato
-                                        st.dataframe(keyword_df_sorted)
-                    
-                                        # Parole chiave con opportunità
-                    
-                                        st.markdown(
-                                            f"<h4>Prioritize the Optimization of These Queries</h4>",
-                                            unsafe_allow_html=True)
-                                        st.write("These queries are currently ranked between positions 1 and 20 and do not appear in any key elements of your page. Optimize your page for these queries to improve their ranking")
-                                        opportunity_keywords = get_opportunity_keywords(grouped_page_data, keyword_presence)
-                                        st.dataframe(opportunity_keywords)
-                
-                    with st.container():
-                        st.subheader("2. Page Topics")
-                        st.divider()
-                        st.write(
-                            "We have grouped the keywords for which Google is considering your page to identify the main themes. For each theme, you can check the total clicks and impressions, as well as the coverage percentage of the theme by your page content.")
-                        if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                            with st.spinner("Clustering topics..."):
-                                clustered_keywords, model = cluster_keywords(grouped_page_data)
-                                cluster_names = get_cluster_names(clustered_keywords)
-                                clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
-                            
-                                for cluster in clustered_keywords['Cluster'].unique():
-                                    cluster_name = cluster_names[cluster]
-                                    cluster_df = clustered_keywords[clustered_keywords['Cluster'] == cluster]
-                                    total_keywords = len(cluster_df)
-                                    covered_keywords = cluster_df['Covered'].sum()
-                                    coverage_percentage = (covered_keywords / total_keywords) * 100
-                                    cluster_name = cluster_name.upper()
-                            
-                                    with st.expander(
-                                            f"**:blue[{cluster_name}]**  | __Clicks {cluster_df['Clicks'].sum()}__  | Impressions {cluster_df['Impressions'].sum()} |  Coverage by page content {coverage_percentage:.2f}%"):
-                                        st.dataframe(cluster_df[['Query', 'Clicks', 'Impressions', 'CTR', 'Position', 'Covered']])
-                        
-                        if 'scan_started' in st.session_state and st.session_state.scan_started:
-                            st.write("")
-                
-            
-                with tab5:
-                    st.subheader("Queries Grouper")        
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.write("💬 Select language")
-                        language = st.selectbox("", ["English", "Italian"])
-                    
-                        if language == "English":
-                            default_stop_words = [
-                                'and', 'but', 'is', 'the', 'to', 'in', 'for', 'on', 'with', 'as', 'by', 'at', 'from',
-                                'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above',
-                                'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again',
-                                'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any',
-                                'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
-                                'own', 'same', 'so', 'than', 'too', ' very', 's', 't', 'can', 'will', 'just', 'don', 
-                                'should', 'now'
-                            ]
-                        else:
-                            default_stop_words = [
-                                'a', 'adesso', 'ai', 'al', 'alla', 'allo', 'allora', 'altre',
-                                'altri', 'altro', 'anche', 'ancora', 'avere', 'aveva', 'avevano',
-                                'ben', 'buono', 'che', 'chi', 'cinque', 'comprare', 'con',
-                                'consecutivi', 'consecutivo', 'cosa', 'cui', 'da', 'del', 'della',
-                                'dello', 'dentro', 'deve', 'devo', 'di', 'doppio', 'due', 'e',
-                                'ecco', 'fare', 'fine', 'fino', 'fra', 'gente', 'giu', 'ha', 'hai',
-                                'hanno', 'ho', 'il', 'indietro', 'invece', 'io', 'la', 'lavoro',
-                                'le', 'lei', 'lo', 'loro', 'lui', 'lungo', 'ma', 'me', 'meglio',
-                                'molta', 'molti', 'molto', 'nei', 'nella', 'no', 'noi', 'nome',
-                                'nostro', 'più', 'se', 'o', 'per', 'un', 'una'
-                            ]
-                    
-                    # Text area for custom stop words
-                    with st.expander("Customize Stop Words"):
-                        custom_stop_words = st.text_area("One per line", "\n".join(default_stop_words))
-                        stop_words = [word.strip() for word in custom_stop_words.split('\n') if word.strip()]
-                    
-                    with col2:
-                        st.text("")
+            with tab4:
+                with st.container():
+                    st.subheader("1. Queries Coverage Analysis")
                     st.divider()
+                
+                    col1, col2 = st.columns([1, 2])
+                    with col1:
+                        st.write(
+                            "This report checks if Google's considered queries are present in various webpage elements such as the title, meta description, headings, body content, and ALT tags. This helps you identify gaps by finding missing important keywords.")
+                
+                    with col2:
+                        if st.session_state.df is not None and 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
+                            selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
+                            scan_button = st.button("Analyze Page🤖", key='scan_button')
+                        else:
+                            st.warning("To use this feature, ensure that the dimensions contains the 'Page' and 'Query'.")
+                            scan_button = False
+        
+                    if scan_button or st.session_state.scan_started:
+                        if scan_button:
+                            st.session_state.scan_started = True
+                        if selected_page and (selected_page != st.session_state.get('selected_page', None)):
+                            st.session_state.selected_page = selected_page
+                            with st.spinner("Fetching page data..."):
+                                st.session_state.page_data = fetch_page_data(selected_page)
+                            st.session_state.keyword_analysis = None
+                
+                        if 'page_data' in st.session_state and st.session_state.page_data is not None:
+                            page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
+                            grouped_page_data = aggregate_queries(page_data)
                     
-                    # Control for minimum group size and tuple length
-                    min_group_size, ngram_size = st.columns(2)
-                    with min_group_size:
-                        min_group_size = st.slider("Minimum Group Size",
-                                                min_value=1,
-                                                max_value=50,
-                                                value=2,
-                                                help="The minimum group size is the minimum number of keywords required in a group for it to be displayed in the results. Increase this value to show only larger keyword groups."
-                                                )
-                    
-                    with ngram_size:
-                        ngram_size = st.slider(
-                        "Length of the keyword", 
-                        min_value=1, 
-                        max_value=5, 
-                        value=2, 
-                        help="Drag the slider to choose the n-gram size for the keyword. An n-gram size of 1 means a single word, whereas 5 means a phrase of up to 5 words."
-                    )
-                    
-                    keyword_column = 'Query'
-                    clicks_column = 'Clicks'
-                    
-                    if st.button("Group Keywords with Clicks ✨"):
-                        with st.spinner("Grouping..."):
-                            try:
-                                if keyword_column in df.columns and clicks_column in df.columns:
-                                    # Remove duplicates and sum clicks
-                                    df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
-                                    # Group keywords
-                                    st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
-                                    # Calculate click totals
-                                    st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
+                            # Analisi della copertura delle parole chiave
+                            with st.container():
+                                st.markdown(
+                                    f"<h4>📄 {st.session_state.page_data['meta_title']} | <a href='{st.session_state.selected_page}'>Go to the page</a></h4>",
+                                    unsafe_allow_html=True)
+                
+                                # Visualizzare i warning se presenti
+                                if 'warnings' in st.session_state.page_data:
+                                    for warning in st.session_state.page_data['warnings']:
+                                        st.warning(warning)
+                
+                                keyword_presence = analyze_keywords(st.session_state.page_data, grouped_page_data)
+                                keyword_df = pd.DataFrame(keyword_presence)
+                
+                                # Controllo se 'Query' è presente nelle colonne
+                                if 'Keyword' not in keyword_df.columns:
+                                    st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                                 else:
-                                    st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
-                            except Exception as e:
-                                st.error(f"An error occurred: {e}")
-                    
-                        if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
-                            sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
-                            top_groups = sorted_groups[:5]
-                            tab1, tab2 = st.columns([2, 2])
-                            with tab1:
-                                try:
-                                    st.subheader("🔑 Groups")
-                                    for group, total_clicks in sorted_groups:
-                                        with st.expander(f"{group} - Total Clicks: {total_clicks}"):
-                                            keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                            keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
-                                            st.write(keyword_clicks_df)
-                                except KeyError as e:
-                                    st.warning(str(e))
+                                    col1, col2, col3, col4, col5, col6 = st.columns([3, 1, 1, 1, 1, 1])
+                                    with col1:
+                                        # Gestione dello stato del filtro di ricerca per query
+                                        search_query = st.text_input(
+                                            label="Filter queries containing",
+                                            placeholder="Insert a query",
+                                            value=st.session_state.get('search_query', '')
+                                        )
+                                        st.session_state.search_query = search_query
+                                        if search_query:
+                                            keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
+        
+                                    # Checkbox per mostrare/nascondere colonne
+                                    with col2:
+                                        show_heading = st.checkbox("Show heading", st.session_state.show_heading)
+                                    with col3:
+                                        show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
+                                    with col4:
+                                        show_meta = st.checkbox("Show meta", st.session_state.show_meta)
+                                    with col5:
+                                        show_body_alt = st.checkbox("Show body alt", st.session_state.show_body_alt)
+                
+                                    st.session_state.show_heading = show_heading
+                                    st.session_state.show_keyword_metrics = show_keyword_metrics
+                                    st.session_state.show_meta = show_meta
+                                    st.session_state.show_body_alt = show_body_alt
+                
+                                    # Creare la lista delle colonne da mostrare
+                                    columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
+                                    if show_keyword_metrics:
+                                        columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
+                                    if show_meta:
+                                        columns_to_show.extend(['Title', 'Meta Description'])
+                                    if show_heading:
+                                        columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
+                                    if show_body_alt:
+                                        columns_to_show.extend(['Body Content', 'Alt Tags'])
+                
+                                    keyword_df = keyword_df[columns_to_show]
+
+                                    with col6:
+                
+                                        # Gestione dello stato del filtro per query non presenti in nessun elemento
+                                        show_not_covered = st.checkbox("Only not covered queries", st.session_state.show_not_covered)
+                                        st.session_state.show_not_covered = show_not_covered
+                
+                                    if show_not_covered:
+                                        keyword_df = keyword_df[(keyword_df['Title'] == False) &
+                                                                (keyword_df['Meta Description'] == False) &
+                                                                (keyword_df['H1'] == False) &
+                                                                (keyword_df['H2'] == False) &
+                                                                (keyword_df['H3'] == False) &
+                                                                (keyword_df['Body Content'] == False) &
+                                                                (keyword_df['Alt Tags'] == False)]
+                
+                                    # Ordina il dataframe per la colonna 'Body Content'
+                                    if 'Body Content' in keyword_df.columns:
+                                        keyword_df_sorted = keyword_df.sort_values(by='Body Content', ascending=False)
+                                    else:
+                                        keyword_df_sorted = keyword_df.sort_values(by='Keyword', ascending=False)
+                
+                                    # Visualizza il dataframe ordinato
+                                    st.dataframe(keyword_df_sorted)
+                
+                                    # Parole chiave con opportunità
+                
+                                    st.markdown(
+                                        f"<h4>Prioritize the Optimization of These Queries</h4>",
+                                        unsafe_allow_html=True)
+                                    st.write("These queries are currently ranked between positions 1 and 20 and do not appear in any key elements of your page. Optimize your page for these queries to improve their ranking")
+                                    opportunity_keywords = get_opportunity_keywords(grouped_page_data, keyword_presence)
+                                    st.dataframe(opportunity_keywords)
             
-                            with tab2:
-                                top_groups_clicks = [click for group, click in top_groups]
-                                top_group_names = [group for group, click in top_groups]
+                with st.container():
+                    st.subheader("2. Page Topics")
+                    st.divider()
+                    st.write(
+                        "We have grouped the keywords for which Google is considering your page to identify the main themes. For each theme, you can check the total clicks and impressions, as well as the coverage percentage of the theme by your page content.")
+                    if 'page_data' in st.session_state and st.session_state.page_data is not None:
+                        with st.spinner("Clustering topics..."):
+                            clustered_keywords, model = cluster_keywords(grouped_page_data)
+                            cluster_names = get_cluster_names(clustered_keywords)
+                            clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
                         
-                                if len(top_groups) > 0:
-                                    fig, ax = plt.subplots()
-                                    ax.barh(top_group_names, top_groups_clicks)
-                                    ax.set_xlabel('Total Clicks')
-                                    ax.set_ylabel('Group Name')
-                                    ax.set_title('Top 5 Groups by Clicks')
-                                    st.pyplot(fig)
+                            for cluster in clustered_keywords['Cluster'].unique():
+                                cluster_name = cluster_names[cluster]
+                                cluster_df = clustered_keywords[clustered_keywords['Cluster'] == cluster]
+                                total_keywords = len(cluster_df)
+                                covered_keywords = cluster_df['Covered'].sum()
+                                coverage_percentage = (covered_keywords / total_keywords) * 100
+                                cluster_name = cluster_name.upper()
+                        
+                                with st.expander(
+                                        f"**:blue[{cluster_name}]**  | __Clicks {cluster_df['Clicks'].sum()}__  | Impressions {cluster_df['Impressions'].sum()} |  Coverage by page content {coverage_percentage:.2f}%"):
+                                    st.dataframe(cluster_df[['Query', 'Clicks', 'Impressions', 'CTR', 'Position', 'Covered']])
                     
-                        st.subheader("🔑 Groups Overview")
-                        top_groups_data = []
-                        for group, total_clicks in sorted_groups:
-                            keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                            top_groups_data.append({
-                                "Group": group,
-                                "Total Clicks": total_clicks,
-                                "Keywords": ", ".join(keywords_list)
-                            })
-                    
-                        top_groups_df = pd.DataFrame(top_groups_data)
-                        st.dataframe(top_groups_df)
-                    
-                        # Sezione per visualizzare i dettagli di ciascun gruppo
-                        st.subheader("🔍 Group Details")
-                        selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
-                    
-                        if selected_group:
+                    if 'scan_started' in st.session_state and st.session_state.scan_started:
+                        st.write("")
+                
+            
+            with tab5:
+                st.subheader("Queries Grouper")        
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write("💬 Select language")
+                    language = st.selectbox("", ["English", "Italian"])
+                
+                    if language == "English":
+                        default_stop_words = [
+                            'and', 'but', 'is', 'the', 'to', 'in', 'for', 'on', 'with', 'as', 'by', 'at', 'from',
+                            'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above',
+                            'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again',
+                            'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any',
+                            'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
+                            'own', 'same', 'so', 'than', 'too', ' very', 's', 't', 'can', 'will', 'just', 'don', 
+                            'should', 'now'
+                        ]
+                    else:
+                        default_stop_words = [
+                            'a', 'adesso', 'ai', 'al', 'alla', 'allo', 'allora', 'altre',
+                            'altri', 'altro', 'anche', 'ancora', 'avere', 'aveva', 'avevano',
+                            'ben', 'buono', 'che', 'chi', 'cinque', 'comprare', 'con',
+                            'consecutivi', 'consecutivo', 'cosa', 'cui', 'da', 'del', 'della',
+                            'dello', 'dentro', 'deve', 'devo', 'di', 'doppio', 'due', 'e',
+                            'ecco', 'fare', 'fine', 'fino', 'fra', 'gente', 'giu', 'ha', 'hai',
+                            'hanno', 'ho', 'il', 'indietro', 'invece', 'io', 'la', 'lavoro',
+                            'le', 'lei', 'lo', 'loro', 'lui', 'lungo', 'ma', 'me', 'meglio',
+                            'molta', 'molti', 'molto', 'nei', 'nella', 'no', 'noi', 'nome',
+                            'nostro', 'più', 'se', 'o', 'per', 'un', 'una'
+                        ]
+                
+                # Text area for custom stop words
+                with st.expander("Customize Stop Words"):
+                    custom_stop_words = st.text_area("One per line", "\n".join(default_stop_words))
+                    stop_words = [word.strip() for word in custom_stop_words.split('\n') if word.strip()]
+                
+                with col2:
+                    st.text("")
+                st.divider()
+                
+                # Control for minimum group size and tuple length
+                min_group_size, ngram_size = st.columns(2)
+                with min_group_size:
+                    min_group_size = st.slider("Minimum Group Size",
+                                            min_value=1,
+                                            max_value=50,
+                                            value=2,
+                                            help="The minimum group size is the minimum number of keywords required in a group for it to be displayed in the results. Increase this value to show only larger keyword groups."
+                                            )
+                
+                with ngram_size:
+                    ngram_size = st.slider(
+                    "Length of the keyword", 
+                    min_value=1, 
+                    max_value=5, 
+                    value=2, 
+                    help="Drag the slider to choose the n-gram size for the keyword. An n-gram size of 1 means a single word, whereas 5 means a phrase of up to 5 words."
+                )
+                
+                keyword_column = 'Query'
+                clicks_column = 'Clicks'
+                
+                if st.button("Group Keywords with Clicks ✨"):
+                    with st.spinner("Grouping..."):
+                        try:
+                            if keyword_column in df.columns and clicks_column in df.columns:
+                                # Remove duplicates and sum clicks
+                                df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
+                                # Group keywords
+                                st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
+                                # Calculate click totals
+                                st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
+                            else:
+                                st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
+                        except Exception as e:
+                            st.error(f"An error occurred: {e}")
+                
+                    if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
+                        sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
+                        top_groups = sorted_groups[:5]
+                        tab1, tab2 = st.columns([2, 2])
+                        with tab1:
                             try:
-                                group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
-                                keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
-                                st.write(f"Details for group: {selected_group}")
-                                st.dataframe(keyword_clicks_df)
+                                st.subheader("🔑 Groups")
+                                for group, total_clicks in sorted_groups:
+                                    with st.expander(f"{group} - Total Clicks: {total_clicks}"):
+                                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                        st.write(keyword_clicks_df)
                             except KeyError as e:
                                 st.warning(str(e))
+        
+                        with tab2:
+                            top_groups_clicks = [click for group, click in top_groups]
+                            top_group_names = [group for group, click in top_groups]
                     
-                        # Grafico dei Top 5 gruppi per clic
-                        st.subheader("📊 Top 5 Groups by Clicks")
-                        top_groups_clicks = [click for group, click in top_groups]
-                        top_group_names = [group for group, click in top_groups]
-                    
-                        if len(top_groups) > 0:
-                            fig, ax = plt.subplots()
-                            ax.barh(top_group_names, top_groups_clicks)
-                            ax.set_xlabel('Total Clicks')
-                            ax.set_ylabel('Group Name')
-                            ax.set_title('Top 5 Groups by Clicks')
-                            st.pyplot(fig)
+                            if len(top_groups) > 0:
+                                fig, ax = plt.subplots()
+                                ax.barh(top_group_names, top_groups_clicks)
+                                ax.set_xlabel('Total Clicks')
+                                ax.set_ylabel('Group Name')
+                                ax.set_title('Top 5 Groups by Clicks')
+                                st.pyplot(fig)
+                
+                    st.subheader("🔑 Groups Overview")
+                    top_groups_data = []
+                    for group, total_clicks in sorted_groups:
+                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                        top_groups_data.append({
+                            "Group": group,
+                            "Total Clicks": total_clicks,
+                            "Keywords": ", ".join(keywords_list)
+                        })
+                
+                    top_groups_df = pd.DataFrame(top_groups_data)
+                    st.dataframe(top_groups_df)
+                
+                    # Sezione per visualizzare i dettagli di ciascun gruppo
+                    st.subheader("🔍 Group Details")
+                    selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
+                
+                    if selected_group:
+                        try:
+                            group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
+                            keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
+                            st.write(f"Details for group: {selected_group}")
+                            st.dataframe(keyword_clicks_df)
+                        except KeyError as e:
+                            st.warning(str(e))
+                
+                    # Grafico dei Top 5 gruppi per clic
+                    st.subheader("📊 Top 5 Groups by Clicks")
+                    top_groups_clicks = [click for group, click in top_groups]
+                    top_group_names = [group for group, click in top_groups]
+                
+                    if len(top_groups) > 0:
+                        fig, ax = plt.subplots()
+                        ax.barh(top_group_names, top_groups_clicks)
+                        ax.set_xlabel('Total Clicks')
+                        ax.set_ylabel('Group Name')
+                        ax.set_title('Top 5 Groups by Clicks')
+                        st.pyplot(fig)
 
     else:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
