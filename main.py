@@ -40,7 +40,6 @@ st.set_page_config(
     page_icon="🔍",
     layout="wide"
 )
-component1=  TabBar(tabs=["Tab1","Tab2"],default=0,background = "red",color="grey",activeColor="blue",fontSize="20px")
 # JavaScript per aggiungere il meta tag di verifica di Google
 js_code = """
 <!-- Google Tag Manager -->
@@ -1254,9 +1253,7 @@ if credentials:
     with col2:
         st.write("")
         
-    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "BULK URLs INSPECTION"])
-
-                    
+    component1=  TabBar(tabs=["Tab1","Tab2"],default=0,background = "red",color="grey",activeColor="blue",fontSize="20px")                    
                     
    
     if(component1 == 0):
