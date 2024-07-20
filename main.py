@@ -2221,6 +2221,7 @@ if credentials:
                             if keyword_column in df.columns and clicks_column in df.columns:
                                 # Remove duplicates and sum clicks
                                 df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
+                                
                                 # Group keywords
                                 st.session_state.keyword_groups = group_keywords(df_cleaned, None, None, None, keyword_column=keyword_column)
                                 # Calculate click totals
@@ -2229,18 +2230,20 @@ if credentials:
                                 
                                 # Creiamo il DataFrame finale combinato
                                 combined_data = []
-                                for group, total_clicks in st.session_state.click_totals.items():
-                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
+                                    for group, total_clicks in st.session_state.click_totals.items():
+                                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                        
+                                        # Aggiungi le righe per il gruppo
+                                        combined_data.append({'group': group, 'total click group': total_clicks, 'keyword': '', 'keyword click': ''})
+                                        # Aggiungi le righe per le keyword
+                                        for idx, row in keyword_clicks_df.iterrows():
+                                            combined_data.append({'group': group, 'total click group': '', 'keyword': row[keyword_column], 'keyword click': row[clicks_column]})
                                     
-                                    # Aggiungi le righe per il gruppo
-                                    combined_data.append({'group': group, 'total click group': total_clicks, 'keyword': '', 'keyword click': ''})
-                                    # Aggiungi le righe per le keyword
-                                    for idx, row in keyword_clicks_df.iterrows():
-                                        combined_data.append({'group': group, 'total click group': '', 'keyword': row[keyword_column], 'keyword click': row[clicks_column]})
-                                
-                                final_df = pd.DataFrame(combined_data)
-                                
+                                    final_df = pd.DataFrame(combined_data)
+                                else:
+                                    st.warning("Data is not available for display.")
                             else:
                                 st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
                         except Exception as e:
@@ -2251,11 +2254,14 @@ if credentials:
                         detailColumns = ["keyword", "keyword click"]
                         detailColNum = len(detailColumns)
                         detailsHeader = "<b>Details</b>"
-                        final_df = pd.DataFrame(combined_data)
+                        
                         # Applicazione della visualizzazione della tabella
                         with st.container():
                             st.subheader("🔑 Groups and Details")
-                            st_mui_table(final_df, key="table2", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
+                            if 'final_df' in locals() and not final_df.empty:
+                                st_mui_table(final_df, key="table2", detailColumns=detailColumns, detailColNum=detailColNum, detailsHeader=detailsHeader)
+                            else:
+                                st.warning("No data available to display.")
 
 
 
