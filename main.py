@@ -2223,7 +2223,13 @@ if credentials:
                         top_groups = sorted_groups[:5]
                         tab1, tab2 = st.columns([9, 1])
                         with tab1:
-                            try:                        
+                            try:
+                                st.subheader("🔑 Groups")
+                                for group, total_clicks in sorted_groups:
+                                    with st.expander(f"{group} - Total Clicks: {total_clicks}"):
+                                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                        st.write(keyword_clicks_df)
 
 
                                  
@@ -2247,8 +2253,6 @@ if credentials:
                                 
                                 # Converti i dati in DataFrame
                                 group_df = pd.DataFrame(group_data)
-                                
-
 
                             
                                                                                 
@@ -2268,33 +2272,32 @@ if credentials:
                                 ax.set_ylabel('Group Name')
                                 ax.set_title('Top 5 Groups by Clicks')
                                 st.pyplot(fig)
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.subheader("🔑 Groups Overview")
-                        top_groups_data = []
-                        for group, total_clicks in sorted_groups:
-                            keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                            top_groups_data.append({
-                                "Group": group,
-                                "Total Clicks": total_clicks,
-                                "Keywords": ", ".join(keywords_list)
-                            })
-                    
-                        top_groups_df = pd.DataFrame(top_groups_data)
-                        st.dataframe(top_groups_df)
-                        with col2:
-                            # Sezione per visualizzare i dettagli di ciascun gruppo
-                            st.subheader("🔍 Group Details")
-                            selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
-                        
-                            if selected_group:
-                                try:
-                                    group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
-                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
-                                    st.write(f"Details for group: {selected_group}")
-                                    st.dataframe(keyword_clicks_df)
-                                except KeyError as e:
-                                    st.warning(str(e))
+                
+                    st.subheader("🔑 Groups Overview")
+                    top_groups_data = []
+                    for group, total_clicks in sorted_groups:
+                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                        top_groups_data.append({
+                            "Group": group,
+                            "Total Clicks": total_clicks,
+                            "Keywords": ", ".join(keywords_list)
+                        })
+                
+                    top_groups_df = pd.DataFrame(top_groups_data)
+                    st.dataframe(top_groups_df)
+                
+                    # Sezione per visualizzare i dettagli di ciascun gruppo
+                    st.subheader("🔍 Group Details")
+                    selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
+                
+                    if selected_group:
+                        try:
+                            group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
+                            keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
+                            st.write(f"Details for group: {selected_group}")
+                            st.dataframe(keyword_clicks_df)
+                        except KeyError as e:
+                            st.warning(str(e))
 
                         
                    
