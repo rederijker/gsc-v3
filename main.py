@@ -2320,13 +2320,24 @@ if credentials:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️', key="inspect"):
             if st.session_state.selected_site:
+                # Verifica che l'input di testo non sia vuoto
+                if not urls_to_inspect.strip():
+                    st.error("The text area is empty. Please insert URLs to inspect.")
+                    return
+                
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                 total_urls = len(urls)
-                results = []
     
+                # Verifica che le URL abbiano lo stesso dominio del sito selezionato
+                selected_site_domain = urlparse(st.session_state.selected_site).netloc
+                invalid_urls = [url for url in urls if urlparse(url).netloc != selected_site_domain]
+                if invalid_urls:
+                    st.error(f"The following URLs do not match the domain of the selected site ({selected_site_domain}):\n" + "\n".join(invalid_urls))
+                    return
+    
+                results = []
                 progress_placeholder = st.empty()
                 table_placeholder = st.empty()  # Placeholder per la tabella
-    
                 start_time = time.time()  # Inizio del timer
     
                 with st.status("Inspecting URLs..."):
@@ -2356,14 +2367,15 @@ if credentials:
                             index_results_partial = pd.DataFrame(results)
                             table_placeholder.write("### Partial Results")
                             table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
-                
+    
                 # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
                 st.write("### Final Results")
                 st.dataframe(index_results.drop(columns=['response']))
-                
-      
-                
+    
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
+
+if 'selected_site' not in st.session_state:
+        st.session_state.selected_site = selected_site
