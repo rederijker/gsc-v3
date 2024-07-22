@@ -2336,7 +2336,6 @@ if credentials:
                         results = []
                         progress_placeholder = st.empty()
                         table_placeholder = st.empty()  # Placeholder per la tabella
-                        progress_bar = st.progress(0)  # Inizializza la barra di progresso
                         start_time = time.time()  # Inizio del timer
         
                         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
@@ -2354,10 +2353,6 @@ if credentials:
                                 remaining_urls = total_urls - (idx + 1)
                                 estimated_time_remaining = avg_time_per_url * remaining_urls
                                 estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
-        
-                                # Aggiornamento della barra di progresso
-                                progress = (idx + 1) / total_urls
-                                progress_bar.progress(progress)
         
                                 # Aggiornamento del placeholder con il progresso e il tempo stimato
                                 progress_placeholder.write(
