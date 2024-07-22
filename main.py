@@ -2329,8 +2329,7 @@ if credentials:
     
                 start_time = time.time()  # Inizio del timer
     
-                with st.spinner("Inspecting URLs..."):
-                    time.sleep(1)
+                with st.status("Inspecting URLs..."):
                     # Uso di ThreadPoolExecutor per l'esecuzione concorrente
                     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
                         future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
