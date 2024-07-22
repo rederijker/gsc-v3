@@ -2247,6 +2247,9 @@ if credentials:
                                 
                                 # Converti i dati in DataFrame
                                 group_df = pd.DataFrame(group_data)
+                                csv = group_df.to_csv(index=False).encode('utf-8')
+                                st.download_button(label="Download Groups CSV", data=csv, file_name='groups.csv', mime='text/csv')
+
 
                             
                                                                                 
