@@ -2276,7 +2276,8 @@ if credentials:
                             })
                     
                         top_groups_df = pd.DataFrame(top_groups_data)
-                        st.dataframe(top_groups_df)
+                        top_groups_df_2 = top_groups_df.drop(columns=["keyword"])
+                        st.dataframe(top_groups_df_2)
                     with col2:
                         # Sezione per visualizzare i dettagli di ciascun gruppo
                         st.subheader("🔍 Group Details")
