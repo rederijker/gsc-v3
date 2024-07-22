@@ -2317,6 +2317,10 @@ if credentials:
                    
 
     else:
+        # Assicurati che 'selected_site' sia impostato in st.session_state
+        if 'selected_site' not in st.session_state:
+            st.session_state.selected_site = "https://example.com"  # Placeholder per il sito selezionato
+        
         if 'urls_to_inspect' not in st.session_state:
             st.session_state.urls_to_inspect = ""
         
