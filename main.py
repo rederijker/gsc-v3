@@ -80,6 +80,9 @@ if 'show_body_alt' not in st.session_state:
     st.session_state.show_body_alt = True
 if 'show_not_covered' not in st.session_state:
     st.session_state.show_not_covered = False
+if 'selected_group' not in st.session_state:
+    st.session_state.selected_group = None
+    
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
 def clear_data():
@@ -2226,13 +2229,8 @@ if credentials:
                             try:
                                 st.subheader("🔑 Groups")
                                 for group, total_clicks in sorted_groups:
-                                    with st.expander(f"{group} - Total Clicks: {total_clicks}"):
-                                        keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
-                                        st.write(keyword_clicks_df)
-
-
-                                 
+                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]                                 
                                 
                                 # Step 1: Preparare i dati
                                 group_data = []
