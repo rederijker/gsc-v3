@@ -29,9 +29,8 @@ from urllib.parse import urlparse, parse_qs
 import streamlit.components.v1 as components
 import concurrent.futures 
 from googleapiclient.errors import HttpError
-from streamlit_javascript import st_javascript
 from st_tabs import TabBar
-from st_mui_table import st_mui_table
+
 
 #PAGE CONFIGURATION
 st.set_page_config(
@@ -39,19 +38,7 @@ st.set_page_config(
     page_icon="🔍",
     layout="wide"
 )
-# JavaScript per aggiungere il meta tag di verifica di Google
-js_code = """
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-NF4DR3VB');</script>
-<!-- End Google Tag Manager -->
-"""
 
-# Esegui il codice JavaScript
-st_javascript(js_code)
 
 
 # Initialize session state
@@ -2266,7 +2253,6 @@ if credentials:
                                 
                                 # Converti i dati in DataFrame
                                 group_df = pd.DataFrame(group_data)
-                                st_mui_table(group_df,key="table2")
 
                             
                                                                                 
@@ -2319,8 +2305,6 @@ if credentials:
     else:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
-         
-
             if st.session_state.selected_site:
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                 total_urls = len(urls)
@@ -2331,7 +2315,7 @@ if credentials:
     
                 start_time = time.time()  # Inizio del timer
     
-                with st.status("Inspecting URLs..."):
+                with st.spinner("Inspecting URLs..."):
                     # Uso di ThreadPoolExecutor per l'esecuzione concorrente
                     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
                         future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
@@ -2369,5 +2353,3 @@ if credentials:
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
-
-
