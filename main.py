@@ -2336,35 +2336,38 @@ if credentials:
                         results = []
                         progress_placeholder = st.empty()
                         table_placeholder = st.empty()  # Placeholder per la tabella
+                        progress_bar = st.progress(0)  # Inizializza la barra di progresso
                         start_time = time.time()  # Inizio del timer
         
-                        with st.spinner("Inspecting URLs..."):
-                            # Uso di ThreadPoolExecutor per l'esecuzione concorrente
-                            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
-                                future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
-                                for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
-                                    url = future_to_url[future]
-                                    try:
-                                        result = future.result()
-                                        results.append(result)
-                                    except Exception as e:
-                                        results.append({'url': url, 'response': str(e)})
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
+                            future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
+                            for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
+                                url = future_to_url[future]
+                                try:
+                                    result = future.result()
+                                    results.append(result)
+                                except Exception as e:
+                                    results.append({'url': url, 'response': str(e)})
         
-                                    elapsed_time = time.time() - start_time
-                                    avg_time_per_url = elapsed_time / (idx + 1)
-                                    remaining_urls = total_urls - (idx + 1)
-                                    estimated_time_remaining = avg_time_per_url * remaining_urls
-                                    estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
+                                elapsed_time = time.time() - start_time
+                                avg_time_per_url = elapsed_time / (idx + 1)
+                                remaining_urls = total_urls - (idx + 1)
+                                estimated_time_remaining = avg_time_per_url * remaining_urls
+                                estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
         
-                                    # Aggiornamento del placeholder con il progresso e il tempo stimato
-                                    progress_placeholder.write(
-                                        f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
-                                    )
+                                # Aggiornamento della barra di progresso
+                                progress = (idx + 1) / total_urls
+                                progress_bar.progress(progress)
         
-                                    # Aggiornamento della tabella parziale nel placeholder
-                                    index_results_partial = pd.DataFrame(results)
-                                    table_placeholder.write("### Partial Results")
-                                    table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                                # Aggiornamento del placeholder con il progresso e il tempo stimato
+                                progress_placeholder.write(
+                                    f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
+                                )
+        
+                                # Aggiornamento della tabella parziale nel placeholder
+                                index_results_partial = pd.DataFrame(results)
+                                table_placeholder.write("### Partial Results")
+                                table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
         
                         # Creazione e visualizzazione del DataFrame finale
                         index_results = pd.DataFrame(results)
