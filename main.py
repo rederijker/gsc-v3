@@ -2318,7 +2318,7 @@ if credentials:
 
     else:
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
-        if st.button('URL INSPECTION 🕵️‍♂️'):
+        if st.button('URL INSPECTION 🕵️‍♂️', key="inspect"):
             if st.session_state.selected_site:
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                 total_urls = len(urls)
