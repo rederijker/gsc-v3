@@ -2281,18 +2281,18 @@ if credentials:
                         top_groups_df = pd.DataFrame(top_groups_data)
                         st.dataframe(top_groups_df)
                         with col2:
-                        # Sezione per visualizzare i dettagli di ciascun gruppo
-                        st.subheader("🔍 Group Details")
-                        selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
-                    
-                        if selected_group:
-                            try:
-                                group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
-                                keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
-                                st.write(f"Details for group: {selected_group}")
-                                st.dataframe(keyword_clicks_df)
-                            except KeyError as e:
-                                st.warning(str(e))
+                            # Sezione per visualizzare i dettagli di ciascun gruppo
+                            st.subheader("🔍 Group Details")
+                            selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
+                        
+                            if selected_group:
+                                try:
+                                    group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
+                                    st.write(f"Details for group: {selected_group}")
+                                    st.dataframe(keyword_clicks_df)
+                                except KeyError as e:
+                                    st.warning(str(e))
 
                         
                    
