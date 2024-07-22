@@ -2323,7 +2323,7 @@ if credentials:
                 # Verifica che l'input di testo non sia vuoto
                 if not urls_to_inspect.strip():
                     st.error("The text area is empty. Please insert URLs to inspect.")
-                    return
+                return
                 
                 urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                 total_urls = len(urls)
@@ -2333,7 +2333,7 @@ if credentials:
                 invalid_urls = [url for url in urls if urlparse(url).netloc != selected_site_domain]
                 if invalid_urls:
                     st.error(f"The following URLs do not match the domain of the selected site ({selected_site_domain}):\n" + "\n".join(invalid_urls))
-                    return
+                return
     
                 results = []
                 progress_placeholder = st.empty()
