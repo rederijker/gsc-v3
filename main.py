@@ -2317,14 +2317,23 @@ if credentials:
                    
 
     else:
-        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
+        if 'urls_to_inspect' not in st.session_state:
+            st.session_state.urls_to_inspect = ""
+        
+        if 'inspect_button_clicked' not in st.session_state:
+            st.session_state.inspect_button_clicked = False
+        
+        st.session_state.urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", st.session_state.urls_to_inspect, height=200)
         if st.button('URL INSPECTION 🕵️‍♂️', key="inspect"):
+            st.session_state.inspect_button_clicked = True
+        
+        if st.session_state.inspect_button_clicked:
             if st.session_state.selected_site:
                 # Verifica che l'input di testo non sia vuoto
-                if not urls_to_inspect.strip():
+                if not st.session_state.urls_to_inspect.strip():
                     st.error("The text area is empty. Please insert URLs to inspect.")
                 else:
-                    urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
+                    urls = [url.strip() for url in st.session_state.urls_to_inspect.split('\n') if url.strip()]
                     total_urls = len(urls)
         
                     # Verifica che le URL abbiano lo stesso dominio del sito selezionato
@@ -2372,3 +2381,6 @@ if credentials:
                         # Cancellazione del placeholder dopo aver completato l'ispezione
                         progress_placeholder.empty()
                         table_placeholder.empty()  # Pulisce la tabella parziale finale
+        
+                        # Reset dello stato del pulsante dopo l'ispezione
+                        st.session_state.inspect_button_clicked = False
