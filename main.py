@@ -1267,9 +1267,9 @@ if credentials:
     api_app = st.radio(
     "What do you feel like doing?",
     [":rainbow[GET INSIGHT FROM MY GSC DATA]", "***INSPECT URLS***"],
-    captions = ["Laugh out loud.", "Get the popcorn.")                    
-   
-    if genre == ":rainbow[GET INSIGHT FROM MY GSC DATA]":
+    captions = ["Laugh out loud.", "Get the popcorn."])  
+
+    if api_app == ":rainbow[GET INSIGHT FROM MY GSC DATA]":
  
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
