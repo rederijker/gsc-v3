@@ -1262,14 +1262,13 @@ if credentials:
     with col1:
         st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
     with col2:
-        st.write("")
         
-    api_app = st.radio(
-    "What do you feel like doing?",
-    [":rainbow[GET INSIGHT FROM MY GSC DATA]", "***INSPECT URLS***"],
-    captions = ["Laugh out loud.", "Get the popcorn."],  
-    horizontal=True
-    )  
+        api_app = st.radio(
+        "What do you feel like doing?",
+        [":rainbow[GET INSIGHT FROM MY GSC DATA]", "***INSPECT URLS***"],
+        captions = ["Laugh out loud.", "Get the popcorn."],  
+        horizontal=True
+        )  
 
     if api_app == ":rainbow[GET INSIGHT FROM MY GSC DATA]":
  
