@@ -1162,7 +1162,7 @@ def authorize_app():
         st.markdown(f"""
         <div class="header" style="padding:5%;background-image:url({gif_url});">
             <h1 style="text-align:center;">GSC InsightHub</h1>
-            <p style="text-align=center;">made with 🎈 by <a href="https://www.linkedin.com/in/cristiano-caggiula/">Cristiano Caggiula</a></p>
+            <p style="text-align:center;">made with 🎈 by <a href="https://www.linkedin.com/in/cristiano-caggiula/">Cristiano Caggiula</a></p>
             <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
             <p style="text-align:center;font-size:17px;">
                 Explore <strong>Google Search Console data</strong>, generate detailed reports, customize searches, and access unlimited information without programming skills required for <strong>Google Search Console API</strong>. Perfect for webmasters, SEO experts, and digital marketers.
