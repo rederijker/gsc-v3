@@ -1270,12 +1270,12 @@ if credentials:
         
         api_app = st.radio(
         "What do you feel like doing?",
-        [":rainbow[GET INSIGHT FROM MY GSC DATA]", "***INSPECT URLS***"],
+        ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***"],
         captions = ["Laugh out loud.", "Get the popcorn."],  
         horizontal=True
         )  
 
-    if api_app == ":rainbow[GET INSIGHT FROM MY GSC DATA]":
+    if api_app == "***GET INSIGHT FROM MY GSC DATA***":
         st.divider()
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
