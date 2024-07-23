@@ -2027,6 +2027,7 @@ if credentials:
 
 
             with tab4:
+
                 with st.container():
                     st.subheader("1. Queries Coverage Analysis")
                     st.divider()
@@ -2089,28 +2090,31 @@ if credentials:
                                         if search_query:
                                             keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
                                         
+                                        st.write(keyword_df)
                     
-                                    # Checkbox per mostrare/nascondere colonne
                                     with col2:
-                                        show_heading = st.checkbox("Show heading", st.session_state.get('show_heading', True), disabled=st.session_state.get('show_not_covered', False))
+                                        # Gestione dello stato del filtro per query non presenti in nessun elemento
+                                        show_not_covered = st.checkbox("Only not covered queries", st.session_state.get('show_not_covered', False))
+                                        st.session_state.show_not_covered = show_not_covered
+                    
+                                    # Disabilitare le checkbox se "Only not covered queries" è attivo
+                                    is_disabled = st.session_state.show_not_covered
+                    
                                     with col3:
-                                        show_keyword_metrics = st.checkbox("Show metrics", st.session_state.get('show_keyword_metrics', True), disabled=st.session_state.get('show_not_covered', False))
+                                        show_heading = st.checkbox("Show heading", st.session_state.get('show_heading', True), disabled=is_disabled)
                                     with col4:
-                                        show_meta = st.checkbox("Show meta", st.session_state.get('show_meta', True), disabled=st.session_state.get('show_not_covered', False))
+                                        show_keyword_metrics = st.checkbox("Show metrics", st.session_state.get('show_keyword_metrics', True), disabled=is_disabled)
                                     with col5:
-                                        show_body_alt = st.checkbox("Show body alt", st.session_state.get('show_body_alt', True), disabled=st.session_state.get('show_not_covered', False))
+                                        show_meta = st.checkbox("Show meta", st.session_state.get('show_meta', True), disabled=is_disabled)
+                                    with col6:
+                                        show_body_alt = st.checkbox("Show body alt", st.session_state.get('show_body_alt', True), disabled=is_disabled)
                     
                                     st.session_state.show_heading = show_heading
                                     st.session_state.show_keyword_metrics = show_keyword_metrics
                                     st.session_state.show_meta = show_meta
                                     st.session_state.show_body_alt = show_body_alt
                     
-                                    with col6:
-                                        # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                        show_not_covered = st.checkbox("Only not covered queries", st.session_state.get('show_not_covered', False))
-                                        st.session_state.show_not_covered = show_not_covered
-                    
-                                    if show_not_covered:
+                                    if st.session_state.show_not_covered:
                                         # Filtrare le query non coperte
                                         keyword_df = keyword_df[
                                             (keyword_df.get('Title', False) == False) &
