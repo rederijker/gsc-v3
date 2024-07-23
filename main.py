@@ -1267,8 +1267,9 @@ if credentials:
     api_app = st.radio(
     "What do you feel like doing?",
     [":rainbow[GET INSIGHT FROM MY GSC DATA]", "***INSPECT URLS***"],
-    captions = ["Laugh out loud.", "Get the popcorn."],  +
-    horizontal)  
+    captions = ["Laugh out loud.", "Get the popcorn."],  
+    horizontal=True
+    )  
 
     if api_app == ":rainbow[GET INSIGHT FROM MY GSC DATA]":
  
