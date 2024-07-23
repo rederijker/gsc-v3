@@ -34,7 +34,7 @@ from st_tabs import TabBar
 
 #PAGE CONFIGURATION
 st.set_page_config(
-    page_title="SEO Gnosis: Master Search Console Data Like a Pro-by Cristiano Caggiula",
+    page_title="GSC InsightHub:SEO analytic tool with GSC data-by Cristiano Caggiula",
     page_icon="🔍",
     layout="wide"
 )
@@ -1163,7 +1163,14 @@ def authorize_app():
         <div class="header" style="padding:5%;background-image:url({gif_url});">
         <h1 style="text-align:center;">SEO Gnosis</h1>
         <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
-        <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
+        <p style="text-align:center;font-size:17px;">Explore <strong>Google Search Console data</strong>, generate detailed reports, customize searches, and access unlimited information without programming skills required for <strong>Google Search Console API</strong>. Perfect for webmasters, SEO experts, and digital marketers.
+
+
+
+
+
+
+.</p>
         
         <div style="text-align:center;">
             <a href="{auth_url}" style="text-decoration:none;">
