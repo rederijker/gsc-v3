@@ -2028,7 +2028,7 @@ if credentials:
 
             with tab4:
 
-                with st.container():
+                with st.container(border=True):
                     st.subheader("1. Queries Coverage Analysis")
                     st.divider()
                     
@@ -2060,7 +2060,7 @@ if credentials:
                             grouped_page_data = aggregate_queries(page_data)
                     
                             # Analisi della copertura delle parole chiave
-                            with st.container():
+                            with st.container(border=True):
                                 st.markdown(
                                     f"<h4>📄 {st.session_state.page_data.get('meta_title', 'No Title')} | <a href='{selected_page_on_page}'>Go to the page</a></h4>",
                                     unsafe_allow_html=True)
@@ -2161,7 +2161,7 @@ if credentials:
                                     st.dataframe(opportunity_keywords)
 
                 
-                with st.container():
+                with st.container(border=True):
                     st.subheader("2. Page Topics")
                     st.divider()
                     st.write(
