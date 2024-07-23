@@ -2089,7 +2089,6 @@ if credentials:
                                         if search_query:
                                             keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
                                         
-                                        st.write(keyword_df)
                     
                                     # Checkbox per mostrare/nascondere colonne
                                     with col2:
