@@ -1175,8 +1175,7 @@ def authorize_app():
                 </a>
             </div>
             <hr>
-            <p>GSC InsightHub leverages Google Search Console data to provide comprehensive SEO analytics. Here's a breakdown of its core functionalities:</p>
-    
+            <p>GSC InsightHub leverages Google Search Console data to provide comprehensive SEO analytics. Here's a breakdown of its core functionalities:</p>    
             <h2>1. Access Search Analytics API</h2>
             <p>With GSC InsightHub, you can easily access the Search Analytics API to:</p>
             <ul>
