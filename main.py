@@ -2077,6 +2077,7 @@ if credentials:
                                     st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
                                 else:
                                     col1, col2, col3, col4, col5, col6 = st.columns([3, 1, 1, 1, 1, 1])
+                                    
                                     with col1:
                                         # Gestione dello stato del filtro di ricerca per query
                                         search_query = st.text_input(
@@ -2087,7 +2088,7 @@ if credentials:
                                         st.session_state.search_query = search_query
                                         if search_query:
                                             keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
-                    
+                                        
                                         st.write(keyword_df)
                     
                                     # Checkbox per mostrare/nascondere colonne
@@ -2105,13 +2106,13 @@ if credentials:
                                     st.session_state.show_meta = show_meta
                                     st.session_state.show_body_alt = show_body_alt
                     
-                                    # Gestione dello stato del filtro per query non presenti in nessun elemento
                                     with col6:
+                                        # Gestione dello stato del filtro per query non presenti in nessun elemento
                                         show_not_covered = st.toggle("Only not covered queries", st.session_state.get('show_not_covered', False))
                                         st.session_state.show_not_covered = show_not_covered
                     
-                                    # Filtrare le query non coperte se il toggle è attivo
                                     if show_not_covered:
+                                        # Filtrare le query non coperte
                                         keyword_df = keyword_df[
                                             (keyword_df.get('Title', False) == False) &
                                             (keyword_df.get('Meta Description', False) == False) &
@@ -2126,6 +2127,10 @@ if credentials:
                                         st.session_state.show_keyword_metrics = False
                                         st.session_state.show_meta = False
                                         st.session_state.show_body_alt = False
+                                        show_heading = False
+                                        show_keyword_metrics = False
+                                        show_meta = False
+                                        show_body_alt = False
                                     else:
                                         # Creare la lista delle colonne da mostrare
                                         columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
@@ -2156,6 +2161,8 @@ if credentials:
                                     st.write("These queries are currently ranked between positions 1 and 20 and do not appear in any key elements of your page. Optimize your page for these queries to improve their ranking")
                                     opportunity_keywords = get_opportunity_keywords(grouped_page_data, keyword_presence)
                                     st.dataframe(opportunity_keywords)
+
+                
                 with st.container():
                     st.subheader("2. Page Topics")
                     st.divider()
