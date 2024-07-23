@@ -2064,7 +2064,7 @@ if credentials:
                                 st.markdown(
                                     f"<h4 style='text-align:center;'>📄 {st.session_state.page_data.get('meta_title', 'No Title')} | <a href='{selected_page_on_page}'>Go to the page</a></h4>",
                                     unsafe_allow_html=True)
-                    
+                                st.divider()
                                 # Visualizzare i warning se presenti
                                 if 'warnings' in st.session_state.page_data:
                                     for warning in st.session_state.page_data['warnings']:
