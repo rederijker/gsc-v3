@@ -1174,6 +1174,7 @@ def authorize_app():
                     </button>
                 </a>
             </div>
+            <br>
             <hr>
             <p>GSC InsightHub leverages Google Search Console data to provide comprehensive SEO analytics. Here's a breakdown of its core functionalities:</p>    
             <h2>1. Access Search Analytics API</h2>
@@ -1181,18 +1182,15 @@ def authorize_app():
             <ul>
                 <li>Generate performance reports on queries and pages.</li>
                 <li>Analyze query distribution in search engine results pages (SERPs).</li>
-            </ul>
-    
+            </ul>    
             <h2>2. On-Page SEO</h2>
             <p>Our tool helps you optimize on-page SEO by:</p>
             <ul>
                 <li>Checking if the queries for which Google considers your webpage are present in the text.</li>
                 <li>Identifying which topics you are covering and which ones you are missing.</li>
-            </ul>
-    
+            </ul>    
             <h2>3. Keyword Grouper</h2>
-            <p>Group and manage your keywords efficiently to enhance your SEO strategy.</p>
-    
+            <p>Group and manage your keywords efficiently to enhance your SEO strategy.</p>    
             <h2>4. Bulk URL Inspection</h2>
             <p>Perform bulk URL inspections to ensure all your web pages meet SEO standards and are indexed properly.</p>
         </div>
