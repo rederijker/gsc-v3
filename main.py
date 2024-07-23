@@ -1161,43 +1161,43 @@ def authorize_app():
         gif_url = "https://github.com/rederijker/gsc-v3/blob/main/assets/back.gif?raw=true"
         st.markdown(f"""
         <div class="header" style="padding:5%;background-image:url({gif_url});">
-        <h1 style="text-align:center;">GSC InsightHub</h1>
-        <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
-        <p style="text-align:center;font-size:17px;">Explore <strong>Google Search Console data</strong>, generate detailed reports, customize searches, and access unlimited information without programming skills required for <strong>Google Search Console API</strong>. Perfect for webmasters, SEO experts, and digital marketers.</p>
-        <div style="text-align:center;">
-            <a href="{auth_url}" style="text-decoration:none;">
-                <button style="background-color: white; color: #4285F4; border: 1px solid #4285F4; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" alt="Google logo" style="width: 47px; height: 47px; margin-right: 8px;">
-                    Login with Google
-                </button>
-            </a>
-        </div>
-        <hr></hr>
-        <p>GSC InsightHub leverages Google Search Console data to provide comprehensive SEO analytics. Here's a breakdown of its core functionalities:</p>
-
+            <h1 style="text-align:center;">GSC InsightHub</h1>
+            <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
+            <p style="text-align:center;font-size:17px;">
+                Explore <strong>Google Search Console data</strong>, generate detailed reports, customize searches, and access unlimited information without programming skills required for <strong>Google Search Console API</strong>. Perfect for webmasters, SEO experts, and digital marketers.
+            </p>
+            <div style="text-align:center;">
+                <a href="{auth_url}" style="text-decoration:none;">
+                    <button style="background-color: white; color: #4285F4; border: 1px solid #4285F4; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" alt="Google logo" style="width: 47px; height: 47px; margin-right: 8px;">
+                        Login with Google
+                    </button>
+                </a>
+            </div>
+            <hr>
+            <p>GSC InsightHub leverages Google Search Console data to provide comprehensive SEO analytics. Here's a breakdown of its core functionalities:</p>
+    
             <h2>1. Access Search Analytics API</h2>
             <p>With GSC InsightHub, you can easily access the Search Analytics API to:</p>
             <ul>
                 <li>Generate performance reports on queries and pages.</li>
                 <li>Analyze query distribution in search engine results pages (SERPs).</li>
             </ul>
-        
+    
             <h2>2. On-Page SEO</h2>
             <p>Our tool helps you optimize on-page SEO by:</p>
             <ul>
                 <li>Checking if the queries for which Google considers your webpage are present in the text.</li>
                 <li>Identifying which topics you are covering and which ones you are missing.</li>
             </ul>
-        
+    
             <h2>3. Keyword Grouper</h2>
             <p>Group and manage your keywords efficiently to enhance your SEO strategy.</p>
-        
+    
             <h2>4. Bulk URL Inspection</h2>
             <p>Perform bulk URL inspections to ensure all your web pages meet SEO standards and are indexed properly.</p>
-
         </div>
         """, unsafe_allow_html=True)
-        
             
     return st.session_state.credentials
 
