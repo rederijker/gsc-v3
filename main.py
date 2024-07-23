@@ -2090,7 +2090,6 @@ if credentials:
                                         if search_query:
                                             keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
                                         
-                                        st.write(keyword_df)
                     
                                     with col2:
                                         # Gestione dello stato del filtro per query non presenti in nessun elemento
