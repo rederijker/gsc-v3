@@ -175,25 +175,25 @@ def determine_optimal_clusters(X, max_clusters=50):
     optimal_k = silhouette_scores.index(max(silhouette_scores)) + 2  # since range starts from 2
     return optimal_k
 
-def cluster_keywords(keywords_df, max_clusters=20):
+def cluster_keywords(keyword_df, max_clusters=20):
     vectorizer = TfidfVectorizer(stop_words='english')
     
     # Rimuovere parole chiave duplicate
-    keywords_df = aggregate_queries(keywords_df)
+    keyword_df = aggregate_queries(keyword_df)
     
-    X = vectorizer.fit_transform(keywords_df['Query'])
+    X = vectorizer.fit_transform(keyword_df['Query'])
     
     if X.shape[0] < 2:
         st.warning("Not enough samples to perform clustering. At least 2 unique queries are required.")
-        return keywords_df, None
+        return keyword_df, None
     
     optimal_k = determine_optimal_clusters(X, max_clusters)
     
     model = KMeans(n_clusters=optimal_k, random_state=42)
     model.fit(X)
     
-    keywords_df['Cluster'] = model.labels_
-    return keywords_df, model
+    keyword_df['Cluster'] = model.labels_
+    return keyword_df, model
   
 # Funzione per analizzare la copertura degli argomenti
 def analyze_topic_coverage(page_data, clustered_keywords):
@@ -214,9 +214,9 @@ def analyze_topic_coverage(page_data, clustered_keywords):
   
 
 # Funzione per ottenere parole chiave con opportunità
-def get_opportunity_keywords(keywords_df, keyword_analysis):
-    avg_impressions = keywords_df['Impressions'].mean()
-    opportunity_keywords = keywords_df[(keywords_df['Impressions'] > avg_impressions) & (keywords_df['Position'] >= 1) & (keywords_df['Position'] <= 20)]
+def get_opportunity_keywords(keyword_df, keyword_analysis):
+    avg_impressions = keyword_df['Impressions'].mean()
+    opportunity_keywords = keyword_df[(keyword_df['Impressions'] > avg_impressions) & (keyword_df['Position'] >= 1) & (keyword_df['Position'] <= 20)]
     
     # Filtra le keyword che non sono presenti in nessun elemento della pagina
     not_covered_keywords = []
@@ -229,7 +229,7 @@ def get_opportunity_keywords(keywords_df, keyword_analysis):
     return opportunity_keywords[['Query', 'Position', 'Clicks', 'Impressions', 'CTR']]
 
 # Funzione per analizzare la presenza delle parole chiave nei vari elementi della pagina
-def analyze_keywords(page_data, keywords_df):
+def analyze_keywords(page_data, keyword_df):
     meta_title_clean = clean_text(page_data['meta_title'])
     meta_description_clean = clean_text(page_data['meta_description'])
     h1_headings_clean = clean_text(page_data['h1_headings'])
@@ -242,7 +242,7 @@ def analyze_keywords(page_data, keywords_df):
     alt_tags_clean = clean_text(page_data['alt_tags'])
 
     keyword_analysis = []
-    for _, row in keywords_df.iterrows():
+    for _, row in keyword_df.iterrows():
         keyword = row['Query']
         keyword_clean = clean_text(keyword)
 
