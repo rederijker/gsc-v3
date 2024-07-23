@@ -2054,7 +2054,7 @@ if credentials:
                             st.session_state.keyword_analysis = None
                 
                         if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                            page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page_on_page[['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
+                            page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page_on_page[['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]]
                             grouped_page_data = aggregate_queries(page_data)
                     
                             # Analisi della copertura delle parole chiave
