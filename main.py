@@ -2062,7 +2062,7 @@ if credentials:
                             # Analisi della copertura delle parole chiave
                             with st.container():
                                 st.markdown(
-                                    f"<h4 style="text-align:center;">📄 {st.session_state.page_data.get('meta_title', 'No Title')} | <a href='{selected_page_on_page}'>Go to the page</a></h4>",
+                                    f"<h4 style='text-align:center;'>📄 {st.session_state.page_data.get('meta_title', 'No Title')} | <a href='{selected_page_on_page}'>Go to the page</a></h4>",
                                     unsafe_allow_html=True)
                     
                                 # Visualizzare i warning se presenti
