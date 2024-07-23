@@ -2322,6 +2322,7 @@ if credentials:
                    
 
     else:
+        st.divider()
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
