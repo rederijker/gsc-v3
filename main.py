@@ -26,20 +26,13 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
-import streamlit.components.v1 as components
-import concurrent.futures 
-from googleapiclient.errors import HttpError
-from st_tabs import TabBar
-
 
 #PAGE CONFIGURATION
 st.set_page_config(
-    page_title="GSC InsightHub:SEO analytic tool with GSC data-by Cristiano Caggiula",
+    page_title="SEO Gnosis: Master Search Console Data Like a Pro-by Cristiano Caggiula",
     page_icon="🔍",
     layout="wide"
 )
-
-
 
 # Initialize session state
 if 'credentials' not in st.session_state:
@@ -80,9 +73,6 @@ if 'show_body_alt' not in st.session_state:
     st.session_state.show_body_alt = True
 if 'show_not_covered' not in st.session_state:
     st.session_state.show_not_covered = False
-if 'selected_group' not in st.session_state:
-    st.session_state.selected_group = None
-    
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
 def clear_data():
@@ -1068,53 +1058,57 @@ def analyze_query_position_changes(df):
                     'Impressions_First_Half': '{:.0f}'
                 }))
 # Funzione per ispezionare un singolo URL
-# Funzione per ispezionare un singolo URL con retry
-def inspect_url(url_to_inspect, selected_site, retries=3):
+def inspect_url(url_to_inspect, selected_site):
     request_body = {'inspectionUrl': url_to_inspect, 'siteUrl': selected_site}
-    for attempt in range(retries):
-        try:
-            response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
-            
-            inspection_result = response.get('inspectionResult', {})
-            index_status_result = inspection_result.get('indexStatusResult', {})
-            mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
-            rich_results_result = inspection_result.get('richResultsResult', {})
-            
-            # Estrazione dei dati richiesti
-            return {
-                'url': url_to_inspect,
-                'index_status_verdict': index_status_result.get('verdict', 'N/A'),
-                'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
-                'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
-                'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
-                'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
-                'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
-                'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
-                'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
-                'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
-                'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
-                'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
-                'response': response
-            }
-        except HttpError as err:
-            if attempt < retries - 1:
-                time.sleep(2 ** attempt)  # Esponenziale backoff
-            else:
-                return {
-                    'url': url_to_inspect,
-                    'index_status_verdict': 'ERROR',
-                    'index_status_coverage_state': 'ERROR',
-                    'index_status_robots_txt_state': 'ERROR',
-                    'index_status_indexing_state': 'ERROR',
-                    'index_status_last_crawl_time': 'ERROR',
-                    'index_status_page_fetch_state': 'ERROR',
-                    'index_status_google_canonical': 'ERROR',
-                    'index_status_user_canonical': 'ERROR',
-                    'index_status_sitemap': 'ERROR',
-                    'index_status_referring_urls': 'ERROR',
-                    'index_status_crawled_as': 'ERROR',
-                    'response': str(err)
-                }
+    try:
+        response = webmasters_service.urlInspection().index().inspect(body=request_body).execute()
+        
+        inspection_result = response.get('inspectionResult', {})
+        index_status_result = inspection_result.get('indexStatusResult', {})
+        mobile_usability_result = inspection_result.get('mobileUsabilityResult', {})
+        rich_results_result = inspection_result.get('richResultsResult', {})
+        
+        # Estrazione dei dati richiesti
+        return {
+            'url': url_to_inspect,
+            'index_status_verdict': index_status_result.get('verdict', 'N/A'),
+            'index_status_coverage_state': index_status_result.get('coverageState', 'N/A'),
+            'index_status_robots_txt_state': index_status_result.get('robotsTxtState', 'N/A'),
+            'index_status_indexing_state': index_status_result.get('indexingState', 'N/A'),
+            'index_status_last_crawl_time': index_status_result.get('lastCrawlTime', 'N/A'),
+            'index_status_page_fetch_state': index_status_result.get('pageFetchState', 'N/A'),
+            'index_status_google_canonical': index_status_result.get('googleCanonical', 'N/A'),
+            'index_status_user_canonical': index_status_result.get('userCanonical', 'N/A'),
+            'index_status_sitemap': ', '.join(index_status_result.get('sitemap', [])),
+            'index_status_referring_urls': ', '.join(index_status_result.get('referringUrls', [])),
+            'index_status_crawled_as': index_status_result.get('crawledAs', 'N/A'),
+            'mobile_usability_verdict': mobile_usability_result.get('verdict', 'N/A'),
+            'rich_results_verdict': rich_results_result.get('verdict', 'N/A'),
+            'rich_results_detected_items': ', '.join(item.get('richResultType', 'N/A') for item in rich_results_result.get('detectedItems', [])),
+            'inspection_result_link': inspection_result.get('inspectionResultLink', 'N/A'),
+            'response': response
+        }
+    except HttpError as err:
+        st.error(f"HTTP error occurred: {err}")
+        return {
+            'url': url_to_inspect,
+            'index_status_verdict': 'ERROR',
+            'index_status_coverage_state': 'ERROR',
+            'index_status_robots_txt_state': 'ERROR',
+            'index_status_indexing_state': 'ERROR',
+            'index_status_last_crawl_time': 'ERROR',
+            'index_status_page_fetch_state': 'ERROR',
+            'index_status_google_canonical': 'ERROR',
+            'index_status_user_canonical': 'ERROR',
+            'index_status_sitemap': 'ERROR',
+            'index_status_referring_urls': 'ERROR',
+            'index_status_crawled_as': 'ERROR',
+            'mobile_usability_verdict': 'ERROR',
+            'rich_results_verdict': 'ERROR',
+            'rich_results_detected_items': 'ERROR',
+            'inspection_result_link': 'ERROR',
+            'response': str(err)
+        }
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
@@ -1142,7 +1136,7 @@ def authorize_app():
 
     if auth_code:
         st.markdown(f"""
-        <h1 style="text-align:center;">GSC InsightHub</h1>""",
+        <h1 style="text-align:center;">SEO Gnosis</h1>""",
         unsafe_allow_html=True
         )        
         if not st.session_state.credentials:
@@ -1161,42 +1155,20 @@ def authorize_app():
         gif_url = "https://github.com/rederijker/gsc-v3/blob/main/assets/back.gif?raw=true"
         st.markdown(f"""
         <div class="header" style="padding:5%;background-image:url({gif_url});">
-            <h1 style="text-align:center;">GSC InsightHub</h1>
-            <p style="text-align:center;">made with 🎈 by <a href="https://www.linkedin.com/in/cristiano-caggiula/">Cristiano Caggiula</a></p>
-            <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
-            <p style="text-align:center;font-size:17px;">
-                Explore <strong>Google Search Console data</strong>, generate detailed reports, customize searches, and access unlimited information without programming skills required for <strong>Google Search Console API</strong>. Perfect for webmasters, SEO experts, and digital marketers.
-            </p>
-            <div style="text-align:center;">
-                <a href="{auth_url}" style="text-decoration:none;">
-                    <button style="background-color: white; color: #4285F4; border: 1px solid #4285F4; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center;">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" alt="Google logo" style="width: 47px; height: 47px; margin-right: 8px;">
-                        Login with Google
-                    </button>
-                </a>
-            </div>
-            <br></br>
-            <hr>
-            <br>
-            <p>GSC InsightHub leverages Google Search Console data to provide comprehensive SEO analytics. Here's a breakdown of its core functionalities:</p>    
-            <h2>1. Access Search Analytics API</h2>
-            <p>With GSC InsightHub, you can easily access the Search Analytics API to:</p>
-            <ul>
-                <li>Generate performance reports on queries and pages.</li>
-                <li>Analyze query distribution in search engine results pages (SERPs).</li>
-            </ul>    
-            <h2>2. On-Page SEO</h2>
-            <p>Our tool helps you optimize on-page SEO by:</p>
-            <ul>
-                <li>Checking if the queries for which Google considers your webpage are present in the text.</li>
-                <li>Identifying which topics you are covering and which ones you are missing.</li>
-            </ul>    
-            <h2>3. Keyword Grouper</h2>
-            <p>Group and manage your keywords efficiently to enhance your SEO strategy.</p>    
-            <h2>4. Bulk URL Inspection</h2>
-            <p>Perform bulk URL inspections to ensure all your web pages meet SEO standards and are indexed properly.</p>
-        </div>
+        <h1 style="text-align:center;">SEO Gnosis</h1>
+        <h2 style="text-align:center;">Master Google Search Console Data like a Pro with a Free SEO tool</h2>
+        <p style="text-align:center;font-size:17px;">Explore Google Search Console data, generate detailed reports, customize searches, and access unlimited information without needing programming skills. Ideal for webmasters, SEO experts, and digital marketers.</p>
+        
+        <div style="text-align:center;">
+            <a href="{auth_url}" style="text-decoration:none;">
+                <button style="background-color: white; color: #4285F4; border: 1px solid #4285F4; padding: 10px 20px; font-size: 17px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" alt="Google logo" style="width: 47px; height: 47px; margin-right: 8px;">
+                    Login with Google
+                </button>
+            </a>
+        </div></div>
         """, unsafe_allow_html=True)
+        
             
     return st.session_state.credentials
 
@@ -1263,11 +1235,63 @@ if credentials:
         st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
     with col2:
         st.write("")
-        
-    component1=  TabBar(tabs=["Search Analytics","Bulk inspection tool"],default=0,background = "black",color="grey",activeColor="blue",fontSize="20px")                    
+    tab1, tab2 = st.tabs(["SEARCH ANALYTICS", "URL INSPECTION"])
+
+    with tab2:
+        # Input dell'utente per una lista di URL, uno per riga
+        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
+        if st.button('URL INSPECTION 🕵️‍♂️'):
+            if st.session_state.selected_site:
+                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
+                results = []
+                total_urls = len(urls)
+                
+                # Creazione di un placeholder per l'aggiornamento dinamico
+                progress_placeholder = st.empty()
+                
+                start_time = time.time()  # Inizio del timer
+    
+                with st.spinner("Inspecting URLs..."):
+                    for idx, url in enumerate(urls):
+                        url_start_time = time.time()  # Tempo di inizio per URL specifico
+                        result = inspect_url(url, st.session_state.selected_site)
+                        results.append(result)
+                        
+                        # Calcolo del tempo trascorso e stimato
+                        elapsed_time = time.time() - start_time
+                        avg_time_per_url = elapsed_time / (idx + 1)
+                        remaining_urls = total_urls - (idx + 1)
+                        estimated_time_remaining = avg_time_per_url * remaining_urls
+                        
+                        # Formattazione del tempo stimato
+                        estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
+                        
+                        # Aggiornamento del placeholder con il progresso e il tempo stimato
+                        progress_placeholder.write(
+                            f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
+                        )
+                        
+                        # Aggiungi un breve ritardo per migliorare la visualizzazione del progresso
+                        time.sleep(0.1)
+                    
+                    # Creazione e visualizzazione del DataFrame
+                    index_results = pd.DataFrame(results)
+                    st.write("### Results")
+                    st.dataframe(index_results.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                    
+                    # Mostrare le risposte complete come espansione
+                    for result in results:
+                        st.write(f"#### URL: {result['url']}")
+                        st.write(result['inspection_result_link'])
+                        with st.expander("Complete response for this URL"):
+                            st.write(f'Response: {result["response"]}')
+                
+                # Cancellazione del placeholder dopo aver completato l'ispezione
+                progress_placeholder.empty()
+                
                     
    
-    if(component1 == 0):
+    with tab1:
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
@@ -1380,991 +1404,934 @@ if credentials:
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
 
-        if st.session_state.data_loaded and st.session_state.download_ready:
-            csv = st.session_state.df.to_csv(index=False).encode('utf-8')
-            st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
-
-
-                    
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
-
-            with tab1:
-
-                if st.session_state.data_loaded:
-                    df = st.session_state.df
-                
-                    average_position = df['Position'].mean()
-                    total_clicks = df['Clicks'].sum()
-                    average_ctr = df['CTR'].mean() * 100
-                    total_impressions = df['Impressions'].sum()                    
-                    formatted_average_m= "{:.2f}".format(average_position)
-                    total_clicks_m = df['Clicks'].sum()
-                    average_ctr_m = df['CTR'].mean()
-                    average_ctr_perc= average_ctr_m * 100
-                    formatted_ctr_m = "{:.2f}%".format(average_ctr_perc)
-                    total_impressions_m = df['Impressions'].sum()
-                    with st.container(border=True):
-                        copy_website_data = df.copy()    
-                        # Rimuovi la colonna "Cleaned_Page" se esiste nella copia
-                        if 'Cleaned_Page' in copy_website_data.columns:
-                            copy_website_data = copy_website_data.drop(columns=['Cleaned_Page'])
-                        
-                        st.subheader("Website Data")
-                        st.divider()      
-                
-                    
-                        
-                        # Aggiornamento delle metriche
-                        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
-                        with col1:
-                            st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
-                            with st.popover("Filters"):
-                                dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
-                                selected_dimension = st.selectbox("Select Dimension", dimensions)
-                        
-                                if selected_dimension == 'Query':
-                                    search_query = st.text_input("Enter Query (supports regex)")
-                                    if search_query:
-                                        copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False, regex=True)]
-                                else:
-                                    selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
-                                    if selected_values:
-                                        copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
-                        
-                                # Ensure that sliders have a valid range
-                                if not copy_website_data.empty:
-                                    min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
-                                    min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
-                                else:
-                                    min_position, max_position = 0, 1
-                                    min_ctr, max_ctr = 0.0, 1.0
-                                
-                                if min_position == max_position:
-                                    min_position, max_position = 0, max_position + 1
-                                
-                                position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
-                                
-                                if min_ctr == max_ctr:
-                                    min_ctr, max_ctr = 0.0, max_ctr + 1.0
-                                
-                                ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
-                        
-                                # Filter data based on position and CTR
-                                if not copy_website_data.empty:
-                                    copy_website_data = copy_website_data[
-                                        (copy_website_data['Position'] >= position_range[0]) &
-                                        (copy_website_data['Position'] <= position_range[1]) &
-                                        (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
-                                        (copy_website_data['CTR'] * 100 <= ctr_range[1])
-                                    ]
-                        
-                            # Calculate metrics based on filtered data
-                            total_clicks = copy_website_data['Clicks'].sum() if not copy_website_data.empty else 0
-                            total_impressions = copy_website_data['Impressions'].sum() if not copy_website_data.empty else 0
-                            average_position = copy_website_data['Position'].mean() if not copy_website_data.empty else 0
-                            average_ctr = copy_website_data['CTR'].mean() * 100 if not copy_website_data.empty else 0
-                        
-                        with col2:
-                            st.metric(label="Total Clicks", value=total_clicks)
-                        with col3:
-                            st.metric(label="Total Impressions", value=total_impressions)
-                        with col4:
-                            st.metric(label="Average Position", value=f"{average_position:.2f}")
-                        with col5:
-                            st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
-                        
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.dataframe(copy_website_data, width=2000, height=520)
-                        with col2:
-                            # Create the graph
-                            if not copy_website_data.empty and 'Date' in copy_website_data.columns:
-                                df_graf = copy_website_data.groupby('Date').agg({
-                                    'Clicks': 'sum',
-                                    'Impressions': 'sum',
-                                    'CTR': 'mean',
-                                    'Position': 'mean'
-                                }).reset_index()
-                        
-                                def traffic_report(df_graf):
-                                    df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
-                                    df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
-                        
-                                    options = {
-                                        "xAxis": {
-                                            "type": "category",
-                                            "data": df_graf['Date'].tolist(),
-                                            "axisLabel": {"formatter": "{value}"}
-                                        },
-                                        "yAxis": {"type": "value", "name": ""},
-                                        "grid": {"right": 20, "left": 65, "top": 45, "bottom": 50},
-                                        "legend": {
-                                            "show": True,
-                                            "top": "top",
-                                            "align": "auto",
-                                            "selected": {"Clicks": True, "Impressions": True, "CTR": False, "Position": False}
-                                        },
-                                        "tooltip": {"trigger": "axis"},
-                                        "series": [
-                                            {"type": "line", "name": "Clicks", "data": df_graf['Clicks'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#D5A021"}, "showSymbol": True},
-                                            {"type": "line", "name": "Impressions", "data": df_graf['Impressions'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#F06449"}, "showSymbol": False},
-                                            {"type": "line", "name": "CTR", "data": df_graf['CTR'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#91C499"}, "showSymbol": False},
-                                            {"type": "line", "name": "Position", "data": df_graf['Position'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#5BC3EB"}, "showSymbol": False, "yAxisIndex": 1, "axisLabel": {"show": "Position"}}
-                                        ],
-                                        "yAxis": [{"type": "value", "name": ""}, {"type": "value", "inverse": True, "show": False}],
-                                        "backgroundColor": "#0a0e12",
-                                        "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
-                                    }
-                        
-                                    st_echarts(option=options, theme='chalk', height=500, width='100%')
-                        
-                                traffic_report(df_graf)
-                            else:
-                                st.write("### Traffic Trend")
-                                st.warning("No graph available without date data.")
+if st.session_state.data_loaded and st.session_state.download_ready:
+    csv = st.session_state.df.to_csv(index=False).encode('utf-8')
+    st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
 
 
             
-            
-            with tab2:
-                    with st.container(border=True):
-                        st.subheader("1. Queries Performance Report")
-                        st.divider()
-                    
-                        
-                        if all(dim in selected_dimensions for dim in ['Query']):
-                            query_funcs = {
-                                'Impressions': 'sum',
-                                'Clicks': 'sum',
-                                'CTR': 'mean',
-                                'Position': 'mean'
-                            }
-                            # Raggruppiamo df per query per il bubble chart
-                            df_query_performance = df.groupby('Query').agg(query_funcs).reset_index()
-                            
-                            # Converti il CTR in percentuale
-                            df_query_performance['CTR'] = df_query_performance['CTR'] * 100
-                            
-                            # Calcola i valori minimi e massimi per il grafico
-                            min_ctr = df_query_performance['CTR'].min()
-                            max_ctr = df_query_performance['CTR'].max()
-                            min_position = df_query_performance['Position'].min()
-                            max_position = df_query_performance['Position'].max()
-                            
-                            # Calcola i valori medi di CTR e Posizione solo per le query selezionate
-                            average_ctr = df_query_performance['CTR'].mean()
-                            average_position = df_query_performance['Position'].mean()
-                            
-                            # Arrotonda la posizione media a due cifre decimali
-                            df_query_performance['Position'] = df_query_performance['Position'].round(2)
-                            
-                            # Crea il grafico a bolle con Plotly utilizzando il DataFrame filtrato
-                            fig = px.scatter(
-                                df_query_performance, 
-                                x='CTR', 
-                                y='Position', 
-                                size='Clicks', 
-                                hover_data={'Query': True, 'CTR': ':.2f%', 'Position': ':.2f', 'Clicks': True},
-                                custom_data=['Query']
-                            )
-                            
-                            # Configura gli assi
-                            fig.update_yaxes(autorange="reversed")
-                            fig.update_yaxes(range=[min_position, max_position])
-                            fig.update_xaxes(range=[min_ctr, max_ctr], tickformat=".2f%%") # Formatta l'asse X come percentuale
-                            
-                            # Aggiungi rettangoli colorati per i quadranti
-                            fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=min_position, y1=average_position,
-                                        fillcolor='rgba(0, 0, 255, 0.2)', line=dict(width=0), layer='below')  # Bottom left quadrant - blue
-                            fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=min_position, y1=average_position,
-                                        fillcolor='rgba(0, 255, 0, 0.2)', line=dict(width=0), layer='below')  # top right quadrant - green
-                            fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=average_position, y1=max_position,
-                                        fillcolor='rgba(255, 0, 0, 0.2)', line=dict(width=0), layer='below')  # Top left quadrant - red
-                            fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=average_position, y1=max_position,
-                                        fillcolor='rgba(255, 255, 0, 0.2)', line=dict(width=0), layer='below')  # bottom right quadrant - yellow
-                            
-                            # Aggiungi linee di riferimento per la media di CTR e posizione
-                            fig.add_shape(type='line', x0=average_ctr, x1=average_ctr, y0=min_position, y1=max_position, line=dict(color='red', dash='dash'))
-                            fig.add_annotation(x=average_ctr, y=max_position, text="Average", showarrow=False, yshift=10, font=dict(color='white'))
-                            
-                            fig.add_shape(type='line', x0=min_ctr, x1=max_ctr, y0=average_position, y1=average_position, line=dict(color='red', dash='dash'))
-                            fig.add_annotation(x=max_ctr, y=average_position, text="Average", showarrow=False, xshift=10, font=dict(color='white'))
-                        
-                            # Aggiorna le tracce delle bolle
-                            fig.update_traces(marker=dict(sizemin=4), hovertemplate='<b>Query:</b> %{customdata[0]}<br><b>CTR:</b> %{x:.2f}%<br><b>Position:</b> %{y:.2f}<br><b>Clicks:</b> %{marker.size}')
-                                
-                            
-                            # Aggiungi titolo
-                            fig.update_layout(
-                                title="Query Performance Bubble Chart",
-                                paper_bgcolor='rgb(10,14,18)',  
-                                plot_bgcolor='rgb(10,14,18)' 
-                            )
-                            
-                            # Aggiungi la mappa di colori per la dimensione delle bolle
-                        
-                            # Mostra il grafico interattivo
-                            col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
-                            with col1:
-                                st.write("This section provides a visual representation of how different search queries are performing. It analyzes and displays metrics such as the position of queries in search results and their click-through rates (CTR). By comparing these metrics to overall averages, it helps identify which queries are performing well and which need improvement.")
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
 
-                            with col2:
-                                unique_query_count_metric = df_query_performance['Query'].nunique()
-                                st.metric("Queries", f"{unique_query_count_metric}")
-                            with col3:                      
-                                st.metric("AVG. CTR", f"{average_ctr_perc:.2f}%")
-                            with col4:                                             
-                                st.metric("AVG. Position", f"{average_position:.2f}")
-                                
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.write("")
-                                with st.popover("How to read the graph?🤔"):
-                                    st.markdown("""                            
-                                    
-                                    #### Chart Elements
-                                    - **Bubbles:** Each bubble represents a single search query.
-                                    - **Axes:** 
-                                    - **X-Axis (CTR):** Positions the bubbles based on the click-through rate (CTR) of the queries.
-                                    - **Y-Axis (Average Position):** Positions the bubbles based on the average position in search results.
-                                    - **Bubble Size:** Indicates the number of clicks received by the query. The larger the bubble, the more clicks it has received.
-                                    - **Dashed Lines:** Represent the average values of CTR and position. The vertical dashed line indicates the average CTR, while the horizontal dashed line indicates the average position.
-                                    
-                                    #### Quadrant Interpretation
-                                    - **Green Quadrant (Top Right):** Queries with CTR and position equal to or above the average. These queries have excellent visibility and attract many clicks.
-                                    - **Yellow Quadrant (Bottom Right):** Queries with above-average CTR but low position. These indicate user interest despite less favorable ranking.
-                                    - **Blue Quadrant (Top Left):** Queries with equal to or above-average position but below-average CTR. These queries are visible but receive fewer clicks.
-                                    - **Red Quadrant (Bottom Left):** Queries with below-average CTR and position. These queries have poor visibility and attract few clicks.
-                                    
-                                    This structure helps quickly identify where queries stand relative to the overall average, facilitating the identification of areas for improvement and optimization opportunities.
-                                    """)                            
-                            
-                                st.plotly_chart(fig, use_container_width=False)
-                                fig.show()
-                            with col2:
-                                # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                                upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
-                                lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
-                                lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
-                                upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
-                            
-                                def unique_pages(series):
-                                    return ', '.join(series.unique())
-                            
-                                try:
-                                    agg_funcs2 = {
-                                        'Impressions': 'sum',
-                                        'Clicks': 'sum',
-                                        'CTR': 'mean',
-                                        'Position': 'mean',
-                                        'Page': unique_pages
-                                    }
-                            
-                                    # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-                                    df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                    df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                    df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                    df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                            
-                                    # Mostrare df
-                                    st.markdown("<br><br>", unsafe_allow_html=True)
-                                    st.markdown("<br><br>", unsafe_allow_html=True)
-                                    with st.expander(":green[GREEN QUADRANT: Queries with Above-Average Position and CTR]"):
-                                        st.write("Queries with CTR and position equal or grather then the average")
-                                        st.write(df_upper_high_ctr)    
-                                        
-                                    with st.expander(":orange[YELLO QUADRANT: Queries with Below-Average Position and Above-Average CTR]"):
-                                        st.write("""
-                                            Those queries appear to be highly relevant to users. They achieve a high click-through rate (CTR) even when they rank lower than the average query on your website. If the average position of these queries improves, it could significantly impact your website's performance. It's advisable to focus on enhancing the SEO for these queries. For instance, consider a prominent query in quadrant 2 for a gardening website, such as "how to build a wooden shed." Check if you already have a dedicated page for this topic and proceed in two ways:
-                            
-                                            - If you don't have a dedicated page, think about creating one to consolidate all the information on your website related to this subject.
-                            
-                                            - If you already have a page, contemplate adding more content to better address the needs of users searching for this query.
-                                        """)
-                                        st.write(df_lower_high_ctr)
+    with tab1:
+
+        if st.session_state.data_loaded:
+            df = st.session_state.df
+        
+            average_position = df['Position'].mean()
+            total_clicks = df['Clicks'].sum()
+            average_ctr = df['CTR'].mean() * 100
+            total_impressions = df['Impressions'].sum()                    
+            formatted_average_m= "{:.2f}".format(average_position)
+            total_clicks_m = df['Clicks'].sum()
+            average_ctr_m = df['CTR'].mean()
+            average_ctr_perc= average_ctr_m * 100
+            formatted_ctr_m = "{:.2f}%".format(average_ctr_perc)
+            total_impressions_m = df['Impressions'].sum()
+            with st.container(border=True):
+                copy_website_data = df.copy()    
+                # Rimuovi la colonna "Cleaned_Page" se esiste nella copia
+                if 'Cleaned_Page' in copy_website_data.columns:
+                    copy_website_data = copy_website_data.drop(columns=['Cleaned_Page'])
                 
-                                    with st.expander(":blue[BLUE QUADRANT: Top position and low CTR Queries]"):
-                                        st.write("""
-                                            These queries might have a low click-through rate (CTR) for various reasons. Check the largest bubbles to find signs of the following:
-                            
-                                            Your competitors may be using structured data markup and appearing with rich results, attracting users to click on their results instead of yours. Consider optimizing for the most common visual elements in Google Search.
-                            
-                                            You may have optimized, or be "accidentally" ranking for a query that users are not interested in relation to your site. This might not be an issue for you, in which case you can ignore those queries. If you prefer people not to find you through those queries (for example, they contain offensive words), try to fine-tune your content to remove mentions that could be seen as synonyms or related queries to the one bringing traffic.
-                            
-                                            People may have already found the information they needed, for example, your company's opening hours, address, or phone number. Check the queries that were used and the URLs that contained the information. If one of your website goals is to drive people to your stores, this is working as intended; if you believe that people should visit your website for extra information, you could try to optimize your titles and descriptions to make that clear. See the next section for more details.
-                                        """)
-                                        st.write(df_upper_low_ctr)
-                                    with st.expander(":red[RED QUADRANT: Low position and low CTR Queries]"):
-                                        st.write("""
-                                            When looking at queries with low CTR (both with low and top position), it's especially interesting to look at the bubble sizes to understand which queries have a low CTR but are still driving significant traffic. While the queries in this quadrant might seem unworthy of your effort, they can be divided into two main groups:
-                                            
-                                            **Related queries**: If the query in question is important to you, it's a good start to have it appearing in Search already. Prioritize these queries over queries that are not appearing in Search results at all, as they'll be easier to optimize.
-                                            
-                                            **Unrelated queries**: If your site doesn't cover content related to this query, maybe it's a good opportunity to fine tune your content or focus on queries that will bring relevant traffic.
-                                        """)
-                                        st.write(df_lower_low_ctr)
-                                except KeyError as e:
-                                    st.warning("To obtain insights on both queries and pages, consider adding 'Page' to the dimensions in your analysis.")
-            
-                        
-
-
-                    # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
-                    # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
-                    if 'Query' in df.columns and 'Page' in df.columns:
-                        with st.container(border=True):
-                            st.subheader("2. Queries distribution on SERP Pages Report")
-                            st.divider()
-                            col1, col2 = st.columns([2, 1])
-                            with col1:
-                                st.write("")
-                    
-                                def assign_page(position):
-                                    if position <= 10:
-                                        return 'Page 1'
-                                    elif position <= 20:
-                                        return 'Page 2'
-                                    elif position <= 30:
-                                        return 'Page 3'
-                                    elif position <= 40:
-                                        return 'Page 4'
-                                    elif position <= 50:
-                                        return 'Page 5'
-                                    elif position <= 60:
-                                        return 'Page 6'
-                                    elif position <= 70:
-                                        return 'Page 7'
-                                    elif position <= 80:
-                                        return 'Page 8'
-                                    elif position <= 90:
-                                        return 'Page 9'
-                                    elif position <= 100:
-                                        return 'Page 10'
-                                    else:
-                                        return 'Beyond Page 10'
-                    
-                                # Calcolare la posizione media per ogni query
-                                df_query_page_serp = df.copy()
-                                df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
-                                df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
-                    
-                                # Unire la posizione media di nuovo con il DataFrame originale
-                                df_query_page_serp = pd.merge(df_query_page_serp, df_query_avg_position, on='Query', how='left')
-                    
-                                # Assegnare la pagina SERP basata sulla posizione media
-                                df_query_page_serp['SERP_Page'] = df_query_page_serp['Avg_Position'].apply(assign_page)
-                    
-                                # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
-                                df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
-                    
-                                # Conta il numero totale di query uniche
-                                total_unique_queries = df_query_performance_unique['Query'].nunique()
-                    
-                                # Raggruppa per pagina e conta il numero di query uniche
-                                page_distribution = df_query_performance_unique.groupby('SERP_Page').agg({'Query': 'nunique'}).reset_index()
-                                page_distribution.rename(columns={'Query': 'Num_Queries'}, inplace=True)
-                    
-                                # Calcola la percentuale del totale
-                                page_distribution['Percentage_of_Total'] = (page_distribution['Num_Queries'] / total_unique_queries) * 100
-                    
-                                # Ordina il DataFrame per pagina
-                                page_order = ['Page 1', 'Page 2', 'Page 3', 'Page 4', 'Page 5', 'Page 6', 'Page 7', 'Page 8', 'Page 9', 'Page 10', 'Beyond Page 10']
-                                page_distribution['SERP_Page'] = pd.Categorical(page_distribution['SERP_Page'], categories=page_order, ordered=True)
-                                page_distribution = page_distribution.sort_values('SERP_Page')
-                    
-                                # Visualizza il numero totale di query uniche
-                                st.write(f"Total Unique Queries: {total_unique_queries}")
-                    
-                                # Creare il grafico a barre
-                                fig_bar = px.bar(page_distribution, x='SERP_Page', y='Num_Queries', title='Number of Queries per Google SERP Page', text='Percentage_of_Total', color='SERP_Page', category_orders={'SERP_Page': page_order})
-                                fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
-                    
-                                # Rimuovere la legenda
-                                fig_bar.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)')
-                                # Visualizzare il grafico utilizzando Streamlit
-                                st.plotly_chart(fig_bar)
-                    
-                            with col2:
-                                # Visualizza il DataFrame
-                                st.dataframe(page_distribution)
-                            
-                            # Selezionare la pagina per vedere i dettagli delle query
-                            selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
-                            
-                            # Filtrare il DataFrame per la pagina selezionata
-                            df_filtered = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
-                            
-                            # Visualizzare i dettagli delle query per la pagina selezionata
-                            st.write(f"Query details for {selected_page}")
-                            st.dataframe(df_filtered[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
-                    else:
-                        st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
+                st.subheader("Website Data")
+                st.divider()      
+           
+             
                 
-                    try:
-                        # Controllo se la colonna 'Page' è presente
-                        if 'Page' in df.columns:
-                            df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
-                    
-                            with st.container(border=True):
-                                st.subheader("3. Queries Cannibalization Report")            
-                                st.divider()
-                                
-                                # Group by the cleaned page and query, and calculate the metrics
-                                query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
-                                    'Position': 'mean',
-                                    'CTR': 'mean',
-                                    'Clicks': 'sum',
-                                    'Impressions': 'sum'
-                                }).reset_index()
-                                
-                                # Group queries by page
-                                query_page_group = query_page_metrics.groupby('Query')['Cleaned_Page'].apply(lambda pages: list(set(pages))).reset_index()
-                                query_page_group.columns = ['Query', 'Pages']
-                                
-                                # Identify cannibalized queries
-                                cannibalized_queries = query_page_group[query_page_group['Pages'].apply(lambda x: len(x) > 1)]
-                                
-                                # Create a cannibalization report
-                                cannibalization_report = cannibalized_queries.explode('Pages').merge(query_page_metrics, left_on=['Query', 'Pages'], right_on=['Query', 'Cleaned_Page']).drop(columns=['Pages'])
-                                
-                                # Count unique cannibalized queries
-                                num_unique_queries = cannibalized_queries['Query'].nunique()
-                                
-                                # Count the number of pages that are cannibalizing queries
-                                num_cannibalizing_pages = cannibalization_report['Cleaned_Page'].nunique()
-                                
-                                # Calculate the average number of pages cannibalizing each query
-                                num_pages_per_query = cannibalization_report.groupby('Query')['Cleaned_Page'].nunique()
-                                average_pages_per_query = num_pages_per_query.mean()
-                            
-                                # Create a DataFrame with the columns 'Query' and 'Number of Pages'
-                                cannibalized_queries['Cannibals Pages'] = cannibalized_queries['Pages'].apply(len)
-                                cannibalized_query_page_counts = cannibalized_queries[['Query', 'Cannibals Pages']]      
-                                cannibalized_query_page_counts_ordered = cannibalized_query_page_counts.sort_values('Cannibals Pages', ascending=False)
-                            
-                                # Display the report
-                                col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-                                with col1:
-                                    st.write("It shows queries appearing on multiple pages and the number of pages per query. Select a query to see detailed metrics for each page (CTR, clicks, position, impressions) aiding in resolving cannibalization issues.")
-                                    
-                                    def convert_cannibalization_report_to_csv(cannibalization_report):
-                                        return cannibalization_report.to_csv(index=False).encode('utf-8')
-                                    
-                                    csvcann = convert_cannibalization_report_to_csv(cannibalization_report)
-                                    st.download_button(label="Download cannibalization report CSV", data=csvcann, file_name='cannibalization_report.csv', mime='text/csv')
-                                
-                                with col2:
-                                    st.metric("Unique cannibalized queries", f"{num_unique_queries}")
-                                with col3:
-                                    st.metric("Pages cannibalizing queries", f"{num_cannibalizing_pages}")
-                                with col4:
-                                    st.metric("AVG n° of pages cannibalizing each query", f"{average_pages_per_query:.2f}")
-                            
-                                col1, col2 = st.columns([1, 2])
-                                with col1:
-                                    st.dataframe(cannibalized_query_page_counts_ordered)
-                                with col2:
-                                    query_selected = st.selectbox("Select a cannibalized Query", cannibalized_queries['Query'])
-                                    # Filter the report based on the selected query
-                                    filtered_report = cannibalization_report[cannibalization_report['Query'] == query_selected]
-                                    
-                                    # Display the filtered DataFrame
-                                    st.write(f"Metrics for the selected Query: {query_selected}")
-                                    st.dataframe(filtered_report)
-                    
-
-                            
-                    
+                # Aggiornamento delle metriche
+                col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+                with col1:
+                    st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
+                    with st.popover("Filters"):
+                        dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
+                        selected_dimension = st.selectbox("Select Dimension", dimensions)
+                
+                        if selected_dimension == 'Query':
+                            search_query = st.text_input("Enter Query (supports regex)")
+                            if search_query:
+                                copy_website_data = copy_website_data[copy_website_data['Query'].str.contains(search_query, case=False, regex=True)]
                         else:
-                            # Mostra un messaggio di avviso se la colonna 'Page' non è presente
-                            st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
-                    except Exception as e:
-                        st.error(f"Si è verificato un errore: {e}")
-                    
-                    analyze_query_performance(df)
-
-                    analyze_query_position_changes(df)
-
+                            selected_values = st.multiselect(f"Select {selected_dimension}", options=copy_website_data[selected_dimension].unique())
+                            if selected_values:
+                                copy_website_data = copy_website_data[copy_website_data[selected_dimension].isin(selected_values)]
                 
-            
-            with tab3:
-            # Supponiamo che `df` sia già definito e contenga i dati necessari
-                try:
-                    # Raggruppamento dei dati
-                    agg_funcs = {
+                        # Ensure that sliders have a valid range
+                        if not copy_website_data.empty:
+                            min_position, max_position = int(copy_website_data['Position'].min()), int(copy_website_data['Position'].max())
+                            min_ctr, max_ctr = float(copy_website_data['CTR'].min() * 100), float(copy_website_data['CTR'].max() * 100)
+                        else:
+                            min_position, max_position = 0, 1
+                            min_ctr, max_ctr = 0.0, 1.0
+                        
+                        if min_position == max_position:
+                            min_position, max_position = 0, max_position + 1
+                        
+                        position_range = st.slider('Select Position Range', min_value=min_position, max_value=max_position, value=(min_position, max_position))
+                        
+                        if min_ctr == max_ctr:
+                            min_ctr, max_ctr = 0.0, max_ctr + 1.0
+                        
+                        ctr_range = st.slider('Select CTR Range (%)', min_value=min_ctr, max_value=max_ctr, value=(min_ctr, max_ctr))
+                
+                        # Filter data based on position and CTR
+                        if not copy_website_data.empty:
+                            copy_website_data = copy_website_data[
+                                (copy_website_data['Position'] >= position_range[0]) &
+                                (copy_website_data['Position'] <= position_range[1]) &
+                                (copy_website_data['CTR'] * 100 >= ctr_range[0]) &
+                                (copy_website_data['CTR'] * 100 <= ctr_range[1])
+                            ]
+                
+                    # Calculate metrics based on filtered data
+                    total_clicks = copy_website_data['Clicks'].sum() if not copy_website_data.empty else 0
+                    total_impressions = copy_website_data['Impressions'].sum() if not copy_website_data.empty else 0
+                    average_position = copy_website_data['Position'].mean() if not copy_website_data.empty else 0
+                    average_ctr = copy_website_data['CTR'].mean() * 100 if not copy_website_data.empty else 0
+                
+                with col2:
+                    st.metric(label="Total Clicks", value=total_clicks)
+                with col3:
+                    st.metric(label="Total Impressions", value=total_impressions)
+                with col4:
+                    st.metric(label="Average Position", value=f"{average_position:.2f}")
+                with col5:
+                    st.metric(label="Average CTR", value=f"{average_ctr:.2f}%")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.dataframe(copy_website_data, width=2000, height=520)
+                with col2:
+                    # Create the graph
+                    if not copy_website_data.empty and 'Date' in copy_website_data.columns:
+                        df_graf = copy_website_data.groupby('Date').agg({
+                            'Clicks': 'sum',
+                            'Impressions': 'sum',
+                            'CTR': 'mean',
+                            'Position': 'mean'
+                        }).reset_index()
+                
+                        def traffic_report(df_graf):
+                            df_graf['CTR'] = df_graf['CTR'].apply(lambda ctr: f"{ctr * 100:.2f}")
+                            df_graf['Position'] = df_graf['Position'].apply(lambda pos: round(pos, 2))
+                
+                            options = {
+                                "xAxis": {
+                                    "type": "category",
+                                    "data": df_graf['Date'].tolist(),
+                                    "axisLabel": {"formatter": "{value}"}
+                                },
+                                "yAxis": {"type": "value", "name": ""},
+                                "grid": {"right": 20, "left": 65, "top": 45, "bottom": 50},
+                                "legend": {
+                                    "show": True,
+                                    "top": "top",
+                                    "align": "auto",
+                                    "selected": {"Clicks": True, "Impressions": True, "CTR": False, "Position": False}
+                                },
+                                "tooltip": {"trigger": "axis"},
+                                "series": [
+                                    {"type": "line", "name": "Clicks", "data": df_graf['Clicks'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#D5A021"}, "showSymbol": True},
+                                    {"type": "line", "name": "Impressions", "data": df_graf['Impressions'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#F06449"}, "showSymbol": False},
+                                    {"type": "line", "name": "CTR", "data": df_graf['CTR'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#91C499"}, "showSymbol": False},
+                                    {"type": "line", "name": "Position", "data": df_graf['Position'].tolist(), "smooth": True, "lineStyle": {"width": 1, "color": "#5BC3EB"}, "showSymbol": False, "yAxisIndex": 1, "axisLabel": {"show": "Position"}}
+                                ],
+                                "yAxis": [{"type": "value", "name": ""}, {"type": "value", "inverse": True, "show": False}],
+                                "backgroundColor": "#0a0e12",
+                                "color": ["#D5A021", "#F06449", "#91C499", "#5BC3EB"],
+                            }
+                
+                            st_echarts(option=options, theme='chalk', height=500, width='100%')
+                
+                        traffic_report(df_graf)
+                    else:
+                        st.write("### Traffic Trend")
+                        st.warning("No graph available without date data.")
+
+
+    
+    
+    with tab2:
+            with st.container(border=True):
+                st.subheader("1. Queries Performance Report")
+                st.divider()
+               
+                
+                if all(dim in selected_dimensions for dim in ['Query']):
+                    query_funcs = {
                         'Impressions': 'sum',
                         'Clicks': 'sum',
                         'CTR': 'mean',
                         'Position': 'mean'
                     }
-                    df_aggregated_popular_page = df.groupby('Page').agg(agg_funcs).reset_index()
+                    # Raggruppiamo df per query per il bubble chart
+                    df_query_performance = df.groupby('Query').agg(query_funcs).reset_index()
                     
-                    df_aggregated_popular_page['CTR'] = (df_aggregated_popular_page['Clicks'] / df_aggregated_popular_page['Impressions'])
-                    df_aggregated_popular_page['CTR'] = df_aggregated_popular_page['CTR'].map('{:.2%}'.format)
-                    df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'CTR': 'Average CTR'})
-                    df_aggregated_popular_page['Position'] = df_aggregated_popular_page['Position'].round(2)
-                    average_position_popular = df_aggregated_popular_page['Position'].mean()
-                    df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'Position': 'Average Position'})
-                    average_clic_df_popular = df_aggregated_popular_page['Clicks'].mean()
-                    average_impression_df_pupular = df_aggregated_popular_page['Impressions'].mean()
+                    # Converti il CTR in percentuale
+                    df_query_performance['CTR'] = df_query_performance['CTR'] * 100
+                    
+                    # Calcola i valori minimi e massimi per il grafico
+                    min_ctr = df_query_performance['CTR'].min()
+                    max_ctr = df_query_performance['CTR'].max()
+                    min_position = df_query_performance['Position'].min()
+                    max_position = df_query_performance['Position'].max()
+                    
+                    # Calcola i valori medi di CTR e Posizione solo per le query selezionate
+                    average_ctr = df_query_performance['CTR'].mean()
+                    average_position = df_query_performance['Position'].mean()
+                    
+                    # Arrotonda la posizione media a due cifre decimali
+                    df_query_performance['Position'] = df_query_performance['Position'].round(2)
+                    
+                    # Crea il grafico a bolle con Plotly utilizzando il DataFrame filtrato
+                    fig = px.scatter(
+                        df_query_performance, 
+                        x='CTR', 
+                        y='Position', 
+                        size='Clicks', 
+                        hover_data={'Query': True, 'CTR': ':.2f%', 'Position': ':.2f', 'Clicks': True},
+                        custom_data=['Query']
+                    )
+                    
+                    # Configura gli assi
+                    fig.update_yaxes(autorange="reversed")
+                    fig.update_yaxes(range=[min_position, max_position])
+                    fig.update_xaxes(range=[min_ctr, max_ctr], tickformat=".2f%%") # Formatta l'asse X come percentuale
+                    
+                    # Aggiungi rettangoli colorati per i quadranti
+                    fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=min_position, y1=average_position,
+                                  fillcolor='rgba(0, 0, 255, 0.2)', line=dict(width=0), layer='below')  # Bottom left quadrant - blue
+                    fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=min_position, y1=average_position,
+                                  fillcolor='rgba(0, 255, 0, 0.2)', line=dict(width=0), layer='below')  # top right quadrant - green
+                    fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=average_position, y1=max_position,
+                                  fillcolor='rgba(255, 0, 0, 0.2)', line=dict(width=0), layer='below')  # Top left quadrant - red
+                    fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=average_position, y1=max_position,
+                                  fillcolor='rgba(255, 255, 0, 0.2)', line=dict(width=0), layer='below')  # bottom right quadrant - yellow
+                    
+                    # Aggiungi linee di riferimento per la media di CTR e posizione
+                    fig.add_shape(type='line', x0=average_ctr, x1=average_ctr, y0=min_position, y1=max_position, line=dict(color='red', dash='dash'))
+                    fig.add_annotation(x=average_ctr, y=max_position, text="Average", showarrow=False, yshift=10, font=dict(color='white'))
+                    
+                    fig.add_shape(type='line', x0=min_ctr, x1=max_ctr, y0=average_position, y1=average_position, line=dict(color='red', dash='dash'))
+                    fig.add_annotation(x=max_ctr, y=average_position, text="Average", showarrow=False, xshift=10, font=dict(color='white'))
                 
-                    popular_pages = df_aggregated_popular_page[
-                        (df_aggregated_popular_page['Average CTR'] > formatted_ctr_m) &
-                        (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
-                        (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
-                        (df_aggregated_popular_page['Average Position'] < 10)
-                    ].sort_values(by='Clicks', ascending=False)
+                    # Aggiorna le tracce delle bolle
+                    fig.update_traces(marker=dict(sizemin=4), hovertemplate='<b>Query:</b> %{customdata[0]}<br><b>CTR:</b> %{x:.2f}%<br><b>Position:</b> %{y:.2f}<br><b>Clicks:</b> %{marker.size}')
+                         
                     
-                    less_pages = df_aggregated_popular_page[
-                        (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
-                        (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
-                        (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
-                        (df_aggregated_popular_page['Average Position'] < 10)
-                    ]
+                    # Aggiungi titolo
+                    fig.update_layout(
+                        title="Query Performance Bubble Chart",
+                        paper_bgcolor='rgb(10,14,18)',  
+                        plot_bgcolor='rgb(10,14,18)' 
+                    )
                     
-                    opp_pages = df_aggregated_popular_page[
-                        (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
-                        (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
-                        (df_aggregated_popular_page['Average Position'] > 10 ) &
-                        (df_aggregated_popular_page['Average Position'] <= 20)
-                    ]
-                    
-                    worst_pages = df_aggregated_popular_page[
-                        (df_aggregated_popular_page['Clicks'] < average_clic_df_popular) &
-                        (df_aggregated_popular_page['Impressions'] < average_impression_df_pupular) &
-                        (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
-                        (df_aggregated_popular_page['Average Position'] > average_position_popular)
-                    ]
-                    with st.container(border=True):
-                        st.subheader("1. Pages Health Check Report")            
-                        st.divider()
-                        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
-                        
-                        format_average_clicks_popular = "{:.2f}".format(average_clic_df_popular)
-                        format_average_impression_popular = "{:.2f}".format(average_impression_df_pupular)
-                        format_average_position_popular = "{:.2f}".format(average_position_popular)
-            
-                        with col1: 
-                            st.write("This report provides an overview of your website's page performance and help identify areas for improvement.")                
-                        with col2:
-                            st.metric("Pages Average Clicks", value=format_average_clicks_popular)
-                        with col3:
-                            st.metric("Pages Average Impressions", value=format_average_impression_popular)
-                        with col4:
-                            st.metric("Pages Average CTR", value=formatted_ctr_m)
-                        with col5:
-                            st.metric("Pages Average Position", value=format_average_position_popular)
-                            st.text("")      
-                    
-                        
-                        worst_pages_count = worst_pages.shape[0]
-                        opp_pages_count = opp_pages.shape[0]
-                        less_pages_count = less_pages.shape[0]
-                        popular_pages_count = popular_pages.shape[0]
-                        
-                        chart_data = {
-                            "Set": ["Best Pages", "Less Effective Pages", "Ranking opportunities", "Require attention"],
-                            "N°Pages": [popular_pages_count, less_pages_count, opp_pages_count, worst_pages_count]
-                        }
-                    
-                        # Creazione del grafico a barre colorato con plotly
-                        fig = px.bar(
-                            x=chart_data["Set"],
-                            y=chart_data["N°Pages"],
-                            labels={"x": "Set", "y": "N°Pages"},
-                            title="🏥 Pages health check graph",
-                            color=chart_data["Set"],
-                            color_discrete_map={
-                                "Best Pages": "green",
-                                "Less Effective Pages": "yellow",
-                                "Ranking opportunities": "blue",
-                                "Require attention": "red"
-                            }
-                        )
-                                
-                        fig.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)' )
-                        
-                        
-                        col1, col2=st.columns([2,2])
-                        with col1:
-                            # Visualizzare il grafico in Streamlit
-                            st.plotly_chart(fig, use_container_width=True)
-                        with col2:
-                            st.markdown("<br><br>", unsafe_allow_html=True)
-                            st.markdown("<br><br>", unsafe_allow_html=True)
-                            with st.expander(":green[BEST PAGES]"):
-                                st.write("Pages with an elevated Click-Through Rate (CTR), a significant volume of Clicks, and a substantial number of Impressions (exceeding the average), with Average position within the top 10 search engine result positions.")
-                                st.write(popular_pages)
-                            with st.expander(":orange[LESS EFFECTIVE PAGES]"):
-                                st.write("Page with High Clicks, High Impressions and Average position within the top 10 search engine result positions, but low CTR")
-                                st.write(less_pages)
-                            with st.expander(":blue[PAGES WITH RANKING OPPORTUNITES]"):
-                                st.write("Page with High Clicks, High Impressions but average position between 10-20 in SERP")
-                                st.write(opp_pages)
-                            with st.expander(":red[PAGES THAT REQUIRE ATTENTION]"):
-                                st.write("Page low Clicks, Low Impression, Low CTR and Low Position in comparison to the average")
-                                st.write(worst_pages)
-
-                    with st.container(border=True):
-                    
-                        analyze_page_performance(df)
-                    
-                except KeyError as e:
-                    st.warning("Add 'Page' to dimensions to show 1. Pages Health Check Report and 2. Pages Traffic Changes Report")
-                            
-                    st.markdown("<br>", unsafe_allow_html=True)
-                
-        
-
-
-            with tab4:
-                with st.container():
-                    st.subheader("1. Queries Coverage Analysis")
-                    st.divider()
-                
-                    col1, col2 = st.columns([1, 2])
+                    # Aggiungi la mappa di colori per la dimensione delle bolle
+                 
+                    # Mostra il grafico interattivo
+                    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
                     with col1:
-                        st.write(
-                            "This report checks if Google's considered queries are present in various webpage elements such as the title, meta description, headings, body content, and ALT tags. This helps you identify gaps by finding missing important keywords.")
-                
+                        st.write("This section provides a visual representation of how different search queries are performing. It analyzes and displays metrics such as the position of queries in search results and their click-through rates (CTR). By comparing these metrics to overall averages, it helps identify which queries are performing well and which need improvement.")
+
                     with col2:
-                        if st.session_state.df is not None and 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
-                            selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
-                            scan_button = st.button("Analyze Page🤖", key='scan_button')
-                        else:
-                            st.warning("To use this feature, ensure that the dimensions contains the 'Page' and 'Query'.")
-                            scan_button = False
-        
-                    if scan_button or st.session_state.scan_started:
-                        if scan_button:
-                            st.session_state.scan_started = True
-                        if selected_page and (selected_page != st.session_state.get('selected_page', None)):
-                            st.session_state.selected_page = selected_page
-                            with st.spinner("Fetching page data..."):
-                                st.session_state.page_data = fetch_page_data(selected_page)
-                            st.session_state.keyword_analysis = None
-                
-                        if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                            page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
-                            grouped_page_data = aggregate_queries(page_data)
-                    
-                            # Analisi della copertura delle parole chiave
-                            with st.container():
-                                st.markdown(
-                                    f"<h4>📄 {st.session_state.page_data['meta_title']} | <a href='{st.session_state.selected_page}'>Go to the page</a></h4>",
-                                    unsafe_allow_html=True)
-                
-                                # Visualizzare i warning se presenti
-                                if 'warnings' in st.session_state.page_data:
-                                    for warning in st.session_state.page_data['warnings']:
-                                        st.warning(warning)
-                
-                                keyword_presence = analyze_keywords(st.session_state.page_data, grouped_page_data)
-                                keyword_df = pd.DataFrame(keyword_presence)
-                
-                                # Controllo se 'Query' è presente nelle colonne
-                                if 'Keyword' not in keyword_df.columns:
-                                    st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
-                                else:
-                                    col1, col2, col3, col4, col5, col6 = st.columns([3, 1, 1, 1, 1, 1])
-                                    with col1:
-                                        # Gestione dello stato del filtro di ricerca per query
-                                        search_query = st.text_input(
-                                            label="Filter queries containing",
-                                            placeholder="Insert a query",
-                                            value=st.session_state.get('search_query', '')
-                                        )
-                                        st.session_state.search_query = search_query
-                                        if search_query:
-                                            keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
-        
-                                    # Checkbox per mostrare/nascondere colonne
-                                    with col2:
-                                        show_heading = st.checkbox("Show heading", st.session_state.show_heading)
-                                    with col3:
-                                        show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
-                                    with col4:
-                                        show_meta = st.checkbox("Show meta", st.session_state.show_meta)
-                                    with col5:
-                                        show_body_alt = st.checkbox("Show body alt", st.session_state.show_body_alt)
-                
-                                    st.session_state.show_heading = show_heading
-                                    st.session_state.show_keyword_metrics = show_keyword_metrics
-                                    st.session_state.show_meta = show_meta
-                                    st.session_state.show_body_alt = show_body_alt
-                
-                                    # Creare la lista delle colonne da mostrare
-                                    columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
-                                    if show_keyword_metrics:
-                                        columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
-                                    if show_meta:
-                                        columns_to_show.extend(['Title', 'Meta Description'])
-                                    if show_heading:
-                                        columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
-                                    if show_body_alt:
-                                        columns_to_show.extend(['Body Content', 'Alt Tags'])
-                
-                                    keyword_df = keyword_df[columns_to_show]
-
-                                    with col6:
-                
-                                        # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                        show_not_covered = st.checkbox("Only not covered queries", st.session_state.show_not_covered)
-                                        st.session_state.show_not_covered = show_not_covered
-                
-                                    if show_not_covered:
-                                        keyword_df = keyword_df[(keyword_df['Title'] == False) &
-                                                                (keyword_df['Meta Description'] == False) &
-                                                                (keyword_df['H1'] == False) &
-                                                                (keyword_df['H2'] == False) &
-                                                                (keyword_df['H3'] == False) &
-                                                                (keyword_df['Body Content'] == False) &
-                                                                (keyword_df['Alt Tags'] == False)]
-                
-                                    # Ordina il dataframe per la colonna 'Body Content'
-                                    if 'Body Content' in keyword_df.columns:
-                                        keyword_df_sorted = keyword_df.sort_values(by='Body Content', ascending=False)
-                                    else:
-                                        keyword_df_sorted = keyword_df.sort_values(by='Keyword', ascending=False)
-                
-                                    # Visualizza il dataframe ordinato
-                                    st.dataframe(keyword_df_sorted)
-                
-                                    # Parole chiave con opportunità
-                
-                                    st.markdown(
-                                        f"<h4>Prioritize the Optimization of These Queries</h4>",
-                                        unsafe_allow_html=True)
-                                    st.write("These queries are currently ranked between positions 1 and 20 and do not appear in any key elements of your page. Optimize your page for these queries to improve their ranking")
-                                    opportunity_keywords = get_opportunity_keywords(grouped_page_data, keyword_presence)
-                                    st.dataframe(opportunity_keywords)
-            
-                with st.container():
-                    st.subheader("2. Page Topics")
-                    st.divider()
-                    st.write(
-                        "We have grouped the keywords for which Google is considering your page to identify the main themes. For each theme, you can check the total clicks and impressions, as well as the coverage percentage of the theme by your page content.")
-                    if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                        with st.spinner("Clustering topics..."):
-                            clustered_keywords, model = cluster_keywords(grouped_page_data)
-                            cluster_names = get_cluster_names(clustered_keywords)
-                            clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
+                        unique_query_count_metric = df_query_performance['Query'].nunique()
+                        st.metric("Queries", f"{unique_query_count_metric}")
+                    with col3:                      
+                        st.metric("AVG. CTR", f"{average_ctr_perc:.2f}%")
+                    with col4:                                             
+                        st.metric("AVG. Position", f"{average_position:.2f}")
                         
-                            for cluster in clustered_keywords['Cluster'].unique():
-                                cluster_name = cluster_names[cluster]
-                                cluster_df = clustered_keywords[clustered_keywords['Cluster'] == cluster]
-                                total_keywords = len(cluster_df)
-                                covered_keywords = cluster_df['Covered'].sum()
-                                coverage_percentage = (covered_keywords / total_keywords) * 100
-                                cluster_name = cluster_name.upper()
-                        
-                                with st.expander(
-                                        f"**:blue[{cluster_name}]**  | __Clicks {cluster_df['Clicks'].sum()}__  | Impressions {cluster_df['Impressions'].sum()} |  Coverage by page content {coverage_percentage:.2f}%"):
-                                    st.dataframe(cluster_df[['Query', 'Clicks', 'Impressions', 'CTR', 'Position', 'Covered']])
-                    
-                    if 'scan_started' in st.session_state and st.session_state.scan_started:
-                        st.write("")
-                
-            
-            with tab5:
-                st.subheader("Queries Grouper")        
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.write("💬 Select language")
-                    language = st.selectbox("", ["English", "Italian"])
-                
-                    if language == "English":
-                        default_stop_words = [
-                            'and', 'but', 'is', 'the', 'to', 'in', 'for', 'on', 'with', 'as', 'by', 'at', 'from',
-                            'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above',
-                            'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again',
-                            'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any',
-                            'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
-                            'own', 'same', 'so', 'than', 'too', ' very', 's', 't', 'can', 'will', 'just', 'don', 
-                            'should', 'now'
-                        ]
-                    else:
-                        default_stop_words = [
-                            'a', 'adesso', 'ai', 'al', 'alla', 'allo', 'allora', 'altre',
-                            'altri', 'altro', 'anche', 'ancora', 'avere', 'aveva', 'avevano',
-                            'ben', 'buono', 'che', 'chi', 'cinque', 'comprare', 'con',
-                            'consecutivi', 'consecutivo', 'cosa', 'cui', 'da', 'del', 'della',
-                            'dello', 'dentro', 'deve', 'devo', 'di', 'doppio', 'due', 'e',
-                            'ecco', 'fare', 'fine', 'fino', 'fra', 'gente', 'giu', 'ha', 'hai',
-                            'hanno', 'ho', 'il', 'indietro', 'invece', 'io', 'la', 'lavoro',
-                            'le', 'lei', 'lo', 'loro', 'lui', 'lungo', 'ma', 'me', 'meglio',
-                            'molta', 'molti', 'molto', 'nei', 'nella', 'no', 'noi', 'nome',
-                            'nostro', 'più', 'se', 'o', 'per', 'un', 'una'
-                        ]
-                
-                # Text area for custom stop words
-                with st.expander("Customize Stop Words"):
-                    custom_stop_words = st.text_area("One per line", "\n".join(default_stop_words))
-                    stop_words = [word.strip() for word in custom_stop_words.split('\n') if word.strip()]
-                
-                with col2:
-                    st.text("")
-                st.divider()
-                
-                # Control for minimum group size and tuple length
-                min_group_size, ngram_size = st.columns(2)
-                with min_group_size:
-                    min_group_size = st.slider("Minimum Group Size",
-                                            min_value=1,
-                                            max_value=50,
-                                            value=2,
-                                            help="The minimum group size is the minimum number of keywords required in a group for it to be displayed in the results. Increase this value to show only larger keyword groups."
-                                            )
-                
-                with ngram_size:
-                    ngram_size = st.slider(
-                    "Length of the keyword", 
-                    min_value=1, 
-                    max_value=5, 
-                    value=2, 
-                    help="Drag the slider to choose the n-gram size for the keyword. An n-gram size of 1 means a single word, whereas 5 means a phrase of up to 5 words."
-                )
-                
-                keyword_column = 'Query'
-                clicks_column = 'Clicks'
-                
-                if st.button("Group Keywords with Clicks ✨"):
-                    with st.spinner("Grouping..."):
-                        try:
-                            if keyword_column in df.columns and clicks_column in df.columns:
-                                # Remove duplicates and sum clicks
-                                df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
-                                # Group keywords
-                                st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
-                                # Calculate click totals
-                                st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
-                            else:
-                                st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
-                        except Exception as e:
-                            st.error(f"An error occurred: {e}")
-                
-                    if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
-                        sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
-                        top_groups = sorted_groups[:5]
-                        tab1, tab2 = st.columns([9, 1])
-                        with tab1:
-                            try:
-                                for group, total_clicks in sorted_groups:
-                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]                                 
-                                
-                                # Step 1: Preparare i dati
-                                group_data = []
-                                
-                                for group, total_clicks in sorted_groups:
-                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)]
-                                    
-                                    # Trasforma i dati delle keyword in una lista di dizionari
-                                    keywords_formatted = keyword_clicks_df[[keyword_column, clicks_column]].to_dict('records')
-                                    
-                                    # Aggiungi una riga per il gruppo
-                                    group_data.append({
-                                        'group': group,
-                                        'total click group': total_clicks,
-                                        'keywords': keywords_formatted  # Lista di dizionari
-                                    })
-                                
-                                # Converti i dati in DataFrame
-                                group_df = pd.DataFrame(group_data)
-
-                            
-                                                                                
-                            except KeyError as e:
-                                st.warning(str(e))
-                
-
-        
-                        with tab2:
-                            top_groups_clicks = [click for group, click in top_groups]
-                            top_group_names = [group for group, click in top_groups]
-                    
                     col1, col2 = st.columns(2)
                     with col1:
-                
-                        st.subheader("🔑 Groups Overview")
-                        top_groups_data = []
-                        for group, total_clicks in sorted_groups:
-                            keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
-                            top_groups_data.append({
-                                "Group": group,
-                                "Total Clicks": total_clicks,
-                                "Keywords": ", ".join(keywords_list)
-                            })
-                    
-                        top_groups_df = pd.DataFrame(top_groups_data)
-                        top_groups_df_2 = top_groups_df.drop(columns=["Keywords"])
-                        st.dataframe(top_groups_df_2)
+                        st.write("")
+                        with st.popover("How to read the graph?🤔"):
+                            st.markdown("""                            
+                            
+                            #### Chart Elements
+                            - **Bubbles:** Each bubble represents a single search query.
+                            - **Axes:** 
+                              - **X-Axis (CTR):** Positions the bubbles based on the click-through rate (CTR) of the queries.
+                              - **Y-Axis (Average Position):** Positions the bubbles based on the average position in search results.
+                            - **Bubble Size:** Indicates the number of clicks received by the query. The larger the bubble, the more clicks it has received.
+                            - **Dashed Lines:** Represent the average values of CTR and position. The vertical dashed line indicates the average CTR, while the horizontal dashed line indicates the average position.
+                            
+                            #### Quadrant Interpretation
+                            - **Green Quadrant (Top Right):** Queries with CTR and position equal to or above the average. These queries have excellent visibility and attract many clicks.
+                            - **Yellow Quadrant (Bottom Right):** Queries with above-average CTR but low position. These indicate user interest despite less favorable ranking.
+                            - **Blue Quadrant (Top Left):** Queries with equal to or above-average position but below-average CTR. These queries are visible but receive fewer clicks.
+                            - **Red Quadrant (Bottom Left):** Queries with below-average CTR and position. These queries have poor visibility and attract few clicks.
+                            
+                            This structure helps quickly identify where queries stand relative to the overall average, facilitating the identification of areas for improvement and optimization opportunities.
+                            """)                            
+                      
+                        st.plotly_chart(fig, use_container_width=False)
+                        fig.show()
                     with col2:
-                        # Sezione per visualizzare i dettagli di ciascun gruppo
-                        st.subheader("🔍 Group Details")
-                        selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
+                        # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
+                        upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
+                        lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
+                        lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
+                        upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
                     
-                        if selected_group:
-                            try:
-                                group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
-                                keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
-                                st.write(f"Details for group: {selected_group}")
-                                st.dataframe(keyword_clicks_df)
-                            except KeyError as e:
-                                st.warning(str(e))
+                        def unique_pages(series):
+                            return ', '.join(series.unique())
+                    
+                        try:
+                            agg_funcs2 = {
+                                'Impressions': 'sum',
+                                'Clicks': 'sum',
+                                'CTR': 'mean',
+                                'Position': 'mean',
+                                'Page': unique_pages
+                            }
+                    
+                            # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
+                            df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                            df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                            df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                            df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                    
+                            # Mostrare df
+                            st.markdown("<br><br>", unsafe_allow_html=True)
+                            st.markdown("<br><br>", unsafe_allow_html=True)
+                            with st.expander(":green[GREEN QUADRANT: Queries with Above-Average Position and CTR]"):
+                                st.write("Queries with CTR and position equal or grather then the average")
+                                st.write(df_upper_high_ctr)    
+                                
+                            with st.expander(":orange[YELLO QUADRANT: Queries with Below-Average Position and Above-Average CTR]"):
+                                st.write("""
+                                    Those queries appear to be highly relevant to users. They achieve a high click-through rate (CTR) even when they rank lower than the average query on your website. If the average position of these queries improves, it could significantly impact your website's performance. It's advisable to focus on enhancing the SEO for these queries. For instance, consider a prominent query in quadrant 2 for a gardening website, such as "how to build a wooden shed." Check if you already have a dedicated page for this topic and proceed in two ways:
+                    
+                                    - If you don't have a dedicated page, think about creating one to consolidate all the information on your website related to this subject.
+                    
+                                    - If you already have a page, contemplate adding more content to better address the needs of users searching for this query.
+                                """)
+                                st.write(df_lower_high_ctr)
+        
+                            with st.expander(":blue[BLUE QUADRANT: Top position and low CTR Queries]"):
+                                st.write("""
+                                    These queries might have a low click-through rate (CTR) for various reasons. Check the largest bubbles to find signs of the following:
+                    
+                                    Your competitors may be using structured data markup and appearing with rich results, attracting users to click on their results instead of yours. Consider optimizing for the most common visual elements in Google Search.
+                    
+                                    You may have optimized, or be "accidentally" ranking for a query that users are not interested in relation to your site. This might not be an issue for you, in which case you can ignore those queries. If you prefer people not to find you through those queries (for example, they contain offensive words), try to fine-tune your content to remove mentions that could be seen as synonyms or related queries to the one bringing traffic.
+                    
+                                    People may have already found the information they needed, for example, your company's opening hours, address, or phone number. Check the queries that were used and the URLs that contained the information. If one of your website goals is to drive people to your stores, this is working as intended; if you believe that people should visit your website for extra information, you could try to optimize your titles and descriptions to make that clear. See the next section for more details.
+                                """)
+                                st.write(df_upper_low_ctr)
+                            with st.expander(":red[RED QUADRANT: Low position and low CTR Queries]"):
+                                st.write("""
+                                    When looking at queries with low CTR (both with low and top position), it's especially interesting to look at the bubble sizes to understand which queries have a low CTR but are still driving significant traffic. While the queries in this quadrant might seem unworthy of your effort, they can be divided into two main groups:
+                                    
+                                    **Related queries**: If the query in question is important to you, it's a good start to have it appearing in Search already. Prioritize these queries over queries that are not appearing in Search results at all, as they'll be easier to optimize.
+                                    
+                                    **Unrelated queries**: If your site doesn't cover content related to this query, maybe it's a good opportunity to fine tune your content or focus on queries that will bring relevant traffic.
+                                """)
+                                st.write(df_lower_low_ctr)
+                        except KeyError as e:
+                            st.warning("To obtain insights on both queries and pages, consider adding 'Page' to the dimensions in your analysis.")
+     
+                
 
+
+            # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+            # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+            if 'Query' in df.columns and 'Page' in df.columns:
+                with st.container(border=True):
+                    st.subheader("2. Queries distribution on SERP Pages Report")
+                    st.divider()
+                    col1, col2 = st.columns([2, 1])
+                    with col1:
+                        st.write("")
+            
+                        def assign_page(position):
+                            if position <= 10:
+                                return 'Page 1'
+                            elif position <= 20:
+                                return 'Page 2'
+                            elif position <= 30:
+                                return 'Page 3'
+                            elif position <= 40:
+                                return 'Page 4'
+                            elif position <= 50:
+                                return 'Page 5'
+                            elif position <= 60:
+                                return 'Page 6'
+                            elif position <= 70:
+                                return 'Page 7'
+                            elif position <= 80:
+                                return 'Page 8'
+                            elif position <= 90:
+                                return 'Page 9'
+                            elif position <= 100:
+                                return 'Page 10'
+                            else:
+                                return 'Beyond Page 10'
+            
+                        # Calcolare la posizione media per ogni query
+                        df_query_page_serp = df.copy()
+                        df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
+                        df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
+            
+                        # Unire la posizione media di nuovo con il DataFrame originale
+                        df_query_page_serp = pd.merge(df_query_page_serp, df_query_avg_position, on='Query', how='left')
+            
+                        # Assegnare la pagina SERP basata sulla posizione media
+                        df_query_page_serp['SERP_Page'] = df_query_page_serp['Avg_Position'].apply(assign_page)
+            
+                        # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
+                        df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
+            
+                        # Conta il numero totale di query uniche
+                        total_unique_queries = df_query_performance_unique['Query'].nunique()
+            
+                        # Raggruppa per pagina e conta il numero di query uniche
+                        page_distribution = df_query_performance_unique.groupby('SERP_Page').agg({'Query': 'nunique'}).reset_index()
+                        page_distribution.rename(columns={'Query': 'Num_Queries'}, inplace=True)
+            
+                        # Calcola la percentuale del totale
+                        page_distribution['Percentage_of_Total'] = (page_distribution['Num_Queries'] / total_unique_queries) * 100
+            
+                        # Ordina il DataFrame per pagina
+                        page_order = ['Page 1', 'Page 2', 'Page 3', 'Page 4', 'Page 5', 'Page 6', 'Page 7', 'Page 8', 'Page 9', 'Page 10', 'Beyond Page 10']
+                        page_distribution['SERP_Page'] = pd.Categorical(page_distribution['SERP_Page'], categories=page_order, ordered=True)
+                        page_distribution = page_distribution.sort_values('SERP_Page')
+            
+                        # Visualizza il numero totale di query uniche
+                        st.write(f"Total Unique Queries: {total_unique_queries}")
+            
+                        # Creare il grafico a barre
+                        fig_bar = px.bar(page_distribution, x='SERP_Page', y='Num_Queries', title='Number of Queries per Google SERP Page', text='Percentage_of_Total', color='SERP_Page', category_orders={'SERP_Page': page_order})
+                        fig_bar.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
+            
+                        # Rimuovere la legenda
+                        fig_bar.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)')
+                        # Visualizzare il grafico utilizzando Streamlit
+                        st.plotly_chart(fig_bar)
+            
+                    with col2:
+                        # Visualizza il DataFrame
+                        st.dataframe(page_distribution)
+                    
+                    # Selezionare la pagina per vedere i dettagli delle query
+                    selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
+                    
+                    # Filtrare il DataFrame per la pagina selezionata
+                    df_filtered = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
+                    
+                    # Visualizzare i dettagli delle query per la pagina selezionata
+                    st.write(f"Query details for {selected_page}")
+                    st.dataframe(df_filtered[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
+            else:
+                st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
+        
+            try:
+                # Controllo se la colonna 'Page' è presente
+                if 'Page' in df.columns:
+                    df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
+            
+                    with st.container(border=True):
+                        st.subheader("3. Queries Cannibalization Report")            
+                        st.divider()
                         
-                   
+                        # Group by the cleaned page and query, and calculate the metrics
+                        query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
+                            'Position': 'mean',
+                            'CTR': 'mean',
+                            'Clicks': 'sum',
+                            'Impressions': 'sum'
+                        }).reset_index()
+                        
+                        # Group queries by page
+                        query_page_group = query_page_metrics.groupby('Query')['Cleaned_Page'].apply(lambda pages: list(set(pages))).reset_index()
+                        query_page_group.columns = ['Query', 'Pages']
+                        
+                        # Identify cannibalized queries
+                        cannibalized_queries = query_page_group[query_page_group['Pages'].apply(lambda x: len(x) > 1)]
+                        
+                        # Create a cannibalization report
+                        cannibalization_report = cannibalized_queries.explode('Pages').merge(query_page_metrics, left_on=['Query', 'Pages'], right_on=['Query', 'Cleaned_Page']).drop(columns=['Pages'])
+                        
+                        # Count unique cannibalized queries
+                        num_unique_queries = cannibalized_queries['Query'].nunique()
+                        
+                        # Count the number of pages that are cannibalizing queries
+                        num_cannibalizing_pages = cannibalization_report['Cleaned_Page'].nunique()
+                        
+                        # Calculate the average number of pages cannibalizing each query
+                        num_pages_per_query = cannibalization_report.groupby('Query')['Cleaned_Page'].nunique()
+                        average_pages_per_query = num_pages_per_query.mean()
+                    
+                        # Create a DataFrame with the columns 'Query' and 'Number of Pages'
+                        cannibalized_queries['Cannibals Pages'] = cannibalized_queries['Pages'].apply(len)
+                        cannibalized_query_page_counts = cannibalized_queries[['Query', 'Cannibals Pages']]      
+                        cannibalized_query_page_counts_ordered = cannibalized_query_page_counts.sort_values('Cannibals Pages', ascending=False)
+                    
+                        # Display the report
+                        col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+                        with col1:
+                            st.write("It shows queries appearing on multiple pages and the number of pages per query. Select a query to see detailed metrics for each page (CTR, clicks, position, impressions) aiding in resolving cannibalization issues.")
+                            
+                            def convert_cannibalization_report_to_csv(cannibalization_report):
+                                return cannibalization_report.to_csv(index=False).encode('utf-8')
+                            
+                            csvcann = convert_cannibalization_report_to_csv(cannibalization_report)
+                            st.download_button(label="Download cannibalization report CSV", data=csvcann, file_name='cannibalization_report.csv', mime='text/csv')
+                        
+                        with col2:
+                            st.metric("Unique cannibalized queries", f"{num_unique_queries}")
+                        with col3:
+                            st.metric("Pages cannibalizing queries", f"{num_cannibalizing_pages}")
+                        with col4:
+                            st.metric("AVG n° of pages cannibalizing each query", f"{average_pages_per_query:.2f}")
+                    
+                        col1, col2 = st.columns([1, 2])
+                        with col1:
+                            st.dataframe(cannibalized_query_page_counts_ordered)
+                        with col2:
+                            query_selected = st.selectbox("Select a cannibalized Query", cannibalized_queries['Query'])
+                            # Filter the report based on the selected query
+                            filtered_report = cannibalization_report[cannibalization_report['Query'] == query_selected]
+                            
+                            # Display the filtered DataFrame
+                            st.write(f"Metrics for the selected Query: {query_selected}")
+                            st.dataframe(filtered_report)
+            
 
-    else:
-        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
-        if st.button('URL INSPECTION 🕵️‍♂️'):
-            if st.session_state.selected_site:
-                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
-                total_urls = len(urls)
-                results = []
-    
-                progress_placeholder = st.empty()
-                table_placeholder = st.empty()  # Placeholder per la tabella
-    
-                start_time = time.time()  # Inizio del timer
-    
-                with st.spinner("Inspecting URLs..."):
-                    # Uso di ThreadPoolExecutor per l'esecuzione concorrente
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
-                        future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
-                        for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
-                            url = future_to_url[future]
-                            try:
-                                result = future.result()
-                                results.append(result)
-                            except Exception as e:
-                                results.append({'url': url, 'response': str(e)})
-    
-                            elapsed_time = time.time() - start_time
-                            avg_time_per_url = elapsed_time / (idx + 1)
-                            remaining_urls = total_urls - (idx + 1)
-                            estimated_time_remaining = avg_time_per_url * remaining_urls
-                            estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
-    
-                            # Aggiornamento del placeholder con il progresso e il tempo stimato
-                            progress_placeholder.write(
-                                f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
-                            )
-    
-                            # Aggiornamento della tabella parziale nel placeholder
-                            index_results_partial = pd.DataFrame(results)
-                            table_placeholder.write("### Partial Results")
-                            table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                    
+            
+                else:
+                    # Mostra un messaggio di avviso se la colonna 'Page' non è presente
+                    st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
+            except Exception as e:
+                st.error(f"Si è verificato un errore: {e}")
+            
+            analyze_query_performance(df)
+
+            analyze_query_position_changes(df)
+
                 
-                # Creazione e visualizzazione del DataFrame finale
-                index_results = pd.DataFrame(results)
-                st.write("### Final Results")
-                st.dataframe(index_results.drop(columns=['response']))
+
+        
+        
+    
+    with tab3:
+       # Supponiamo che `df` sia già definito e contenga i dati necessari
+        try:
+            # Raggruppamento dei dati
+            agg_funcs = {
+                'Impressions': 'sum',
+                'Clicks': 'sum',
+                'CTR': 'mean',
+                'Position': 'mean'
+            }
+            df_aggregated_popular_page = df.groupby('Page').agg(agg_funcs).reset_index()
+            
+            df_aggregated_popular_page['CTR'] = (df_aggregated_popular_page['Clicks'] / df_aggregated_popular_page['Impressions'])
+            df_aggregated_popular_page['CTR'] = df_aggregated_popular_page['CTR'].map('{:.2%}'.format)
+            df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'CTR': 'Average CTR'})
+            df_aggregated_popular_page['Position'] = df_aggregated_popular_page['Position'].round(2)
+            average_position_popular = df_aggregated_popular_page['Position'].mean()
+            df_aggregated_popular_page = df_aggregated_popular_page.rename(columns={'Position': 'Average Position'})
+            average_clic_df_popular = df_aggregated_popular_page['Clicks'].mean()
+            average_impression_df_pupular = df_aggregated_popular_page['Impressions'].mean()
+        
+            popular_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Average CTR'] > formatted_ctr_m) &
+                (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average Position'] < 10)
+            ].sort_values(by='Clicks', ascending=False)
+            
+            less_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
+                (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average Position'] < 10)
+            ]
+            
+            opp_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average Position'] > 10 ) &
+                (df_aggregated_popular_page['Average Position'] <= 20)
+            ]
+            
+            worst_pages = df_aggregated_popular_page[
+                (df_aggregated_popular_page['Clicks'] < average_clic_df_popular) &
+                (df_aggregated_popular_page['Impressions'] < average_impression_df_pupular) &
+                (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
+                (df_aggregated_popular_page['Average Position'] > average_position_popular)
+            ]
+            with st.container(border=True):
+                st.subheader("1. Pages Health Check Report")            
+                st.divider()
+                col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
                 
-      
+                format_average_clicks_popular = "{:.2f}".format(average_clic_df_popular)
+                format_average_impression_popular = "{:.2f}".format(average_impression_df_pupular)
+                format_average_position_popular = "{:.2f}".format(average_position_popular)
+    
+                with col1: 
+                    st.write("This report provides an overview of your website's page performance and help identify areas for improvement.")                
+                with col2:
+                    st.metric("Pages Average Clicks", value=format_average_clicks_popular)
+                with col3:
+                    st.metric("Pages Average Impressions", value=format_average_impression_popular)
+                with col4:
+                    st.metric("Pages Average CTR", value=formatted_ctr_m)
+                with col5:
+                    st.metric("Pages Average Position", value=format_average_position_popular)
+                    st.text("")      
+               
                 
-                # Cancellazione del placeholder dopo aver completato l'ispezione
-                progress_placeholder.empty()
-                table_placeholder.empty()  # Pulisce la tabella parziale finale
+                worst_pages_count = worst_pages.shape[0]
+                opp_pages_count = opp_pages.shape[0]
+                less_pages_count = less_pages.shape[0]
+                popular_pages_count = popular_pages.shape[0]
+                
+                chart_data = {
+                    "Set": ["Best Pages", "Less Effective Pages", "Ranking opportunities", "Require attention"],
+                    "N°Pages": [popular_pages_count, less_pages_count, opp_pages_count, worst_pages_count]
+                }
+            
+                # Creazione del grafico a barre colorato con plotly
+                fig = px.bar(
+                    x=chart_data["Set"],
+                    y=chart_data["N°Pages"],
+                    labels={"x": "Set", "y": "N°Pages"},
+                    title="🏥 Pages health check graph",
+                    color=chart_data["Set"],
+                    color_discrete_map={
+                        "Best Pages": "green",
+                        "Less Effective Pages": "yellow",
+                        "Ranking opportunities": "blue",
+                        "Require attention": "red"
+                    }
+                )
+                           
+                fig.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)' )
+                
+                
+                col1, col2=st.columns([2,2])
+                with col1:
+                    # Visualizzare il grafico in Streamlit
+                    st.plotly_chart(fig, use_container_width=True)
+                with col2:
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+                    st.markdown("<br><br>", unsafe_allow_html=True)
+                    with st.expander(":green[BEST PAGES]"):
+                        st.write("Pages with an elevated Click-Through Rate (CTR), a significant volume of Clicks, and a substantial number of Impressions (exceeding the average), with Average position within the top 10 search engine result positions.")
+                        st.write(popular_pages)
+                    with st.expander(":orange[LESS EFFECTIVE PAGES]"):
+                        st.write("Page with High Clicks, High Impressions and Average position within the top 10 search engine result positions, but low CTR")
+                        st.write(less_pages)
+                    with st.expander(":blue[PAGES WITH RANKING OPPORTUNITES]"):
+                        st.write("Page with High Clicks, High Impressions but average position between 10-20 in SERP")
+                        st.write(opp_pages)
+                    with st.expander(":red[PAGES THAT REQUIRE ATTENTION]"):
+                        st.write("Page low Clicks, Low Impression, Low CTR and Low Position in comparison to the average")
+                        st.write(worst_pages)
+
+            with st.container(border=True):
+               
+                analyze_page_performance(df)
+            
+        except KeyError as e:
+            st.warning("Add 'Page' to dimensions to show 1. Pages Health Check Report and 2. Pages Traffic Changes Report")
+                    
+            st.markdown("<br>", unsafe_allow_html=True)
+        
+ 
+
+
+        with tab4:
+            with st.container():
+                st.subheader("1. Queries Coverage Analysis")
+                st.divider()
+            
+                col1, col2 = st.columns([1, 2])
+                with col1:
+                    st.write(
+                        "This report checks if Google's considered queries are present in various webpage elements such as the title, meta description, headings, body content, and ALT tags. This helps you identify gaps by finding missing important keywords.")
+            
+                with col2:
+                    if st.session_state.df is not None and 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
+                        selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
+                        scan_button = st.button("Analyze Page🤖", key='scan_button')
+                    else:
+                        st.warning("To use this feature, ensure that the dimensions contains the 'Page' and 'Query'.")
+                        scan_button = False
+    
+                if scan_button or st.session_state.scan_started:
+                    if scan_button:
+                        st.session_state.scan_started = True
+                    if selected_page and (selected_page != st.session_state.get('selected_page', None)):
+                        st.session_state.selected_page = selected_page
+                        with st.spinner("Fetching page data..."):
+                            st.session_state.page_data = fetch_page_data(selected_page)
+                        st.session_state.keyword_analysis = None
+            
+                    if 'page_data' in st.session_state and st.session_state.page_data is not None:
+                        page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
+                        grouped_page_data = aggregate_queries(page_data)
+                  
+                        # Analisi della copertura delle parole chiave
+                        with st.container():
+                            st.markdown(
+                                f"<h4>📄 {st.session_state.page_data['meta_title']} | <a href='{st.session_state.selected_page}'>Go to the page</a></h4>",
+                                unsafe_allow_html=True)
+            
+                            # Visualizzare i warning se presenti
+                            if 'warnings' in st.session_state.page_data:
+                                for warning in st.session_state.page_data['warnings']:
+                                    st.warning(warning)
+            
+                            keyword_presence = analyze_keywords(st.session_state.page_data, grouped_page_data)
+                            keyword_df = pd.DataFrame(keyword_presence)
+            
+                            # Controllo se 'Query' è presente nelle colonne
+                            if 'Keyword' not in keyword_df.columns:
+                                st.error("The DataFrame does not contain the required column 'Keyword'. Please check the data processing.")
+                            else:
+                                col1, col2, col3, col4, col5, col6 = st.columns([3, 1, 1, 1, 1, 1])
+                                with col1:
+                                    # Gestione dello stato del filtro di ricerca per query
+                                    search_query = st.text_input(
+                                        label="Filter queries containing",
+                                        placeholder="Insert a query",
+                                        value=st.session_state.get('search_query', '')
+                                    )
+                                    st.session_state.search_query = search_query
+                                    if search_query:
+                                        keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
+    
+                                # Checkbox per mostrare/nascondere colonne
+                                with col2:
+                                    show_heading = st.checkbox("Show heading", st.session_state.show_heading)
+                                with col3:
+                                    show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
+                                with col4:
+                                    show_meta = st.checkbox("Show meta", st.session_state.show_meta)
+                                with col5:
+                                    show_body_alt = st.checkbox("Show body alt", st.session_state.show_body_alt)
+            
+                                st.session_state.show_heading = show_heading
+                                st.session_state.show_keyword_metrics = show_keyword_metrics
+                                st.session_state.show_meta = show_meta
+                                st.session_state.show_body_alt = show_body_alt
+            
+                                # Creare la lista delle colonne da mostrare
+                                columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
+                                if show_keyword_metrics:
+                                    columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
+                                if show_meta:
+                                    columns_to_show.extend(['Title', 'Meta Description'])
+                                if show_heading:
+                                    columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
+                                if show_body_alt:
+                                    columns_to_show.extend(['Body Content', 'Alt Tags'])
+            
+                                keyword_df = keyword_df[columns_to_show]
+
+                                with col6:
+            
+                                    # Gestione dello stato del filtro per query non presenti in nessun elemento
+                                    show_not_covered = st.checkbox("Only not covered queries", st.session_state.show_not_covered)
+                                    st.session_state.show_not_covered = show_not_covered
+            
+                                if show_not_covered:
+                                    keyword_df = keyword_df[(keyword_df['Title'] == False) &
+                                                            (keyword_df['Meta Description'] == False) &
+                                                            (keyword_df['H1'] == False) &
+                                                            (keyword_df['H2'] == False) &
+                                                            (keyword_df['H3'] == False) &
+                                                            (keyword_df['Body Content'] == False) &
+                                                            (keyword_df['Alt Tags'] == False)]
+            
+                                # Ordina il dataframe per la colonna 'Body Content'
+                                if 'Body Content' in keyword_df.columns:
+                                    keyword_df_sorted = keyword_df.sort_values(by='Body Content', ascending=False)
+                                else:
+                                    keyword_df_sorted = keyword_df.sort_values(by='Keyword', ascending=False)
+            
+                                # Visualizza il dataframe ordinato
+                                st.dataframe(keyword_df_sorted)
+            
+                                # Parole chiave con opportunità
+            
+                                st.markdown(
+                                    f"<h4>Prioritize the Optimization of These Queries</h4>",
+                                    unsafe_allow_html=True)
+                                st.write("These queries are currently ranked between positions 1 and 20 and do not appear in any key elements of your page. Optimize your page for these queries to improve their ranking")
+                                opportunity_keywords = get_opportunity_keywords(grouped_page_data, keyword_presence)
+                                st.dataframe(opportunity_keywords)
+        
+            with st.container():
+                st.subheader("2. Page Topics")
+                st.divider()
+                st.write(
+                    "We have grouped the keywords for which Google is considering your page to identify the main themes. For each theme, you can check the total clicks and impressions, as well as the coverage percentage of the theme by your page content.")
+                if 'page_data' in st.session_state and st.session_state.page_data is not None:
+                    with st.spinner("Clustering topics..."):
+                        clustered_keywords, model = cluster_keywords(grouped_page_data)
+                        cluster_names = get_cluster_names(clustered_keywords)
+                        clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
+                    
+                        for cluster in clustered_keywords['Cluster'].unique():
+                            cluster_name = cluster_names[cluster]
+                            cluster_df = clustered_keywords[clustered_keywords['Cluster'] == cluster]
+                            total_keywords = len(cluster_df)
+                            covered_keywords = cluster_df['Covered'].sum()
+                            coverage_percentage = (covered_keywords / total_keywords) * 100
+                            cluster_name = cluster_name.upper()
+                    
+                            with st.expander(
+                                    f"**:blue[{cluster_name}]**  | __Clicks {cluster_df['Clicks'].sum()}__  | Impressions {cluster_df['Impressions'].sum()} |  Coverage by page content {coverage_percentage:.2f}%"):
+                                st.dataframe(cluster_df[['Query', 'Clicks', 'Impressions', 'CTR', 'Position', 'Covered']])
+                
+                if 'scan_started' in st.session_state and st.session_state.scan_started:
+                    st.write("")
+           
+    
+        with tab5:
+            st.subheader("Queries Grouper")        
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("💬 Select language")
+                language = st.selectbox("", ["English", "Italian"])
+            
+                if language == "English":
+                    default_stop_words = [
+                        'and', 'but', 'is', 'the', 'to', 'in', 'for', 'on', 'with', 'as', 'by', 'at', 'from',
+                        'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above',
+                        'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again',
+                        'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any',
+                        'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
+                        'own', 'same', 'so', 'than', 'too', ' very', 's', 't', 'can', 'will', 'just', 'don', 
+                        'should', 'now'
+                    ]
+                else:
+                    default_stop_words = [
+                        'a', 'adesso', 'ai', 'al', 'alla', 'allo', 'allora', 'altre',
+                        'altri', 'altro', 'anche', 'ancora', 'avere', 'aveva', 'avevano',
+                        'ben', 'buono', 'che', 'chi', 'cinque', 'comprare', 'con',
+                        'consecutivi', 'consecutivo', 'cosa', 'cui', 'da', 'del', 'della',
+                        'dello', 'dentro', 'deve', 'devo', 'di', 'doppio', 'due', 'e',
+                        'ecco', 'fare', 'fine', 'fino', 'fra', 'gente', 'giu', 'ha', 'hai',
+                        'hanno', 'ho', 'il', 'indietro', 'invece', 'io', 'la', 'lavoro',
+                        'le', 'lei', 'lo', 'loro', 'lui', 'lungo', 'ma', 'me', 'meglio',
+                        'molta', 'molti', 'molto', 'nei', 'nella', 'no', 'noi', 'nome',
+                        'nostro', 'più', 'se', 'o', 'per', 'un', 'una'
+                    ]
+            
+            # Text area for custom stop words
+            with st.expander("Customize Stop Words"):
+                custom_stop_words = st.text_area("One per line", "\n".join(default_stop_words))
+                stop_words = [word.strip() for word in custom_stop_words.split('\n') if word.strip()]
+            
+            with col2:
+                st.text("")
+            st.divider()
+            
+            # Control for minimum group size and tuple length
+            min_group_size, ngram_size = st.columns(2)
+            with min_group_size:
+                min_group_size = st.slider("Minimum Group Size",
+                                           min_value=1,
+                                           max_value=50,
+                                           value=2,
+                                           help="The minimum group size is the minimum number of keywords required in a group for it to be displayed in the results. Increase this value to show only larger keyword groups."
+                                          )
+            
+            with ngram_size:
+                ngram_size = st.slider(
+                "Length of the keyword", 
+                min_value=1, 
+                max_value=5, 
+                value=2, 
+                help="Drag the slider to choose the n-gram size for the keyword. An n-gram size of 1 means a single word, whereas 5 means a phrase of up to 5 words."
+            )
+            
+            keyword_column = 'Query'
+            clicks_column = 'Clicks'
+            
+            if st.button("Group Keywords with Clicks ✨"):
+                with st.spinner("Grouping..."):
+                    try:
+                        if keyword_column in df.columns and clicks_column in df.columns:
+                            # Remove duplicates and sum clicks
+                            df_cleaned = remove_duplicates_and_sum_clicks(df, keyword_column, clicks_column)
+                            # Group keywords
+                            st.session_state.keyword_groups = group_keywords(df_cleaned, stop_words, min_group_size, ngram_size, keyword_column=keyword_column)
+                            # Calculate click totals
+                            st.session_state.click_totals = calculate_click_totals(df_cleaned, st.session_state.keyword_groups, keyword_column=keyword_column, clicks_column=clicks_column)
+                        else:
+                            st.warning("The DataFrame must contain 'Query' and 'Clicks' columns to proceed.")
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
+            
+                if st.session_state.keyword_groups is not None and st.session_state.click_totals is not None:
+                    sorted_groups = sorted(st.session_state.click_totals.items(), key=lambda x: x[1], reverse=True)
+                    top_groups = sorted_groups[:5]
+                    tab1, tab2 = st.columns([2, 2])
+                    with tab1:
+                        try:
+                            st.subheader("🔑 Groups")
+                            for group, total_clicks in sorted_groups:
+                                with st.expander(f"{group} - Total Clicks: {total_clicks}"):
+                                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                                    keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(keywords_list)][[keyword_column, clicks_column]]
+                                    st.write(keyword_clicks_df)
+                        except KeyError as e:
+                            st.warning(str(e))
+       
+                    with tab2:
+                        top_groups_clicks = [click for group, click in top_groups]
+                        top_group_names = [group for group, click in top_groups]
+                
+                        if len(top_groups) > 0:
+                            fig, ax = plt.subplots()
+                            ax.barh(top_group_names, top_groups_clicks)
+                            ax.set_xlabel('Total Clicks')
+                            ax.set_ylabel('Group Name')
+                            ax.set_title('Top 5 Groups by Clicks')
+                            st.pyplot(fig)
+            
+                st.subheader("🔑 Groups Overview")
+                top_groups_data = []
+                for group, total_clicks in sorted_groups:
+                    keywords_list = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == group]['Keywords'].tolist()
+                    top_groups_data.append({
+                        "Group": group,
+                        "Total Clicks": total_clicks,
+                        "Keywords": ", ".join(keywords_list)
+                    })
+            
+                top_groups_df = pd.DataFrame(top_groups_data)
+                st.dataframe(top_groups_df)
+            
+                # Sezione per visualizzare i dettagli di ciascun gruppo
+                st.subheader("🔍 Group Details")
+                selected_group = st.selectbox("Select a Group to View Details", top_groups_df["Group"])
+            
+                if selected_group:
+                    try:
+                        group_details_df = st.session_state.keyword_groups[st.session_state.keyword_groups['Group'] == selected_group]
+                        keyword_clicks_df = df_cleaned[df_cleaned[keyword_column].isin(group_details_df['Keywords'])][[keyword_column, clicks_column]]
+                        st.write(f"Details for group: {selected_group}")
+                        st.dataframe(keyword_clicks_df)
+                    except KeyError as e:
+                        st.warning(str(e))
+            
+                # Grafico dei Top 5 gruppi per clic
+                st.subheader("📊 Top 5 Groups by Clicks")
+                top_groups_clicks = [click for group, click in top_groups]
+                top_group_names = [group for group, click in top_groups]
+            
+                if len(top_groups) > 0:
+                    fig, ax = plt.subplots()
+                    ax.barh(top_group_names, top_groups_clicks)
+                    ax.set_xlabel('Total Clicks')
+                    ax.set_ylabel('Group Name')
+                    ax.set_title('Top 5 Groups by Clicks')
+                    st.pyplot(fig)
