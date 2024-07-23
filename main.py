@@ -2027,6 +2027,7 @@ if credentials:
 
 
             with tab4:
+                # Codice di Streamlit
                 with st.container():
                     st.subheader("1. Queries Coverage Analysis")
                     st.divider()
@@ -2041,7 +2042,7 @@ if credentials:
                             selected_page_on_page = st.selectbox("Select a page", st.session_state.df['Page'].unique())
                             scan_button = st.button("Analyze Page🤖", key='scan_button')
                         else:
-                            st.warning("To use this feature, ensure that the dimensions contains the 'Page' and 'Query'.")
+                            st.warning("To use this feature, ensure that the dimensions contain 'Page' and 'Query'.")
                             scan_button = False
                 
                     if scan_button or st.session_state.get('scan_started', False):
@@ -2089,61 +2090,68 @@ if credentials:
                                             keyword_df = keyword_df[keyword_df['Keyword'].str.contains(search_query, case=False, na=False)]
                     
                                         st.write(keyword_df)
-        
-                                    # Checkbox per mostrare/nascondere colonne
-                                    with col2:
-                                        show_heading = st.checkbox("Show heading", st.session_state.show_heading)
-                                    with col3:
-                                        show_keyword_metrics = st.checkbox("Show metrics", st.session_state.show_keyword_metrics)
-                                    with col4:
-                                        show_meta = st.checkbox("Show meta", st.session_state.show_meta)
-                                    with col5:
-                                        show_body_alt = st.checkbox("Show body alt", st.session_state.show_body_alt)
-                
-                                    st.session_state.show_heading = show_heading
-                                    st.session_state.show_keyword_metrics = show_keyword_metrics
-                                    st.session_state.show_meta = show_meta
-                                    st.session_state.show_body_alt = show_body_alt
-                
-                                    # Creare la lista delle colonne da mostrare
-                                    columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
-                                    if show_keyword_metrics:
-                                        columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
-                                    if show_meta:
-                                        columns_to_show.extend(['Title', 'Meta Description'])
-                                    if show_heading:
-                                        columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
-                                    if show_body_alt:
-                                        columns_to_show.extend(['Body Content', 'Alt Tags'])
-                
-                                    keyword_df = keyword_df[columns_to_show]
-
+                    
+                                    # Toggle per mostrare solo le query non coperte
                                     with col6:
-                
-                                        # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                        show_not_covered = st.checkbox("Only not covered queries", st.session_state.show_not_covered)
-                                        st.session_state.show_not_covered = show_not_covered
-                
-                                    if show_not_covered:
-                                        keyword_df = keyword_df[(keyword_df['Title'] == False) &
-                                                                (keyword_df['Meta Description'] == False) &
-                                                                (keyword_df['H1'] == False) &
-                                                                (keyword_df['H2'] == False) &
-                                                                (keyword_df['H3'] == False) &
-                                                                (keyword_df['Body Content'] == False) &
-                                                                (keyword_df['Alt Tags'] == False)]
-                
+                                        show_only_uncovered = st.checkbox("Show only uncovered queries", st.session_state.get('show_only_uncovered', False))
+                                        st.session_state.show_only_uncovered = show_only_uncovered
+                    
+                                    if show_only_uncovered:
+                                        # Disabilita le checkbox quando il toggle è attivato
+                                        st.session_state.show_heading = False
+                                        st.session_state.show_keyword_metrics = False
+                                        st.session_state.show_meta = False
+                                        st.session_state.show_body_alt = False
+                                        
+                                        # Mostra solo le keyword non coperte
+                                        keyword_df = keyword_df[
+                                            (keyword_df['Title'] == False) &
+                                            (keyword_df['Meta Description'] == False) &
+                                            (keyword_df['H1'] == False) &
+                                            (keyword_df['H2'] == False) &
+                                            (keyword_df['H3'] == False) &
+                                            (keyword_df['Body Content'] == False) &
+                                            (keyword_df['Alt Tags'] == False)
+                                        ]
+                                    else:
+                                        # Checkbox per mostrare/nascondere colonne
+                                        with col2:
+                                            show_heading = st.checkbox("Show heading", st.session_state.get('show_heading', False))
+                                        with col3:
+                                            show_keyword_metrics = st.checkbox("Show metrics", st.session_state.get('show_keyword_metrics', False))
+                                        with col4:
+                                            show_meta = st.checkbox("Show meta", st.session_state.get('show_meta', False))
+                                        with col5:
+                                            show_body_alt = st.checkbox("Show body alt", st.session_state.get('show_body_alt', False))
+                    
+                                        st.session_state.show_heading = show_heading
+                                        st.session_state.show_keyword_metrics = show_keyword_metrics
+                                        st.session_state.show_meta = show_meta
+                                        st.session_state.show_body_alt = show_body_alt
+                    
+                                        # Creare la lista delle colonne da mostrare
+                                        columns_to_show = ['Keyword']  # La colonna Keyword deve essere sempre visibile
+                                        if show_keyword_metrics:
+                                            columns_to_show.extend(['Clicks', 'Impressions', 'CTR', 'Position'])
+                                        if show_meta:
+                                            columns_to_show.extend(['Title', 'Meta Description'])
+                                        if show_heading:
+                                            columns_to_show.extend(['H1', 'H2', 'H3', 'H4', 'H5', 'H6'])
+                                        if show_body_alt:
+                                            columns_to_show.extend(['Body Content', 'Alt Tags'])
+                    
+                                        keyword_df = keyword_df[columns_to_show]
+                    
                                     # Ordina il dataframe per la colonna 'Body Content'
                                     if 'Body Content' in keyword_df.columns:
                                         keyword_df_sorted = keyword_df.sort_values(by='Body Content', ascending=False)
                                     else:
                                         keyword_df_sorted = keyword_df.sort_values(by='Keyword', ascending=False)
-                
+                    
                                     # Visualizza il dataframe ordinato
                                     st.dataframe(keyword_df_sorted)
-                
+                    
                                     # Parole chiave con opportunità
-                
                                     st.markdown(
                                         f"<h4>Prioritize the Optimization of These Queries</h4>",
                                         unsafe_allow_html=True)
