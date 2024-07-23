@@ -1271,7 +1271,7 @@ if credentials:
         )  
 
     if api_app == ":rainbow[GET INSIGHT FROM MY GSC DATA]":
- 
+        st.divider()
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
