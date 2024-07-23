@@ -1264,10 +1264,13 @@ if credentials:
     with col2:
         st.write("")
         
-    component1=  TabBar(tabs=["Search Analytics","Bulk inspection tool"],default=0,background = "black",color="grey",activeColor="blue",fontSize="20px")                    
-                    
+    api_app = st.radio(
+    "What do you feel like doing?",
+    [":rainbow[GET INSIGHT FROM MY GSC DATA]", "***INSPECT URLS***"],
+    captions = ["Laugh out loud.", "Get the popcorn.")                    
    
-    if(component1 == 0):
+    if genre == ":rainbow[GET INSIGHT FROM MY GSC DATA]":
+ 
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
