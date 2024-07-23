@@ -2108,7 +2108,7 @@ if credentials:
                     
                                     with col6:
                                         # Gestione dello stato del filtro per query non presenti in nessun elemento
-                                        show_not_covered = st.toggle("Only not covered queries", st.session_state.get('show_not_covered', False))
+                                        show_not_covered = st.checkbox("Only not covered queries", st.session_state.get('show_not_covered', False))
                                         st.session_state.show_not_covered = show_not_covered
                     
                                     if show_not_covered:
@@ -2123,10 +2123,6 @@ if credentials:
                                             (keyword_df.get('Alt Tags', False) == False)
                                         ]
                                         # Disabilitare le checkbox
-                                        st.session_state.show_heading = False
-                                        st.session_state.show_keyword_metrics = False
-                                        st.session_state.show_meta = False
-                                        st.session_state.show_body_alt = False
                                         show_heading = False
                                         show_keyword_metrics = False
                                         show_meta = False
