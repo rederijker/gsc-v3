@@ -82,6 +82,11 @@ if 'show_not_covered' not in st.session_state:
     st.session_state.show_not_covered = False
 if 'selected_group' not in st.session_state:
     st.session_state.selected_group = None
+
+if 'selected_page_on_page' not in st.session_state:
+    st.session_state.selected_page = None
+
+
     
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
@@ -2033,7 +2038,7 @@ if credentials:
                 
                     with col2:
                         if st.session_state.df is not None and 'Page' in st.session_state.df.columns and 'Query' in st.session_state.df.columns:
-                            selected_page = st.selectbox("Select a page", st.session_state.df['Page'].unique(), key='select_page')
+                            selected_page_on_page = st.selectbox("Select a page", st.session_state.df['Page'].unique())
                             scan_button = st.button("Analyze Page🤖", key='scan_button')
                         else:
                             st.warning("To use this feature, ensure that the dimensions contains the 'Page' and 'Query'.")
@@ -2042,20 +2047,20 @@ if credentials:
                     if scan_button or st.session_state.scan_started:
                         if scan_button:
                             st.session_state.scan_started = True
-                        if selected_page and (selected_page != st.session_state.get('selected_page', None)):
-                            st.session_state.selected_page = selected_page
+                        if selected_page_on_page and (selected_page_on_page != st.session_state.get('selected_page_on_page', None)):
+                            st.session_state.selected_page_on_page = selected_page_on_page
                             with st.spinner("Fetching page data..."):
-                                st.session_state.page_data = fetch_page_data(selected_page)
+                                st.session_state.page_data = fetch_page_data(selected_page_on_page)
                             st.session_state.keyword_analysis = None
                 
                         if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                            page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page][['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
+                            page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page_on_page[['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
                             grouped_page_data = aggregate_queries(page_data)
                     
                             # Analisi della copertura delle parole chiave
                             with st.container():
                                 st.markdown(
-                                    f"<h4>📄 {st.session_state.page_data['meta_title']} | <a href='{st.session_state.selected_page}'>Go to the page</a></h4>",
+                                    f"<h4>📄 {st.session_state.page_data['meta_title']} | <a href='{st.session_state.selected_page_on_page'>Go to the page</a></h4>",
                                     unsafe_allow_html=True)
                 
                                 # Visualizzare i warning se presenti
