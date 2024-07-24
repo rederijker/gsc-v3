@@ -1273,7 +1273,7 @@ if credentials:
         
         api_app = st.radio(
         "What do you feel like doing?",
-        ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***", ***INDEXING API***],
+        ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***", "***INDEXING API***"],
         captions = ["Laugh out loud.", "Get the popcorn.", "I'm feel lucking"],  
         horizontal=True
         )  
