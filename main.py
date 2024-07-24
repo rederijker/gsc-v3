@@ -30,6 +30,9 @@ import streamlit.components.v1 as components
 import concurrent.futures 
 from googleapiclient.errors import HttpError
 from st_tabs import TabBar
+from google.oauth2 import service_account
+from googleapiclient.http import BatchHttpRequest
+import json
 
 
 #PAGE CONFIGURATION
@@ -1270,8 +1273,8 @@ if credentials:
         
         api_app = st.radio(
         "What do you feel like doing?",
-        ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***"],
-        captions = ["Laugh out loud.", "Get the popcorn."],  
+        ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***", ***INDEXING API***],
+        captions = ["Laugh out loud.", "Get the popcorn.", "I'm feel lucking"],  
         horizontal=True
         )  
 
@@ -2339,7 +2342,7 @@ if credentials:
                         
                    
 
-    else:
+    if api_app == "***BULK INSPECTION URLS***":
         st.divider()
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
@@ -2391,3 +2394,60 @@ if credentials:
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
+                
+    else:
+        def index_api(request_id, response, exception):
+            if exception is not None:
+                st.error(f"Error: {exception}")
+            else:
+                st.write(response)
+        
+        st.title("Google Indexing API Integration")
+        
+        # Inizializzazione dello stato della sessione
+        if 'action' not in st.session_state:
+            st.session_state['action'] = "Aggiorna URL"
+        if 'url' not in st.session_state:
+            st.session_state['url'] = ""
+        if 'json_file' not in st.session_state:
+            st.session_state['json_file'] = None
+        
+        # Seleziona l'azione desiderata
+        st.subheader("Step 1: Seleziona l'azione desiderata")
+        st.session_state['action'] = st.selectbox(
+            "Azione", 
+            ["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"], 
+            index=["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"].index(st.session_state['action'])
+        )
+        
+        # Input URL
+        st.subheader("Step 2: Inserisci l'URL")
+        st.session_state['url'] = st.text_input("Inserisci l'URL:", st.session_state['url'])
+        
+        # Caricamento del file JSON delle credenziali
+        st.subheader("Step 3: Carica il file JSON delle credenziali Google Cloud")
+        st.session_state['json_file'] = st.file_uploader("Carica il file JSON", type=["json"])
+        
+        if st.button("Esegui"):
+            if not st.session_state['url'] or not st.session_state['json_file']:
+                st.error("Assicurati di aver inserito l'URL e caricato il file JSON.")
+            else:
+                credentials = service_account.Credentials.from_service_account_info(
+                    json.load(st.session_state['json_file'])
+                )
+                service = build('indexing', 'v3', credentials=credentials)
+        
+                if st.session_state['action'] == "Aggiorna URL":
+                    body = {"url": st.session_state['url'], "type": "URL_UPDATED"}
+                    service.urlNotifications().publish(body=body).execute()
+                    st.success("L'URL è stato aggiornato.")
+        
+                elif st.session_state['action'] == "Rimuovi URL":
+                    body = {"url": st.session_state['url'], "type": "URL_DELETED"}
+                    service.urlNotifications().publish(body=body).execute()
+                    st.success("L'URL è stato rimosso.")
+        
+                elif st.session_state['action'] == "Conoscere lo stato dell'URL":
+                    encoded_url = urllib.parse.quote(st.session_state['url'], safe='')
+                    response = service.urlNotifications().getMetadata(url=encoded_url).execute()
+                    st.json(response)
