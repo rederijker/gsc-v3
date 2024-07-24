@@ -2343,7 +2343,7 @@ if credentials:
                         
                    
 
-    if api_app == "***BULK INSPECT URLS**":
+    if api_app == "***BULK INSPECT URLS***":
         st.divider()
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
@@ -2408,8 +2408,8 @@ if credentials:
         # Inizializzazione dello stato della sessione
         if 'action' not in st.session_state:
             st.session_state['action'] = "Aggiorna URL"
-        if 'url' not in st.session_state:
-            st.session_state['url'] = ""
+        if 'urls' not in st.session_state:
+            st.session_state['urls'] = ""
         if 'json_file' not in st.session_state:
             st.session_state['json_file'] = None
         
@@ -2422,34 +2422,38 @@ if credentials:
         )
         
         # Input URL
-        st.subheader("Step 2: Inserisci l'URL")
-        st.session_state['url'] = st.text_input("Inserisci l'URL:", st.session_state['url'])
+        st.subheader("Step 2: Inserisci gli URL (uno per riga)")
+        st.session_state['urls'] = st.text_area("Inserisci gli URL:", st.session_state['urls'])
         
         # Caricamento del file JSON delle credenziali
         st.subheader("Step 3: Carica il file JSON delle credenziali Google Cloud")
         st.session_state['json_file'] = st.file_uploader("Carica il file JSON", type=["json"])
         
         if st.button("Esegui"):
-            if not st.session_state['url'] or not st.session_state['json_file']:
-                st.error("Assicurati di aver inserito l'URL e caricato il file JSON.")
+            if not st.session_state['urls'] or not st.session_state['json_file']:
+                st.error("Assicurati di aver inserito gli URL e caricato il file JSON.")
             else:
                 credentials = service_account.Credentials.from_service_account_info(
                     json.load(st.session_state['json_file'])
                 )
                 service = build('indexing', 'v3', credentials=credentials)
-        
-                if st.session_state['action'] == "Aggiorna URL":
-                    body = {"url": st.session_state['url'], "type": "URL_UPDATED"}
-                    response = service.urlNotifications().publish(body=body).execute()
-                    st.success("L'URL è stato aggiornato.")
-                    st.json(response)
-        
-                elif st.session_state['action'] == "Rimuovi URL":
-                    body = {"url": st.session_state['url'], "type": "URL_DELETED"}
-                    response = service.urlNotifications().publish(body=body).execute()
-                    st.success("L'URL è stato rimosso.")
-                    st.json(response)
-        
-                elif st.session_state['action'] == "Conoscere lo stato dell'URL":
-                    response = service.urlNotifications().getMetadata(url=st.session_state['url']).execute()
-                    st.json(response)
+                
+                urls = st.session_state['urls'].splitlines()
+                for url in urls:
+                    url = url.strip()
+                    if url:
+                        if st.session_state['action'] == "Aggiorna URL":
+                            body = {"url": url, "type": "URL_UPDATED"}
+                            response = service.urlNotifications().publish(body=body).execute()
+                            st.success(f"L'URL {url} è stato aggiornato.")
+                            st.json(response)
+            
+                        elif st.session_state['action'] == "Rimuovi URL":
+                            body = {"url": url, "type": "URL_DELETED"}
+                            response = service.urlNotifications().publish(body=body).execute()
+                            st.success(f"L'URL {url} è stato rimosso.")
+                            st.json(response)
+            
+                        elif st.session_state['action'] == "Conoscere lo stato dell'URL":
+                            response = service.urlNotifications().getMetadata(url=url).execute()
+                            st.json(response)
