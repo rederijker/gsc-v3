@@ -34,6 +34,7 @@ from google.oauth2 import service_account
 from googleapiclient.http import BatchHttpRequest
 import json
 import urllib.parse
+from googleapiclient.errors import HttpError
 
 
 #PAGE CONFIGURATION
