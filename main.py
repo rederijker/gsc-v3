@@ -2440,15 +2440,16 @@ if credentials:
         
                 if st.session_state['action'] == "Aggiorna URL":
                     body = {"url": st.session_state['url'], "type": "URL_UPDATED"}
-                    service.urlNotifications().publish(body=body).execute()
+                    response = service.urlNotifications().publish(body=body).execute()
                     st.success("L'URL è stato aggiornato.")
+                    st.json(response)
         
                 elif st.session_state['action'] == "Rimuovi URL":
                     body = {"url": st.session_state['url'], "type": "URL_DELETED"}
-                    service.urlNotifications().publish(body=body).execute()
+                    response = service.urlNotifications().publish(body=body).execute()
                     st.success("L'URL è stato rimosso.")
+                    st.json(response)
         
                 elif st.session_state['action'] == "Conoscere lo stato dell'URL":
-                    encoded_url = urllib.parse.quote(st.session_state['url'], safe='')
-                    response = service.urlNotifications().getMetadata(url=encoded_url).execute()
+                    response = service.urlNotifications().getMetadata(url=st.session_state['url']).execute()
                     st.json(response)
