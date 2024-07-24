@@ -2343,7 +2343,7 @@ if credentials:
                         
                    
 
-    if api_app == "***BULK INSPECTION URLS***":
+    if api_app == "***BULK INSPECT URLS**":
         st.divider()
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
