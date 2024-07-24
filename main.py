@@ -33,6 +33,7 @@ from st_tabs import TabBar
 from google.oauth2 import service_account
 from googleapiclient.http import BatchHttpRequest
 import json
+import urllib.parse
 
 
 #PAGE CONFIGURATION
