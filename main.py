@@ -1275,7 +1275,7 @@ if credentials:
         api_app = st.radio(
         "What do you feel like doing?",
         ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***", "***INDEXING API***"],
-        captions = ["Laugh out loud.", "Get the popcorn.", "I'm feel lucking"],  
+        captions = ["Laugh out loud.", "Get the popcorn.", "I'm feel lucky"],  
         horizontal=True
         )  
 
@@ -2396,7 +2396,7 @@ if credentials:
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
                 
-    else:
+    if api_app == "***INDEXING API***":
         def index_api(request_id, response, exception):
             if exception is not None:
                 st.error(f"Error: {exception}")
