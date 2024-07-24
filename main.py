@@ -2442,18 +2442,25 @@ if credentials:
                 for url in urls:
                     url = url.strip()
                     if url:
-                        if st.session_state['action'] == "Aggiorna URL":
-                            body = {"url": url, "type": "URL_UPDATED"}
-                            response = service.urlNotifications().publish(body=body).execute()
-                            st.success(f"L'URL {url} è stato aggiornato.")
-                            st.json(response)
+                        try:
+                            if st.session_state['action'] == "Aggiorna URL":
+                                body = {"url": url, "type": "URL_UPDATED"}
+                                response = service.urlNotifications().publish(body=body).execute()
+                                st.success(f"L'URL {url} è stato aggiornato.")
+                                st.json(response)
             
-                        elif st.session_state['action'] == "Rimuovi URL":
-                            body = {"url": url, "type": "URL_DELETED"}
-                            response = service.urlNotifications().publish(body=body).execute()
-                            st.success(f"L'URL {url} è stato rimosso.")
-                            st.json(response)
+                            elif st.session_state['action'] == "Rimuovi URL":
+                                body = {"url": url, "type": "URL_DELETED"}
+                                response = service.urlNotifications().publish(body=body).execute()
+                                st.success(f"L'URL {url} è stato rimosso.")
+                                st.json(response)
             
-                        elif st.session_state['action'] == "Conoscere lo stato dell'URL":
-                            response = service.urlNotifications().getMetadata(url=url).execute()
-                            st.json(response)
+                            elif st.session_state['action'] == "Conoscere lo stato dell'URL":
+                                response = service.urlNotifications().getMetadata(url=url).execute()
+                                st.json(response)
+                        
+                        except errors.HttpError as e:
+                            error_content = json.loads(e.content.decode('utf-8'))
+                            st.error(f"HTTP Error {e.status_code}: {error_content['error']['message']}")
+                        except Exception as e:
+                            st.error(f"An unexpected error occurred: {e}")
