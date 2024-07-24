@@ -2460,7 +2460,7 @@ if credentials:
                                 response = service.urlNotifications().getMetadata(url=url).execute()
                                 st.json(response)
                         
-                        except errors.HttpError as e:
+                        except HttpError as e:
                             error_content = json.loads(e.content.decode('utf-8'))
                             st.error(f"HTTP Error {e.status_code}: {error_content['error']['message']}")
                         except Exception as e:
