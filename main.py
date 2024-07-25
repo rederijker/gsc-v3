@@ -2371,10 +2371,7 @@ if credentials:
                                 except KeyError as e:
                                     st.warning(str(e))
 
-             # Mantieni la tab corrente durante il ricaricamento della pagina
-            if st.session_state.selected_tab == 0:
-                st.rerun()                         
-                   
+      
 
     elif st.session_state.api_app == "***BULK INSPECT URLS***":
         st.divider()
