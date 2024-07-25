@@ -2345,9 +2345,6 @@ if credentials:
                    
 
     if api_app == "***BULK INSPECT URLS***":
-        st.divider()
-       
-        
         # Assicurati che 'selected_site' sia presente nello stato della sessione
         if "selected_site" not in st.session_state:
             st.session_state.selected_site = None
@@ -2358,15 +2355,16 @@ if credentials:
         if st.session_state.api_app == "***BULK INSPECT URLS***":
             st.divider()
             urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
+            
+            # Definiamo i placeholders prima del controllo del pulsante
+            progress_placeholder = st.empty()
+            table_placeholder = st.empty()
         
             if st.button('URL INSPECTION 🕵️‍♂️'):
                 if st.session_state.selected_site:
                     urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                     total_urls = len(urls)
                     results = []
-        
-                    progress_placeholder = st.empty()
-                    table_placeholder = st.empty()  # Placeholder per la tabella
         
                     start_time = time.time()  # Inizio del timer
         
@@ -2405,7 +2403,7 @@ if credentials:
         
                     # Cancellazione del placeholder dopo aver completato l'ispezione
                     progress_placeholder.empty()
-            table_placeholder.empty()  # Pulisce la tabella parziale finalee
+                    table_placeholder.empty()  # Pulisce la tabella parziale finale
                 
     if api_app == "***INDEXING API***":
         def index_api(request_id, response, exception):
