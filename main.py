@@ -98,6 +98,8 @@ if "urls_to_inspect" not in st.session_state:
     st.session_state.urls_to_inspect = ""
 if "selected_tab" not in st.session_state:
     st.session_state.selected_tab = 0  # Imposta il valore predefinito della scheda
+def handle_tab_selection(tab_index):
+    st.session_state.selected_tab = tab_index
 
     
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
