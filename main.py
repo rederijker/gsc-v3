@@ -91,6 +91,9 @@ if 'selected_group' not in st.session_state:
 if 'selected_page_on_page' not in st.session_state:
     st.session_state.selected_page = None
 
+# Inizializzazione dello stato della sessione
+if "api_app" not in st.session_state:
+    st.session_state.api_app = "***GET INSIGHT FROM MY GSC DATA***"  # Imposta il valore predefinito
 
     
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
@@ -1272,15 +1275,24 @@ if credentials:
     with col1:
         st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
     with col2:
-        
-        api_app = st.radio(
-        "What do you feel like doing?",
-        ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***", "***INDEXING API***"],
-        captions = ["Laugh out loud.", "Get the popcorn.", "I'm feel lucky."],  
-        horizontal=True
-        )  
 
-    if api_app == "***GET INSIGHT FROM MY GSC DATA***":
+
+        
+
+        api_app = st.radio(
+            "What do you feel like doing?",
+            ["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***", "***INDEXING API***"],
+            captions=["Laugh out loud.", "Get the popcorn.", "I'm feel lucky."],
+            horizontal=True,
+            index=["***GET INSIGHT FROM MY GSC DATA***", "***BULK INSPECT URLS***", "***INDEXING API***"].index(st.session_state.api_app)  # Mantiene il valore selezionato
+        )
+        # Aggiorna lo stato della sessione con la selezione corrente
+        if api_app != st.session_state.api_app:
+            st.session_state.api_app = api_app
+
+
+
+    if st.session_state.api_app == "***GET INSIGHT FROM MY GSC DATA***":
         st.divider()
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
@@ -2344,7 +2356,7 @@ if credentials:
                         
                    
 
-    if api_app == "***BULK INSPECT URLS***":
+    elif st.session_state.api_app == "***BULK INSPECT URLS***":
         st.divider()
         urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
@@ -2397,7 +2409,7 @@ if credentials:
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
                 
-    if api_app == "***INDEXING API***":
+    elif st.session_state.api_app == "***INDEXING API***":
         def index_api(request_id, response, exception):
             if exception is not None:
                 st.error(f"Error: {exception}")
