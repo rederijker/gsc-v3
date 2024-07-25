@@ -20,4 +20,4 @@ streamlit-javascript
 tenacity
 st_tabs
 st_mui_table==0.0.4
-streamlit-aggrid
+streamlit==1.33.0
