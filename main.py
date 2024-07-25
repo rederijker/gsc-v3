@@ -2346,7 +2346,6 @@ if credentials:
 
 
      # Assicurati che 'selected_site' sia presente nello stato della sessione
-       Assicurati che 'selected_site' sia presente nello stato della sessione
     if "selected_site" not in st.session_state:
         st.session_state.selected_site = "example_site"
     
