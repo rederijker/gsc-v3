@@ -1420,7 +1420,7 @@ if credentials:
             tabs = st.tabs(["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
 
 
-            with tab[0]:
+            with tabs[0]:
                 st.session_state.selected_tab = 0
 
                 if st.session_state.data_loaded:
