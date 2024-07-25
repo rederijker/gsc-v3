@@ -2344,84 +2344,58 @@ if credentials:
                         
                    
 
-
-     # Assicurati che 'selected_site' sia presente nello stato della sessione
-    if "selected_site" not in st.session_state:
-        st.session_state.selected_site = "example_site"
-    
-    if "api_app" not in st.session_state:
-        st.session_state.api_app = "***BULK INSPECT URLS***"
-    
-    if "urls_to_inspect" not in st.session_state:
-        st.session_state.urls_to_inspect = ""
-    
-    if "results" not in st.session_state:
-        st.session_state.results = []
-    
-    # Radio buttons or other navigation elements
-    options = ["Option 1", "Option 2", "***BULK INSPECT URLS***"]
-    api_app = st.radio("Select an option", options, index=options.index(st.session_state.api_app))
-    
-    if api_app != st.session_state.api_app:
-        st.session_state.api_app = api_app
-    
-    if st.session_state.api_app == "***BULK INSPECT URLS***":
+    if api_app == "***BULK INSPECT URLS***":
         st.divider()
-        st.session_state.urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
-    
-        progress_placeholder = st.empty()
-        table_placeholder = st.empty()
-        loading_image_placeholder = st.empty()  # Placeholder per l'immagine di caricamento
-    
+        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
-                urls = [url.strip() for url in st.session_state.urls_to_inspect.split('\n') if url.strip()]
+                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
                 total_urls = len(urls)
-                st.session_state.results = []
+                results = []
+    
+                progress_placeholder = st.empty()
+                table_placeholder = st.empty()  # Placeholder per la tabella
     
                 start_time = time.time()  # Inizio del timer
     
-                # Mostra l'immagine di caricamento
-                loading_image_placeholder.image("https://canapamontana.it/wp-content/uploads/2024/03/Logo_CanapaMontana_neg.webp")
+                with st.spinner("Inspecting URLs..."):
+                    # Uso di ThreadPoolExecutor per l'esecuzione concorrente
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
+                        future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
+                        for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
+                            url = future_to_url[future]
+                            try:
+                                result = future.result()
+                                results.append(result)
+                            except Exception as e:
+                                results.append({'url': url, 'response': str(e)})
     
-                # Uso di ThreadPoolExecutor per l'esecuzione concorrente
-                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
-                    future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
-                    for idx, future in enumerate(concurrent.futures.as_completed(future_to_url)):
-                        url = future_to_url[future]
-                        try:
-                            result = future.result()
-                            st.session_state.results.append(result)
-                        except Exception as e:
-                            st.session_state.results.append({'url': url, 'response': str(e)})
+                            elapsed_time = time.time() - start_time
+                            avg_time_per_url = elapsed_time / (idx + 1)
+                            remaining_urls = total_urls - (idx + 1)
+                            estimated_time_remaining = avg_time_per_url * remaining_urls
+                            estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
     
-                        elapsed_time = time.time() - start_time
-                        avg_time_per_url = elapsed_time / (idx + 1)
-                        remaining_urls = total_urls - (idx + 1)
-                        estimated_time_remaining = avg_time_per_url * remaining_urls
-                        estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
+                            # Aggiornamento del placeholder con il progresso e il tempo stimato
+                            progress_placeholder.write(
+                                f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
+                            )
     
-                        # Aggiornamento del placeholder con il progresso e il tempo stimato
-                        progress_placeholder.write(
-                            f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
-                        )
-    
-                        # Aggiornamento della tabella parziale nel placeholder
-                        index_results_partial = pd.DataFrame(st.session_state.results)
-                        table_placeholder.write("### Partial Results")
-                        table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
-    
+                            # Aggiornamento della tabella parziale nel placeholder
+                            index_results_partial = pd.DataFrame(results)
+                            table_placeholder.write("### Partial Results")
+                            table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+                
                 # Creazione e visualizzazione del DataFrame finale
-                index_results = pd.DataFrame(st.session_state.results)
+                index_results = pd.DataFrame(results)
                 st.write("### Final Results")
                 st.dataframe(index_results.drop(columns=['response']))
-    
-                # Rimozione dell'immagine di caricamento
-                loading_image_placeholder.empty()
+                
+      
+                
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
-
                 
     if api_app == "***INDEXING API***":
         def index_api(request_id, response, exception):
