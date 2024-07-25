@@ -96,6 +96,9 @@ if "api_app" not in st.session_state:
     st.session_state.api_app = "***GET INSIGHT FROM MY GSC DATA***"  # Imposta il valore predefinito
 if "urls_to_inspect" not in st.session_state:
     st.session_state.urls_to_inspect = ""
+if "selected_tab" not in st.session_state:
+    st.session_state.selected_tab = 0  # Imposta il valore predefinito della scheda
+
     
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
@@ -1414,9 +1417,11 @@ if credentials:
 
 
                     
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
+            tabs = st.tabs(["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
 
-            with tab1:
+
+            with tab[0]:
+                st.session_state.selected_tab = 0
 
                 if st.session_state.data_loaded:
                     df = st.session_state.df
@@ -1554,7 +1559,8 @@ if credentials:
 
             
             
-            with tab2:
+            with tabs[1]:
+                st.session_state.selected_tab = 0
                     with st.container(border=True):
                         st.subheader("1. Queries Performance Report")
                         st.divider()
@@ -1915,7 +1921,10 @@ if credentials:
 
                 
             
-            with tab3:
+            with tabs[2]:
+                st.session_state.selected_tab = 2
+
+
             # Supponiamo che `df` sia già definito e contenga i dati necessari
                 try:
                     # Raggruppamento dei dati
@@ -2045,7 +2054,9 @@ if credentials:
         
 
 
-            with tab4:
+            with tabs[3]:
+                st.session_state.selected_tab = 3
+
 
                 with st.container(border=True):
                     st.subheader("1. Queries Coverage Analysis")
@@ -2207,7 +2218,9 @@ if credentials:
                         st.write("")
                 
             
-            with tab5:
+            with tabs[4]:
+                st.session_state.selected_tab = 4
+
                 st.subheader("Queries Grouper")        
                 col1, col2 = st.columns(2)
                 with col1:
