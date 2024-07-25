@@ -1560,7 +1560,7 @@ if credentials:
             
             
             with tabs[1]:
-                st.session_state.selected_tab = 0
+                st.session_state.selected_tab = 1
                 with st.container(border=True):
                     st.subheader("1. Queries Performance Report")
                     st.divider()
