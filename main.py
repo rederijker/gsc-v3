@@ -29,7 +29,6 @@ from urllib.parse import urlparse, parse_qs
 import streamlit.components.v1 as components
 import concurrent.futures 
 from googleapiclient.errors import HttpError
-from st_tabs import TabBar
 from google.oauth2 import service_account
 from googleapiclient.http import BatchHttpRequest
 import json
