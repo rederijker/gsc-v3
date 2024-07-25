@@ -2075,6 +2075,7 @@ if credentials:
                     
                     if scan_button or st.session_state.get('scan_started', False):
                         if scan_button:
+                            st.session_state.selected_tab = 3
                             st.session_state.scan_started = True
                         if selected_page_on_page != st.session_state.get('selected_page_on_page', None):
                             st.session_state.selected_page_on_page = selected_page_on_page
