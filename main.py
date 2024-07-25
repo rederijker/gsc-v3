@@ -94,7 +94,8 @@ if 'selected_page_on_page' not in st.session_state:
 # Inizializzazione dello stato della sessione
 if "api_app" not in st.session_state:
     st.session_state.api_app = "***GET INSIGHT FROM MY GSC DATA***"  # Imposta il valore predefinito
-
+if "urls_to_inspect" not in st.session_state:
+    st.session_state.urls_to_inspect = ""
     
 required_columns = ['Page', 'Query', 'Clicks', 'Impressions', 'CTR', 'Position']
 
@@ -2359,10 +2360,16 @@ if credentials:
 
     elif st.session_state.api_app == "***BULK INSPECT URLS***":
         st.divider()
-        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
+        # Mostra il campo di input con il valore memorizzato
+        st.session_state.urls_to_inspect = st.text_area(
+            "Insert URLs to inspect (one per line):",
+            value=st.session_state.urls_to_inspect,
+            height=200
+        )
+    
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
-                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
+                urls = [url.strip() for url in st.session_state.urls_to_inspect.split('\n') if url.strip()]
                 total_urls = len(urls)
                 results = []
     
@@ -2398,14 +2405,12 @@ if credentials:
                             index_results_partial = pd.DataFrame(results)
                             table_placeholder.write("### Partial Results")
                             table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
-                
+    
                 # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
                 st.write("### Final Results")
                 st.dataframe(index_results.drop(columns=['response']))
-                
-      
-                
+    
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
