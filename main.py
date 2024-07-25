@@ -1560,7 +1560,7 @@ if credentials:
             
             
             with tabs[1]:
-                if st.session_state.selected_tab == 1
+                if st.session_state.selected_tab == 1:
                     with st.container(border=True):
                         st.subheader("1. Queries Performance Report")
                         st.divider()
@@ -1920,7 +1920,7 @@ if credentials:
                     analyze_query_position_changes(df)
 
             with tabs[2]:
-                if st.session_state.selected_tab == 2
+                if st.session_state.selected_tab == 2:
                     
 
 
@@ -2054,7 +2054,7 @@ if credentials:
 
 
             with tabs[3]:
-                if st.session_state.selected_tab == 3
+                if st.session_state.selected_tab == 3:
 
 
                     with st.container(border=True):
@@ -2220,7 +2220,7 @@ if credentials:
             
             with tabs[4]:
 
-                if st.session_state.selected_tab == 4
+                if st.session_state.selected_tab == 4:
 
                     st.subheader("Queries Grouper")        
                     col1, col2 = st.columns(2)
