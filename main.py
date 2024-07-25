@@ -2363,7 +2363,12 @@ if credentials:
                                     st.warning(str(e))
 
                         
-                   
+            # Aggiungi un widget di navigazione per le schede
+            tab_selection = st.selectbox("Select a tab", ["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"])
+            
+            # Aggiorna lo stato della sessione quando si seleziona una nuova scheda
+            if tab_selection != st.session_state.selected_tab:
+                st.session_state.selected_tab = tab_selection
 
     elif st.session_state.api_app == "***BULK INSPECT URLS***":
         st.divider()
