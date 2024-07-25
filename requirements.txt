@@ -19,5 +19,3 @@ scikit-learn
 streamlit-javascript
 tenacity
 st_tabs
-st_mui_table==0.0.4
-streamlit==1.23.0
