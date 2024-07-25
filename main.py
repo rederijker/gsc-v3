@@ -2344,20 +2344,39 @@ if credentials:
                    
 
     if api_app == "***BULK INSPECT URLS***":
-        st.divider()
-        urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
-        if st.button('URL INSPECTION 🕵️‍♂️'):
-            if st.session_state.selected_site:
-                urls = [url.strip() for url in urls_to_inspect.split('\n') if url.strip()]
-                total_urls = len(urls)
-                results = []
-    
-                progress_placeholder = st.empty()
-                table_placeholder = st.empty()  # Placeholder per la tabella
-    
-                start_time = time.time()  # Inizio del timer
-    
-                with st.spinner("Inspecting URLs..."):
+        # Inizializzazione dello stato della sessione
+        
+        if "urls_to_inspect" not in st.session_state:
+            st.session_state.urls_to_inspect = ""
+        
+        if "results" not in st.session_state:
+            st.session_state.results = []
+        
+        if "is_processing" not in st.session_state:
+            st.session_state.is_processing = False
+        
+        # Radio buttons or other navigation elements
+
+        if api_app != st.session_state.api_app:
+            st.session_state.api_app = api_app
+        
+        if st.session_state.api_app == "***BULK INSPECT URLS***":
+            st.divider()
+            st.session_state.urls_to_inspect = st.text_area("Insert URLs to inspect (one per line):", height=200)
+        
+            # Bottone per avviare l'ispezione delle URL
+            if st.button('URL INSPECTION 🕵️‍♂️'):
+                if not st.session_state.is_processing:
+                    st.session_state.is_processing = True
+                    # Mostra l'immagine di caricamento
+                    st.image("https://canapamontana.it/wp-content/uploads/2024/03/Logo_CanapaMontana_neg.webp")
+        
+                    # Avvio del processo di ispezione
+                    urls = [url.strip() for url in st.session_state.urls_to_inspect.split('\n') if url.strip()]
+                    total_urls = len(urls)
+                    st.session_state.results = []
+                    start_time = time.time()  # Inizio del timer
+        
                     # Uso di ThreadPoolExecutor per l'esecuzione concorrente
                     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:  # Limita a 1 worker thread
                         future_to_url = {executor.submit(inspect_url, url, st.session_state.selected_site): url for url in urls}
@@ -2365,36 +2384,31 @@ if credentials:
                             url = future_to_url[future]
                             try:
                                 result = future.result()
-                                results.append(result)
+                                st.session_state.results.append(result)
                             except Exception as e:
-                                results.append({'url': url, 'response': str(e)})
-    
+                                st.session_state.results.append({'url': url, 'response': str(e)})
+        
                             elapsed_time = time.time() - start_time
                             avg_time_per_url = elapsed_time / (idx + 1)
                             remaining_urls = total_urls - (idx + 1)
                             estimated_time_remaining = avg_time_per_url * remaining_urls
                             estimated_time_remaining_str = f"{int(estimated_time_remaining // 60)}m {int(estimated_time_remaining % 60)}s"
-    
-                            # Aggiornamento del placeholder con il progresso e il tempo stimato
-                            progress_placeholder.write(
-                                f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}"
-                            )
-    
-                            # Aggiornamento della tabella parziale nel placeholder
-                            index_results_partial = pd.DataFrame(results)
-                            table_placeholder.write("### Partial Results")
-                            table_placeholder.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
-                
-                # Creazione e visualizzazione del DataFrame finale
-                index_results = pd.DataFrame(results)
-                st.write("### Final Results")
-                st.dataframe(index_results.drop(columns=['response']))
-                
-      
-                
-                # Cancellazione del placeholder dopo aver completato l'ispezione
-                progress_placeholder.empty()
-                table_placeholder.empty()  # Pulisce la tabella parziale finale
+        
+                            # Aggiornamento del progresso
+                            st.write(f"Processing URL {idx + 1} of {total_urls}... Estimated time remaining: {estimated_time_remaining_str}")
+        
+                            # Aggiornamento della tabella parziale
+                            index_results_partial = pd.DataFrame(st.session_state.results)
+                            st.write("### Partial Results")
+                            st.dataframe(index_results_partial.drop(columns=['response']))  # Visualizzazione del DataFrame senza la colonna 'response'
+        
+                    # Creazione e visualizzazione del DataFrame finale
+                    index_results = pd.DataFrame(st.session_state.results)
+                    st.write("### Final Results")
+                    st.dataframe(index_results.drop(columns=['response']))
+        
+                    # Pulizia e reset dello stato di elaborazione
+                    st.session_state.is_processing = False
                 
     if api_app == "***INDEXING API***":
         def index_api(request_id, response, exception):
