@@ -1289,6 +1289,7 @@ if credentials:
         # Aggiorna lo stato della sessione con la selezione corrente
         if api_app != st.session_state.api_app:
             st.session_state.api_app = api_app
+            st.experimental_rerun() 
 
 
 
