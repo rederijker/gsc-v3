@@ -1563,7 +1563,7 @@ if credentials:
 
 
             
-            if selected_tab == 1:
+            elif selected_tab == 1:
                 with tabs[1]:
                     st.session_state.selected_tab = 1
                     with st.container(border=True):
@@ -1923,7 +1923,7 @@ if credentials:
                     analyze_query_performance(df)
 
                     analyze_query_position_changes(df)
-            if selected_tab == 2:
+            elif selected_tab == 2:
                 with tabs[2]:
                     st.session_state.selected_tab = 2
 
@@ -2056,7 +2056,7 @@ if credentials:
                 
         
 
-            if selected_tab == 3:
+            elif selected_tab == 3:
                 with tabs[3]:
                     st.session_state.selected_tab = 3
 
@@ -2220,7 +2220,7 @@ if credentials:
                         if 'scan_started' in st.session_state and st.session_state.scan_started:
                             st.write("")
                 
-            if selected_tab == 4:
+            elif selected_tab == 4:
                 with tabs[4]:
                     st.session_state.selected_tab = 4
 
