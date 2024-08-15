@@ -1162,7 +1162,7 @@ def authorize_app():
 
     if auth_code:
         st.markdown(f"""
-        <h1 style="text-align:center;">GSC InsightHub</h1>""",
+        <h1 style="text-align:center;">GSC InsightHub</h1><br>""",
         unsafe_allow_html=True
         )        
         if not st.session_state.credentials:
