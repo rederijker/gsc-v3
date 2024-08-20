@@ -1413,7 +1413,7 @@ if credentials:
                         progress_bar.progress(100)
         
                     except HttpError as e:
-                        st.error(f"HTTP Error: {e}")
+                        st.warning(f"HTTP Error: {e}")
 
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
