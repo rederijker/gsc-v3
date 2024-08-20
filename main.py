@@ -1382,8 +1382,8 @@ if credentials:
                         
                         if not rows:
                             st.warning("No data retrieved from API.")
-                            except Exception as e:
-                            st.error(f"An error occurred: {e}"                            
+                            
+                            st.write(f"An error occurred: {e}"                            
                             break
 
                         data_list = []
