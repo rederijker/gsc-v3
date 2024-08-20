@@ -1381,9 +1381,7 @@ if credentials:
                         rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, start_date, end_date, dimensions, st.session_state.dimension_filters, selected_type, start_row, row_limit)
                         
                         if not rows:
-                            st.warning("No data retrieved from API.")
-                            
-                            st.write(f"An error occurred: {e}"                            
+                            st.warning("No data retrieved from API.")                            
                             break
 
                         data_list = []
