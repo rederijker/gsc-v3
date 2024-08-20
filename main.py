@@ -1305,7 +1305,7 @@ if credentials:
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
-            options_type = {'Web': 'web', 'News': 'news', 'Discovery': 'discover', 'Image': 'image', 'Video': 'video'}
+            options_type = {'Web': 'web', 'News': 'news', 'Discover': 'discover', 'Image': 'image', 'Video': 'video'}
             
             # Data di oggi
             today = datetime.now()
