@@ -1367,49 +1367,53 @@ if credentials:
             clear_data()
             if st.session_state.selected_site:
                 dimensions = [dim for dim in selected_dimensions]
-
+        
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total_downloaded_rows = 0
                 start_row = 0
-
+        
                 if st.session_state.df is None:
                     st.session_state.df = pd.DataFrame()
-
+        
                 with st.spinner("Downloading data..."):
-                    while True:
-                        rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, start_date, end_date, dimensions, st.session_state.dimension_filters, selected_type, start_row, row_limit)
-                        
-                        if not rows:
-                            st.warning("No data retrieved from API.")                            
-                            break
-
-                        data_list = []
-                        for row in rows:
-                            data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
-                            data_entry.update({
-                                'Clicks': row['clicks'],
-                                'Impressions': row['impressions'],
-                                'CTR': row['ctr'],
-                                'Position': row['position']
-                            })
-                            data_list.append(data_entry)
-
-                        chunk_df = pd.DataFrame(data_list)
-                        st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
-                        
-                        total_downloaded_rows += len(rows)
-                        start_row += len(rows)
-                        status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
-                        
-                        if len(rows) < 25000 or (row_limit and total_downloaded_rows >= row_limit):
-                            break
-                        
-                        progress_bar.progress(min(total_downloaded_rows / (row_limit if row_limit else total_downloaded_rows + len(rows)), 1.0))
-                    
-                    st.session_state.data_loaded = True
-                    st.session_state.download_ready = True
-                    progress_bar.progress(100)
+                    try:
+                        while True:
+                            rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, start_date, end_date, dimensions, st.session_state.dimension_filters, selected_type, start_row, row_limit)
+                            
+                            if not rows:
+                                st.warning("No data retrieved from API.")                            
+                                break
+        
+                            data_list = []
+                            for row in rows:
+                                data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
+                                data_entry.update({
+                                    'Clicks': row['clicks'],
+                                    'Impressions': row['impressions'],
+                                    'CTR': row['ctr'],
+                                    'Position': row['position']
+                                })
+                                data_list.append(data_entry)
+        
+                            chunk_df = pd.DataFrame(data_list)
+                            st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
+                            
+                            total_downloaded_rows += len(rows)
+                            start_row += len(rows)
+                            status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
+                            
+                            if len(rows) < 25000 or (row_limit and total_downloaded_rows >= row_limit):
+                                break
+                            
+                            progress_bar.progress(min(total_downloaded_rows / (row_limit if row_limit else total_downloaded_rows + len(rows)), 1.0))
+        
+                        st.session_state.data_loaded = True
+                        st.session_state.download_ready = True
+                        progress_bar.progress(100)
+        
+                    except HttpError as e:
+                        st.error(f"HTTP Error: {e}")
 
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
