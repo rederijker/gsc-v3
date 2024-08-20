@@ -1428,6 +1428,8 @@ if credentials:
 
 
             with tabs[0]:                    
+                if st.session_state.data_loaded:
+                    df = st.session_state.df
                 average_position = df['Position'].mean()
                 total_clicks = df['Clicks'].sum()
                 average_ctr = df['CTR'].mean() * 100
