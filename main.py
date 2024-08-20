@@ -2441,7 +2441,7 @@ if credentials:
                 st.error(f"Error: {exception}")
             else:
                 st.write(response)
-        
+        st.divider()
         st.title("Google Indexing API Integration")
         
         # Inizializzazione dello stato della sessione
