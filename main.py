@@ -2442,6 +2442,7 @@ if credentials:
             st.session_state['json_file'] = None
         
         st.columns([1,2])
+        st.divider()
         with col1:            
             st.session_state['action'] = st.selectbox(
                 "Azione", 
