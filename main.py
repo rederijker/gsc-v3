@@ -2371,7 +2371,6 @@ if credentials:
       
 
     elif st.session_state.api_app == "***BULK INSPECT URLS***":
-        st.divider()
         # Mostra il campo di input con il valore memorizzato
         st.session_state.urls_to_inspect = st.text_area(
             "Insert URLs to inspect (one per line):",
@@ -2432,9 +2431,7 @@ if credentials:
             if exception is not None:
                 st.error(f"Error: {exception}")
             else:
-                st.write(response)
-
-        
+                st.write(response)      
 
         
         st.columns([1,2])
@@ -2449,8 +2446,6 @@ if credentials:
         with col2:
             # Input URL
             st.session_state['urls'] = st.text_area("Inserisci gli URL:", st.session_state['urls'])
-            
-
             
         if st.button("Esegui"):
             if not st.session_state['urls'] or not st.session_state['json_file']:
