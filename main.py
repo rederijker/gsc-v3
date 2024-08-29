@@ -1281,10 +1281,7 @@ if credentials:
     col1, col2 =st.columns([1,2])
     with col1:
         st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
-    with col2:
-
-
-        
+    with col2:      
 
         api_app = st.radio(
             "What do you feel like doing?",
@@ -1297,11 +1294,10 @@ if credentials:
         if api_app != st.session_state.api_app:
             st.session_state.api_app = api_app
             st.rerun() 
-
+    st.divider()
 
 
     if st.session_state.api_app == "***GET INSIGHT FROM MY GSC DATA***":
-        st.divider()
         col1, col2, col3 = st.columns([1,2,1])
         with col1:
             # Opzioni per i tipi di dati
@@ -2426,7 +2422,6 @@ if credentials:
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
                 
     elif st.session_state.api_app == "***INDEXING API***":
-        st.divider()
         def index_api(request_id, response, exception):
             if exception is not None:
                 st.error(f"Error: {exception}")
