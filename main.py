@@ -2429,7 +2429,11 @@ if credentials:
                 
     elif st.session_state.api_app == "***INDEXING API***":
         st.write("s")
-        
+        def index_api(request_id, response, exception):
+            if exception is not None:
+                st.error(f"Error: {exception}")
+            else:
+                st.write(response)      
 
 
         
