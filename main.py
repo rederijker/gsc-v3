@@ -2449,8 +2449,7 @@ if credentials:
                 index=["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"].index(st.session_state['action'])
             )
             # Caricamento del file JSON delle credenziali
-            st.subheader("Step 3: Carica il file JSON delle credenziali Google Cloud")
-            st.session_state['json_file'] = st.file_uploader("Carica il file JSON", type=["json"])
+            st.session_state['json_file'] = st.file_uploader("Carica il file JSON delle credenziali Google Cloud", type=["json"])
         with col2:
             # Input URL
             st.session_state['urls'] = st.text_area("Inserisci gli URL:", st.session_state['urls'])
