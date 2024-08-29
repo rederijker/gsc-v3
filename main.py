@@ -2441,11 +2441,8 @@ if credentials:
         if 'json_file' not in st.session_state:
             st.session_state['json_file'] = None
         st.divider()
-        st.title("Google Indexing API Integration")
         st.columns(2)
-        with col1:
-            # Seleziona l'azione desiderata
-            
+        with col1:            
             st.session_state['action'] = st.selectbox(
                 "Azione", 
                 ["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"], 
