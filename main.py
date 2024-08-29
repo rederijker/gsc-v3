@@ -1284,6 +1284,7 @@ if credentials:
     if not st.session_state.available_sites:
         site_list = webmasters_service.sites().list().execute()
         st.session_state.available_sites = [site['siteUrl'] for site in site_list.get('siteEntry', [])]
+    st.divider()
     col1, col2 =st.columns([1,2])
     with col1:
         st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
