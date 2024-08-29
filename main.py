@@ -2441,20 +2441,21 @@ if credentials:
         if 'json_file' not in st.session_state:
             st.session_state['json_file'] = None
         
-        st.columns(2)
+        st.columns([1,2])
         with col1:            
             st.session_state['action'] = st.selectbox(
                 "Azione", 
                 ["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"], 
                 index=["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"].index(st.session_state['action'])
             )
+            # Caricamento del file JSON delle credenziali
+            st.subheader("Step 3: Carica il file JSON delle credenziali Google Cloud")
+            st.session_state['json_file'] = st.file_uploader("Carica il file JSON", type=["json"])
         with col2:
             # Input URL
             st.session_state['urls'] = st.text_area("Inserisci gli URL:", st.session_state['urls'])
             
-            # Caricamento del file JSON delle credenziali
-            st.subheader("Step 3: Carica il file JSON delle credenziali Google Cloud")
-            st.session_state['json_file'] = st.file_uploader("Carica il file JSON", type=["json"])
+
             
         if st.button("Esegui"):
             if not st.session_state['urls'] or not st.session_state['json_file']:
