@@ -2431,8 +2431,7 @@ if credentials:
                 st.error(f"Error: {exception}")
             else:
                 st.write(response)
-        st.divider()
-        st.title("Google Indexing API Integration")
+
         
         # Inizializzazione dello stato della sessione
         if 'action' not in st.session_state:
@@ -2441,6 +2440,8 @@ if credentials:
             st.session_state['urls'] = ""
         if 'json_file' not in st.session_state:
             st.session_state['json_file'] = None
+        st.divider()
+        st.title("Google Indexing API Integration")
         st.columns(2)
         with col1:
             # Seleziona l'azione desiderata
