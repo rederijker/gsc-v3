@@ -90,8 +90,14 @@ if 'selected_group' not in st.session_state:
 
 if 'selected_page_on_page' not in st.session_state:
     st.session_state.selected_page = None
-
-# Inizializzazione dello stato della sessione
+# Inizializzazione dello stato della sessione indexing api
+if 'action' not in st.session_state:
+    st.session_state['action'] = "Aggiorna URL"
+if 'urls' not in st.session_state:
+    st.session_state['urls'] = ""
+if 'json_file' not in st.session_state:
+            st.session_state['json_file'] = None
+# Inizializzazione dello stato della sessione URL INSPECTION
 if "api_app" not in st.session_state:
     st.session_state.api_app = "***GET INSIGHT FROM MY GSC DATA***"  # Imposta il valore predefinito
 if "urls_to_inspect" not in st.session_state:
@@ -2429,13 +2435,7 @@ if credentials:
                 st.write(response)
 
         
-        # Inizializzazione dello stato della sessione
-        if 'action' not in st.session_state:
-            st.session_state['action'] = "Aggiorna URL"
-        if 'urls' not in st.session_state:
-            st.session_state['urls'] = ""
-        if 'json_file' not in st.session_state:
-            st.session_state['json_file'] = None
+
         
         st.columns([1,2])
         with col1:            
