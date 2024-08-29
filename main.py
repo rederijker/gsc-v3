@@ -2440,7 +2440,7 @@ if credentials:
             st.session_state['urls'] = ""
         if 'json_file' not in st.session_state:
             st.session_state['json_file'] = None
-        st.divider()
+        
         st.columns(2)
         with col1:            
             st.session_state['action'] = st.selectbox(
