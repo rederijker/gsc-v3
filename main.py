@@ -2374,6 +2374,7 @@ if credentials:
 
     elif st.session_state.api_app == "***BULK INSPECT URLS***":
         # Mostra il campo di input con il valore memorizzato
+        st.write("Paste a list of URLs. The URL tool provides information on the version of a specific page indexed by Google and also allows you to check if a URL could be indexable. The information includes details on structured data, linked videos, AMP, and indexing/indexability.")
         st.session_state.urls_to_inspect = st.text_area(
             "Insert URLs to inspect (one per line):",
             value=st.session_state.urls_to_inspect,
