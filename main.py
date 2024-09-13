@@ -1257,7 +1257,11 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
 st.markdown("""
     <style>
 
-
+#root > div:nth-child(1) > div.withScreencast > div > div > div > section > div.stAppViewBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(5) {
+    border: solid 1px cadetblue;
+    padding: 1%;
+    border-radius: 9px;
+}
 .st-emotion-cache-qcpnpn {
     border: 2px solid rgb(3 169 244 / 50%);
     border-radius: 0.5rem;
@@ -1284,7 +1288,6 @@ if credentials:
     if not st.session_state.available_sites:
         site_list = webmasters_service.sites().list().execute()
         st.session_state.available_sites = [site['siteUrl'] for site in site_list.get('siteEntry', [])]
-    st.divider()
     col1, col2 =st.columns([1,2])
     with col1:
         st.session_state.selected_site = st.selectbox('Select a website:', st.session_state.available_sites)
@@ -2374,7 +2377,7 @@ if credentials:
 
     elif st.session_state.api_app == "***BULK INSPECT URLS***":
         # Mostra il campo di input con il valore memorizzato
-        st.subheader("BULK INSPECT URLS🕵️‍♂️")
+        st.subheader("BULK INSPECT URLs")
         st.write("Paste a list of URLs. The tool provides information on the version of a specific page indexed by Google and also allows you to check if a URL could be indexable. The information includes details on structured data, linked videos, AMP, and indexing/indexability.")
         st.session_state.urls_to_inspect = st.text_area(
             "Insert URLs to inspect (one per line):",
