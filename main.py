@@ -2199,7 +2199,7 @@ if credentials:
                     st.write(
                         "We have grouped the keywords for which Google is considering your page to identify the main themes. For each theme, you can check the total clicks and impressions, as well as the coverage percentage of the theme by your page content.")
                     if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                        with st.progress("Clustering topics..."):
+                        with st.status("Clustering topics..."):
                             clustered_keywords, model = cluster_keywords(grouped_page_data)
                             cluster_names = get_cluster_names(clustered_keywords)
                             clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
@@ -2285,7 +2285,7 @@ if credentials:
                 clicks_column = 'Clicks'
                 
                 if st.button("Group Keywords with Clicks ✨"):
-                    with st.spinner("Grouping..."):
+                    with st.status("Grouping..."):
                         try:
                             if keyword_column in df.columns and clicks_column in df.columns:
                                 # Remove duplicates and sum clicks
