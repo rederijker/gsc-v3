@@ -1414,6 +1414,7 @@ if credentials:
                         st.session_state.data_loaded = True
                         st.session_state.download_ready = True
                         progress_bar.progress(100)
+                        progress_bar.empty()
         
                     except HttpError as e:
                         st.warning(f"HTTP Error: {e}")
