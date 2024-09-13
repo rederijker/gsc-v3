@@ -1257,7 +1257,7 @@ def fetch_data_chunk(webmasters_service, site_url, start_date, end_date, dimensi
 st.markdown("""
     <style>
 
-#root > div:nth-child(1) > div.withScreencast > div > div > div > section > div.stAppViewBlockContainer.block-container.st-emotion-cache-1jicfl2.ea3mdgi5 > div > div > div > div:nth-child(4) {
+.st-emotion-cache-ocqkz7.e1f1d6gn5 {
     border: solid 1px cadetblue;
     padding: 1%;
     border-radius: 9px;
