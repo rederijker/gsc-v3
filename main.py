@@ -2285,7 +2285,7 @@ if credentials:
                 clicks_column = 'Clicks'
                 
                 if st.button("Group Keywords with Clicks ✨"):
-                    with st.status("Grouping..."):
+                    with st.spinner("Grouping..."):
                         try:
                             if keyword_column in df.columns and clicks_column in df.columns:
                                 # Remove duplicates and sum clicks
