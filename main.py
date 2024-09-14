@@ -460,9 +460,9 @@ def analyze_page_performance(df):
         st.metric("Average CTR Change", f"{overall_ctr_trend_page_performance_analysis * 100:.2f}%", f"{overall_ctr_trend_page_performance_analysis * 100:.2f}%")
     with col5:
         if overall_position_trend_page_performance_analysis < 0:
-            st.metric("Average Position Change", f"{overall_position_trend_page_performance_analysis:.2f}", f"{-position_percentage_change:.2f}%", delta_color="normal")
-        else:
             st.metric("Average Position Change", f"{overall_position_trend_page_performance_analysis:.2f}", f"{position_percentage_change:.2f}%", delta_color="inverse")
+        else:
+            st.metric("Average Position Change", f"{overall_position_trend_page_performance_analysis:.2f}", f"{position_percentage_change:.2f}%", delta_color="normal")
 
     # Creazione del grafico a barre con plotly
     bar_data_page_performance_analysis = {
