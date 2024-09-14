@@ -2063,7 +2063,7 @@ if credentials:
 
             with tabs[3]:
                 with st.container(border=True):
-                    st.subheader("1. Queries Coverage Analysis")
+                    st.subheader("Queries Coverage Analysis")
                     st.divider()
                     
                     col1, col2 = st.columns([1, 2])
@@ -2083,12 +2083,21 @@ if credentials:
                         if scan_button:
                             st.session_state.selected_tab = 3
                             st.session_state.scan_started = True
+                        
                         if selected_page_on_page != st.session_state.get('selected_page_on_page', None):
                             st.session_state.selected_page_on_page = selected_page_on_page
-                            with st.spinner("Fetching page data..."):
-                                st.session_state.page_data = fetch_page_data(selected_page_on_page)
+                    
+                            # Creazione di una barra di progresso
+                            progress_bar = st.progress(0)
+                            
+                            # Simulazione del caricamento dei dati con un ciclo
+                            for percent_complete in range(100):
+                                time.sleep(0.05)  # Simula il tempo necessario per caricare i dati
+                                progress_bar.progress(percent_complete + 1)
+                    
+                            st.session_state.page_data = fetch_page_data(selected_page_on_page)
                             st.session_state.keyword_analysis = None
-                        
+                    
                         if 'page_data' in st.session_state and st.session_state.page_data is not None:
                             page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page_on_page]
                             page_data = page_data[['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
