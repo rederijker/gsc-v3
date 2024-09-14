@@ -2089,13 +2089,12 @@ if credentials:
                     
                             # Creazione di una barra di progresso
                             progress_text = "Fetching page data..."
-                            progress_bar_2 = st.progress(0, text=progress_text)
+                            progress_bar = st.progress(0, text=progress_text)
                             
                             # Simulazione del caricamento dei dati con un ciclo
                             for percent_complete in range(100):
                                 time.sleep(0.02)  # Simula il tempo necessario per caricare i dati
-                                progress_bar_2.progress(percent_complete + 1)
-                                progress_bar_2.empty()
+                                progress_bar.progress(percent_complete + 1)
                     
                             st.session_state.page_data = fetch_page_data(selected_page_on_page)
                             st.session_state.keyword_analysis = None
