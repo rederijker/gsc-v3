@@ -994,9 +994,9 @@ def analyze_query_position_changes(df):
                 """)
             with col2:
                 if overall_position_trend < 0:
-                    st.metric("Average Position Change", f"{overall_position_trend:.2f}", f"{position_percentage_change:.2f}%", delta_color="normal")
-                else:
                     st.metric("Average Position Change", f"{overall_position_trend:.2f}", f"{position_percentage_change:.2f}%", delta_color="inverse")
+                else:
+                    st.metric("Average Position Change", f"{overall_position_trend:.2f}", f"{position_percentage_change:.2f}%", delta_color="normal")
         
             # Creazione del grafico a barre con plotly
             bar_data_position_analysis = {
