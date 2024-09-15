@@ -2094,6 +2094,7 @@ if credentials:
                         else:
                             st.warning("To use this feature, ensure that the dimensions contain the 'Page' and 'Query'.")
                             scan_button = False
+                            
                     
                     if scan_button or st.session_state.get('scan_started', False):
                         if scan_button:
