@@ -1940,6 +1940,8 @@ if credentials:
 
             
             elif selected2 == "PAGES REPORT":
+                if st.session_state.data_loaded:
+                    df = st.session_state.df
 
 
             # Supponiamo che `df` sia già definito e contenga i dati necessari
