@@ -1428,10 +1428,15 @@ if credentials:
 
 
                     
-            tabs = st.tabs(["WEBSITE DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION","QUERIES GROUPER"])
+            # 2. horizontal menu
+            selected2 = option_menu(None, ["WEBSITE DATA OVERVIEW", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
+                icons=['house', 'cloud-upload', "list-task", 'gear'], 
+                menu_icon="cast", default_index=0, orientation="horizontal")
+            selected2
 
 
-            with tabs[0]:                    
+
+            if selected2 == "WEBSITE DATA OVERVIEW":                    
                 if st.session_state.data_loaded:
                     df = st.session_state.df
                 average_position = df['Position'].mean()
@@ -1567,7 +1572,8 @@ if credentials:
 
             
             
-            with tabs[1]:
+            
+            elif selected2 == "PAGES REPORT":
             
                 with st.container(border=True):
                     st.subheader("1. Queries Performance Report")
@@ -1927,7 +1933,9 @@ if credentials:
 
                 analyze_query_position_changes(df)
 
-            with tabs[2]:
+            
+            elif selected2 == "PAGE OPTIMIZATION":
+
 
             # Supponiamo che `df` sia già definito e contenga i dati necessari
                 try:
@@ -2058,7 +2066,8 @@ if credentials:
         
 
 
-            with tabs[3]:
+            elif selected2 == "QUERIES GROUPER":
+
                 with st.container(border=True):
                     st.subheader("Queries Coverage Analysis")
                     st.divider()
@@ -2239,7 +2248,10 @@ if credentials:
                         st.write("")
                 
             
-            with tabs[4]:
+            
+            elif selected2 == "QUERIES GROUPER":
+
+            
 
 
                 st.subheader("Queries Grouper")        
@@ -2508,49 +2520,3 @@ if credentials:
                         except Exception as e:
                             st.error(f"An unexpected error occurred: {e}")
 
-# 1. as sidebar menu
-with st.sidebar:
-    selected = option_menu("Main Menu", ["Home", 'Settings'], 
-        icons=['house', 'gear'], menu_icon="cast", default_index=1)
-    selected
-
-# 2. horizontal menu
-selected2 = option_menu(None, ["Home", "Upload", "Tasks", 'Settings'], 
-    icons=['house', 'cloud-upload', "list-task", 'gear'], 
-    menu_icon="cast", default_index=0, orientation="horizontal")
-selected2
-
-# 3. CSS style definitions
-selected3 = option_menu(None, ["Home", "Upload",  "Tasks", 'Settings'], 
-    icons=['house', 'cloud-upload', "list-task", 'gear'], 
-    menu_icon="cast", default_index=0, orientation="horizontal",
-    styles={
-        "container": {"padding": "0!important", "background-color": "#fafafa"},
-        "icon": {"color": "orange", "font-size": "25px"}, 
-        "nav-link": {"font-size": "25px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
-        "nav-link-selected": {"background-color": "green"},
-    }
-)
-
-# 4. Manual item selection
-if st.session_state.get('switch_button', False):
-    st.session_state['menu_option'] = (st.session_state.get('menu_option', 0) + 1) % 4
-    manual_select = st.session_state['menu_option']
-else:
-    manual_select = None
-    
-selected4 = option_menu(None, ["Home", "Upload", "Tasks", 'Settings'], 
-    icons=['house', 'cloud-upload', "list-task", 'gear'], 
-    orientation="horizontal", manual_select=manual_select, key='menu_4')
-st.button(f"Move to Next {st.session_state.get('menu_option', 1)}", key='switch_button')
-selected4
-
-# 5. Add on_change callback
-def on_change(key):
-    selection = st.session_state[key]
-    st.write(f"Selection changed to {selection}")
-    
-selected5 = option_menu(None, ["Home", "Upload", "Tasks", 'Settings'],
-                        icons=['house', 'cloud-upload', "list-task", 'gear'],
-                        on_change=on_change, key='menu_5', orientation="horizontal")
-selected5
