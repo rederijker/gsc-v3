@@ -1944,7 +1944,7 @@ if credentials:
             elif selected2 == "PAGES REPORT":
                 if st.session_state.data_loaded:
                     df = st.session_state.df
-                formatted_ctr_m = st.session_state.average_ctr_perc
+                formatted_ctr_m = st.session_state.formatted_ctr_m
 
 
             # Supponiamo che `df` sia già definito e contenga i dati necessari
