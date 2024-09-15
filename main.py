@@ -1429,7 +1429,7 @@ if credentials:
 
                     
             # 2. horizontal menu
-            with sidebar:
+            with st.sidebar:
                 selected2 = option_menu(None, ["WEBSITE DATA OVERVIEW", "QUERIS REPORT", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
                     icons=['house', 'cloud-upload', 'cloud-upload', "list-task", 'gear'], 
                     menu_icon="cast", default_index=0, orientation="horizontal")
