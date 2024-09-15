@@ -2253,8 +2253,7 @@ if credentials:
                 col1, col2 = st.columns(2)
                 with col1:
                     st.write("💬 Select language")
-                    language = st.selectbox("", ["English", "Italian"])
-                
+                    language = st.selectbox("", ["English", "Italian"])                
                     if language == "English":
                         default_stop_words = [
                             'and', 'but', 'is', 'the', 'to', 'in', 'for', 'on', 'with', 'as', 'by', 'at', 'from',
@@ -2286,29 +2285,28 @@ if credentials:
                 
                 with col2:
                     st.text("")
-                st.divider()
                 
-                # Control for minimum group size and tuple length
-                min_group_size, ngram_size = st.columns(2)
-                with min_group_size:
-                    min_group_size = st.slider("Minimum Group Size",
-                                            min_value=1,
-                                            max_value=50,
-                                            value=2,
-                                            help="The minimum group size is the minimum number of keywords required in a group for it to be displayed in the results. Increase this value to show only larger keyword groups."
-                                            )
-                
-                with ngram_size:
-                    ngram_size = st.slider(
-                    "Length of the keyword", 
-                    min_value=1, 
-                    max_value=5, 
-                    value=2, 
-                    help="Drag the slider to choose the n-gram size for the keyword. An n-gram size of 1 means a single word, whereas 5 means a phrase of up to 5 words."
-                )
-                
-                keyword_column = 'Query'
-                clicks_column = 'Clicks'
+                    # Control for minimum group size and tuple length
+                    min_group_size, ngram_size = st.columns(2)
+                    with min_group_size:
+                        min_group_size = st.slider("Minimum Group Size",
+                                                min_value=1,
+                                                max_value=50,
+                                                value=2,
+                                                help="The minimum group size is the minimum number of keywords required in a group for it to be displayed in the results. Increase this value to show only larger keyword groups."
+                                                )
+                    
+                    with ngram_size:
+                        ngram_size = st.slider(
+                        "Length of the keyword", 
+                        min_value=1, 
+                        max_value=5, 
+                        value=2, 
+                        help="Drag the slider to choose the n-gram size for the keyword. An n-gram size of 1 means a single word, whereas 5 means a phrase of up to 5 words."
+                    )
+                    
+                    keyword_column = 'Query'
+                    clicks_column = 'Clicks'
                 
                 if st.button("Group Keywords with Clicks ✨"):
                     with st.spinner("Grouping..."):
