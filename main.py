@@ -2252,7 +2252,7 @@ if credentials:
                 st.subheader("Queries Grouper")        
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.write("💬 Select language")
+                    st.write("💬 Lang settings")
                     language = st.selectbox("", ["English", "Italian"])                
                     if language == "English":
                         default_stop_words = [
@@ -2287,6 +2287,7 @@ if credentials:
                     st.text("")
                 
                     # Control for minimum group size and tuple length
+                    st.write("✨ Grouping settings")
                     min_group_size, ngram_size = st.columns(2)
                     with min_group_size:
                         min_group_size = st.slider("Minimum Group Size",
@@ -2308,7 +2309,7 @@ if credentials:
                     keyword_column = 'Query'
                     clicks_column = 'Clicks'
                 
-                if st.button("Group Keywords with Clicks ✨"):
+                if st.button("Start Grouping ▶"):
                     with st.spinner("Grouping..."):
                         try:
                             if keyword_column in df.columns and clicks_column in df.columns:
