@@ -1429,8 +1429,8 @@ if credentials:
 
                     
             # 2. horizontal menu
-            selected2 = option_menu(None, ["WEBSITE DATA OVERVIEW", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
-                icons=['house', 'cloud-upload', "list-task", 'gear'], 
+            selected2 = option_menu(None, ["WEBSITE DATA OVERVIEW", "QUERIS REPORT", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
+                icons=['house', 'cloud-upload', 'cloud-upload', "list-task", 'gear'], 
                 menu_icon="cast", default_index=0, orientation="horizontal")
             selected2
 
@@ -1573,7 +1573,7 @@ if credentials:
             
             
             
-            elif selected2 == "PAGES REPORT":
+            elif selected2 == "QUERIS REPORT":
             
                 with st.container(border=True):
                     st.subheader("1. Queries Performance Report")
@@ -1934,7 +1934,7 @@ if credentials:
                 analyze_query_position_changes(df)
 
             
-            elif selected2 == "PAGE OPTIMIZATION":
+            elif selected2 == "PAGES REPORT":
 
 
             # Supponiamo che `df` sia già definito e contenga i dati necessari
@@ -2066,7 +2066,7 @@ if credentials:
         
 
 
-            elif selected2 == "QUERIES GROUPER":
+            elif selected2 == "PAGE OPTIMIZATION":
 
                 with st.container(border=True):
                     st.subheader("Queries Coverage Analysis")
