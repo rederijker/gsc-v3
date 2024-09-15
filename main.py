@@ -37,7 +37,9 @@ import urllib.parse
 from googleapiclient.errors import HttpError
 from streamlit_option_menu import option_menu
 
-
+import socket
+import ssl
+from tenacity import retry, wait_exponential, stop_after_attempt
 
 #PAGE CONFIGURATION
 st.set_page_config(
@@ -1368,26 +1370,41 @@ if credentials:
 
         if st.button('GET DATA ⬇️'):
             clear_data()
+            @retry(wait=wait_exponential(multiplier=1, min=2, max=60), stop=stop_after_attempt(5), reraise=True)
+            def fetch_data_chunk_with_retry(*args, **kwargs):
+                return fetch_data_chunk(*args, **kwargs)
+            
             if st.session_state.selected_site:
                 dimensions = [dim for dim in selected_dimensions]
-        
+            
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total_downloaded_rows = 0
                 start_row = 0
-        
+            
                 if st.session_state.df is None:
                     st.session_state.df = pd.DataFrame()
-        
+            
                 with st.spinner("Downloading data..."):
                     try:
                         while True:
-                            rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, start_date, end_date, dimensions, st.session_state.dimension_filters, selected_type, start_row, row_limit)
-                            
+                            try:
+                                rows = fetch_data_chunk_with_retry(
+                                    webmasters_service, st.session_state.selected_site, 
+                                    start_date, end_date, dimensions, 
+                                    st.session_state.dimension_filters, selected_type, 
+                                    start_row, row_limit
+                                )
+                            except (socket.timeout, ssl.SSLError) as e:
+                                st.warning(f"Timeout o errore SSL: {e}")
+                                time.sleep(5)  # Aggiunge una piccola pausa prima di riprovare
+                                continue  # Ripete il tentativo
+            
                             if not rows:
                                 st.warning("No data retrieved from API.")                            
                                 break
-        
+            
+                            # Prepara i dati scaricati
                             data_list = []
                             for row in rows:
                                 data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
@@ -1398,33 +1415,38 @@ if credentials:
                                     'Position': row['position']
                                 })
                                 data_list.append(data_entry)
-        
+            
+                            # Aggiorna il DataFrame sessionale
                             chunk_df = pd.DataFrame(data_list)
                             st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
-                            
+            
                             total_downloaded_rows += len(rows)
                             start_row += len(rows)
                             status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
-                            
+            
+                            # Termina se non ci sono più righe o se abbiamo raggiunto il limite
                             if len(rows) < 25000 or (row_limit and total_downloaded_rows >= row_limit):
                                 break
-                            
+            
                             progress_bar.progress(min(total_downloaded_rows / (row_limit if row_limit else total_downloaded_rows + len(rows)), 1.0))
-        
+            
                         st.session_state.data_loaded = True
                         st.session_state.download_ready = True
                         progress_bar.progress(100)
                         progress_bar.empty()
-        
+            
                     except HttpError as e:
                         st.warning(f"HTTP Error: {e}")
-
+                    except Exception as e:
+                        st.warning(f"Errore imprevisto: {e}")
+            
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
-
-        if st.session_state.data_loaded and st.session_state.download_ready:
-            csv = st.session_state.df.to_csv(index=False).encode('utf-8')
-            st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
+            
+            # Bottone per il download del CSV
+            if st.session_state.data_loaded and st.session_state.download_ready:
+                csv = st.session_state.df.to_csv(index=False).encode('utf-8')
+                st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
 
 
                     
