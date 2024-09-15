@@ -2077,8 +2077,9 @@ if credentials:
 
             elif selected2 == "PAGE OPTIMIZATION":
 
+  
                 with st.container(border=True):
-                    st.subheader("Queries Coverage Analysis")
+                    st.subheader("1. Queries Coverage Analysis")
                     st.divider()
                     
                     col1, col2 = st.columns([1, 2])
@@ -2094,35 +2095,16 @@ if credentials:
                             st.warning("To use this feature, ensure that the dimensions contain the 'Page' and 'Query'.")
                             scan_button = False
                     
-                    # Quando si avvia la scansione, inizia la progress bar
                     if scan_button or st.session_state.get('scan_started', False):
                         if scan_button:
                             st.session_state.selected_tab = 3
                             st.session_state.scan_started = True
-                        
                         if selected_page_on_page != st.session_state.get('selected_page_on_page', None):
                             st.session_state.selected_page_on_page = selected_page_on_page
-                    
-                            # Creazione di una barra di progresso e un placeholder per il testo
-                            progress_bar = st.progress(0)
-                            status_text = st.empty()  # Placeholder per il testo di caricamento
-                    
-                            # Simulazione del caricamento dei dati con un ciclo
-                            for percent_complete in range(100):
-                                time.sleep(0.05)  # Simula il tempo necessario per caricare i dati
-                                progress_bar.progress(percent_complete + 1)
-                                status_text.text(f"Loading data... {percent_complete + 1}% complete")
-                    
-                            # Rimuove la barra e il testo dopo il completamento
-                            progress_bar.empty()  # Nasconde la progress bar
-                            status_text.empty()  # Rimuove il testo
-                    
-                            # Qui carichi i dati effettivi
-                            st.session_state.page_data = fetch_page_data(selected_page_on_page)
+                            with st.spinner("Fetching page data..."):
+                                st.session_state.page_data = fetch_page_data(selected_page_on_page)
                             st.session_state.keyword_analysis = None
-                    
-
-
+                        
                         if 'page_data' in st.session_state and st.session_state.page_data is not None:
                             page_data = st.session_state.df[st.session_state.df['Page'] == st.session_state.selected_page_on_page]
                             page_data = page_data[['Query', 'Clicks', 'Impressions', 'CTR', 'Position']]
@@ -2236,7 +2218,7 @@ if credentials:
                     st.write(
                         "We have grouped the keywords for which Google is considering your page to identify the main themes. For each theme, you can check the total clicks and impressions, as well as the coverage percentage of the theme by your page content.")
                     if 'page_data' in st.session_state and st.session_state.page_data is not None:
-                        with st.spinner("Clustering topics..."):
+                        with st.progress(10, "Clustering topics..."):
                             clustered_keywords, model = cluster_keywords(grouped_page_data)
                             cluster_names = get_cluster_names(clustered_keywords)
                             clustered_keywords = analyze_topic_coverage(st.session_state.page_data, clustered_keywords)
