@@ -1574,6 +1574,8 @@ if credentials:
             
             
             elif selected2 == "QUERIS REPORT":
+                if st.session_state.data_loaded:
+                    df = st.session_state.df
             
                 with st.container(border=True):
                     st.subheader("1. Queries Performance Report")
