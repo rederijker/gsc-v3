@@ -2250,7 +2250,7 @@ if credentials:
 
 
                 st.subheader("Queries Grouper")        
-                col1, col2 = st.columns(2)
+                col1, col2 = st.columns([1,2])
                 with col1:
                     st.write("💬 Lang settings")
                     language = st.selectbox("", ["English", "Italian"])                
@@ -2365,7 +2365,7 @@ if credentials:
                             top_groups_clicks = [click for group, click in top_groups]
                             top_group_names = [group for group, click in top_groups]
                     
-                    col1, col2 = st.columns(2)
+                    col1, col2 = st.columns([1,2])
                     with col1:
                 
                         st.subheader("🔑 Groups Overview")
