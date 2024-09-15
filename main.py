@@ -1429,11 +1429,10 @@ if credentials:
 
                     
             # 2. horizontal menu
-            with st.sidebar:
-                selected2 = option_menu(None, ["WEBSITE DATA OVERVIEW", "QUERIS REPORT", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
-                    icons=['house', 'cloud-upload', 'cloud-upload', "list-task", 'gear'], 
-                    menu_icon="cast", default_index=0, orientation="horizontal")
-                selected2
+            selected2 = option_menu(None, ["GSC DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
+                icons=['graph-up-arrow', 'key', 'file-earmark-text', "rocket", 'intersect'], 
+                menu_icon="cast", default_index=0, orientation="horizontal")
+            selected2
 
 
 
