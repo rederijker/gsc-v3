@@ -1436,7 +1436,7 @@ if credentials:
 
 
 
-            if selected2 == "WEBSITE DATA OVERVIEW":                    
+            if selected2 == "GSC DATA OVERVIEW":                    
                 if st.session_state.data_loaded:
                     df = st.session_state.df
                 average_position = df['Position'].mean()
