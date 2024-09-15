@@ -1457,7 +1457,8 @@ if credentials:
             selected2 = option_menu(None, ["GSC DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
                 icons=['graph-up-arrow', 'key', 'file-earmark-text', "rocket", 'intersect'], 
                 menu_icon="cast", default_index=0, orientation="horizontal")
-            st.session_state.selected2 = selected2
+            if st.session_state.selected2 != selected2:
+                st.session_state.selected2 = selected2
 
 
 
