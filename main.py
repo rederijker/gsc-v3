@@ -1944,6 +1944,7 @@ if credentials:
             elif selected2 == "PAGES REPORT":
                 if st.session_state.data_loaded:
                     df = st.session_state.df
+                formatted_ctr_m = st.session_state.average_ctr_perc
 
 
             # Supponiamo che `df` sia già definito e contenga i dati necessari
@@ -1967,14 +1968,14 @@ if credentials:
                     average_impression_df_pupular = df_aggregated_popular_page['Impressions'].mean()
                 
                     popular_pages = df_aggregated_popular_page[
-                        (df_aggregated_popular_page['Average CTR'] > session_state.formatted_ctr_m) &
+                        (df_aggregated_popular_page['Average CTR'] > formatted_ctr_m) &
                         (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
                         (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
                         (df_aggregated_popular_page['Average Position'] < 10)
                     ].sort_values(by='Clicks', ascending=False)
                     
                     less_pages = df_aggregated_popular_page[
-                        (df_aggregated_popular_page['Average CTR'] < session_state.formatted_ctr_m) &
+                        (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
                         (df_aggregated_popular_page['Clicks'] > average_clic_df_popular) &
                         (df_aggregated_popular_page['Impressions'] > average_impression_df_pupular) &
                         (df_aggregated_popular_page['Average Position'] < 10)
@@ -1990,7 +1991,7 @@ if credentials:
                     worst_pages = df_aggregated_popular_page[
                         (df_aggregated_popular_page['Clicks'] < average_clic_df_popular) &
                         (df_aggregated_popular_page['Impressions'] < average_impression_df_pupular) &
-                        (df_aggregated_popular_page['Average CTR'] < session_state.formatted_ctr_m) &
+                        (df_aggregated_popular_page['Average CTR'] < formatted_ctr_m) &
                         (df_aggregated_popular_page['Average Position'] > average_position_popular)
                     ]
                     with st.container(border=True):
@@ -2009,7 +2010,7 @@ if credentials:
                         with col3:
                             st.metric("Pages Average Impressions", value=format_average_impression_popular)
                         with col4:
-                            st.metric("Pages Average CTR", value=session_state.formatted_ctr_m)
+                            st.metric("Pages Average CTR", value=formatted_ctr_m)
                         with col5:
                             st.metric("Pages Average Position", value=format_average_position_popular)
                             st.text("")      
