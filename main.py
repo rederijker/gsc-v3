@@ -1575,7 +1575,7 @@ if credentials:
             
             
             
-            elif selected2 == "QUERIS REPORT":
+            elif selected2 == "QUERIES REPORT":
                 if st.session_state.data_loaded:
                     df = st.session_state.df
                     average_ctr_perc = st.session_state.average_ctr_perc
