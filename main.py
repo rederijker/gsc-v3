@@ -108,6 +108,9 @@ if "urls_to_inspect" not in st.session_state:
     st.session_state.urls_to_inspect = ""
 if "selected_tab" not in st.session_state:
     st.session_state.selected_tab = 0  # Imposta il valore predefinito della scheda
+# Gestisci la selezione del menu usando st.session_state
+if 'selected2' not in st.session_state:
+    st.session_state.selected2 = "GSC DATA OVERVIEW"
 
 def handle_tab_selection(tab_index):
     st.session_state.selected_tab = tab_index
@@ -1454,6 +1457,7 @@ if credentials:
             selected2 = option_menu(None, ["GSC DATA OVERVIEW", "QUERIES REPORT", "PAGES REPORT", "PAGE OPTIMIZATION", "QUERIES GROUPER"], 
                 icons=['graph-up-arrow', 'key', 'file-earmark-text', "rocket", 'intersect'], 
                 menu_icon="cast", default_index=0, orientation="horizontal")
+            st.session_state.selected2 = selected2
 
 
 
