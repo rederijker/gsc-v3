@@ -2279,10 +2279,10 @@ if credentials:
                             'nostro', 'più', 'se', 'o', 'per', 'un', 'una'
                         ]
                 
-                # Text area for custom stop words
-                with st.expander("Customize Stop Words"):
-                    custom_stop_words = st.text_area("One per line", "\n".join(default_stop_words))
-                    stop_words = [word.strip() for word in custom_stop_words.split('\n') if word.strip()]
+                    # Text area for custom stop words
+                    with st.expander("Customize Stop Words"):
+                        custom_stop_words = st.text_area("One per line", "\n".join(default_stop_words))
+                        stop_words = [word.strip() for word in custom_stop_words.split('\n') if word.strip()]
                 
                 with col2:
                     st.text("")
