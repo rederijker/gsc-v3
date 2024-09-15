@@ -2259,6 +2259,9 @@ if credentials:
             
             
             elif selected2 == "QUERIES GROUPER":
+                if st.session_state.data_loaded:
+                    df = st.session_state.df
+
 
             
 
