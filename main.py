@@ -46,8 +46,7 @@ st.set_page_config(
     layout="wide"
 )
 
-if 'average_ctr_perc' not in st.session_state:
-    st.session_state['average_ctr_perc'] = ''
+
 
 # Initialize session state
 if 'credentials' not in st.session_state:
@@ -1448,6 +1447,8 @@ if credentials:
                 total_clicks_m = df['Clicks'].sum()
                 average_ctr_m = df['CTR'].mean()
                 average_ctr_perc= average_ctr_m * 100
+                st.session_state['average_ctr_perc'] = average_ctr_perc
+
                 formatted_ctr_m = "{:.2f}%".format(average_ctr_perc)
                 total_impressions_m = df['Impressions'].sum()
                 with st.container(border=True):
