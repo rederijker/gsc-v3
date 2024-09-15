@@ -46,7 +46,8 @@ st.set_page_config(
     layout="wide"
 )
 
-
+if 'average_ctr_perc' not in st.session_state:
+    st.session_state['average_ctr_perc'] = ''
 
 # Initialize session state
 if 'credentials' not in st.session_state:
