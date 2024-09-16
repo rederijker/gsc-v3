@@ -1696,11 +1696,16 @@ if credentials:
                             st.plotly_chart(fig, use_container_width=False)
                             fig.show()
                         with col2:
-                            # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
-                            lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
-                            lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
-                            upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
+                            upper_high_ctr = df_query_performance[(df_query_performance['Position'] <= average_position) & (df_query_performance['CTR'] > average_ctr)]
+                            lower_high_ctr = df_query_performance[(df_query_performance['Position'] > average_position) & (df_query_performance['CTR'] > average_ctr)]
+                            lower_low_ctr = df_query_performance[(df_query_performance['Position'] > average_position) & (df_query_performance['CTR'] <= average_ctr)]
+                            upper_low_ctr = df_query_performance[(df_query_performance['Position'] <= average_position) & (df_query_performance['CTR'] <= average_ctr)]
+                        
+                            #Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
+                            supper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
+                            slower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
+                            slower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
+                            supper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
                         
                             def unique_pages(series):
                                 return ', '.join(series.unique())
