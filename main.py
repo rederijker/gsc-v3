@@ -1698,9 +1698,7 @@ if credentials:
                         with col2:
                           
                             #Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
-
-                            
+                            upper_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]                            
                             lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
                             lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
                             upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
@@ -1718,7 +1716,7 @@ if credentials:
                                 }
                         
                                 # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-                                df_upper_high_ctr_2 = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
@@ -1728,8 +1726,10 @@ if credentials:
                                 st.markdown("<br><br>", unsafe_allow_html=True)
                                 with st.expander(":green[GREEN QUADRANT: Queries with Above-Average Position and CTR]"):
                                     st.write("Queries with CTR and position equal or grather then the average")
-                                    st.write(df_upper_high_ctr_2)    
-                                    st.write(f"Upper High CTR (Green Quadrant): {upper_high_ctr.shape[0]} queries")
+                                    st.write(df_upper_high_ctr)    
+                                    st.write(f"Min CTR: {min_ctr}, Max CTR: {max_ctr}, Average CTR: {average_ctr}")
+                                    st.write(f"Min Position: {min_position}, Max Position: {max_position}, Average Position: {average_position}")
+
 
                                     
                                 with st.expander(":orange[YELLO QUADRANT: Queries with Below-Average Position and Above-Average CTR]"):
