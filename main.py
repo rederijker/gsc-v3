@@ -1699,7 +1699,8 @@ if credentials:
                         with col2:
                           
                             #Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] >= average_ctr)]                         
+                            upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] >= average_ctr)]  
+                            st.write(upper_high_ctr)
                             lower_high_ctr = df[(df['Position'] >= average_position) & (df['CTR'] >= average_ctr)]
                             lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
                             upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
@@ -1725,7 +1726,6 @@ if credentials:
                                 
                                 # Aggrega le copie
                                 df_upper_high_ctr = upper_high_ctr_copy.groupby('Query').agg(agg_funcs2).reset_index()
-                                st.write("Aggregated Upper High CTR DataFrame", df_upper_high_ctr)
 
                                 df_lower_high_ctr = lower_high_ctr_copy.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_lower_low_ctr = lower_low_ctr_copy.groupby('Query').agg(agg_funcs2).reset_index()
