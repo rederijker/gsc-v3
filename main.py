@@ -1696,16 +1696,12 @@ if credentials:
                             st.plotly_chart(fig, use_container_width=False)
                             fig.show()
                         with col2:
-                            upper_high_ctr = df_query_performance[(df_query_performance['Position'] <= average_position) & (df_query_performance['CTR'] > average_ctr)]
-                            lower_high_ctr = df_query_performance[(df_query_performance['Position'] > average_position) & (df_query_performance['CTR'] > average_ctr)]
-                            lower_low_ctr = df_query_performance[(df_query_performance['Position'] > average_position) & (df_query_performance['CTR'] <= average_ctr)]
-                            upper_low_ctr = df_query_performance[(df_query_performance['Position'] <= average_position) & (df_query_performance['CTR'] <= average_ctr)]
-                        
+                          
                             #Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            supper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
-                            slower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
-                            slower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
-                            supper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
+                            upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
+                            lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
+                            lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
+                            upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
                         
                             def unique_pages(series):
                                 return ', '.join(series.unique())
@@ -1731,6 +1727,8 @@ if credentials:
                                 with st.expander(":green[GREEN QUADRANT: Queries with Above-Average Position and CTR]"):
                                     st.write("Queries with CTR and position equal or grather then the average")
                                     st.write(df_upper_high_ctr)    
+                                    st.write(f"Upper High CTR (Green Quadrant): {upper_high_ctr.shape[0]} queries")
+
                                     
                                 with st.expander(":orange[YELLO QUADRANT: Queries with Below-Average Position and Above-Average CTR]"):
                                     st.write("""
