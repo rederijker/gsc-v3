@@ -1701,6 +1701,9 @@ if credentials:
                             #Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
                             upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] >= average_ctr)]  
                             st.write(upper_high_ctr)
+                            st.write(average_position)
+                            st.write(average_ctr)
+                            
                             lower_high_ctr = df[(df['Position'] >= average_position) & (df['CTR'] >= average_ctr)]
                             lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
                             upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
