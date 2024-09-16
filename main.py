@@ -1716,10 +1716,18 @@ if credentials:
                                 }
                         
                                 # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-                                df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                # Crea copie esplicite dei DataFrame filtrati
+                                upper_high_ctr_copy = upper_high_ctr.copy()
+                                lower_high_ctr_copy = lower_high_ctr.copy()
+                                lower_low_ctr_copy = lower_low_ctr.copy()
+                                upper_low_ctr_copy = upper_low_ctr.copy()
+                                
+                                # Aggrega le copie
+                                df_upper_high_ctr = upper_high_ctr_copy.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_lower_high_ctr = lower_high_ctr_copy.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_lower_low_ctr = lower_low_ctr_copy.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_upper_low_ctr = upper_low_ctr_copy.groupby('Query').agg(agg_funcs2).reset_index()
+
                         
                                 # Mostrare df
                                 st.markdown("<br><br>", unsafe_allow_html=True)
