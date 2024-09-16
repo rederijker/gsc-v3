@@ -1666,7 +1666,7 @@ if credentials:
                             unique_query_count_metric = df_query_performance['Query'].nunique()
                             st.metric("Queries", f"{unique_query_count_metric}")
                         with col3:                      
-                            st.metric("AVG. CTR", f"{average_ctr_perc:.2f}%")
+                            st.metric("AVG. CTR", f"{average_ctr:.2f}%")
                         with col4:                                             
                             st.metric("AVG. Position", f"{average_position:.2f}")
                             
