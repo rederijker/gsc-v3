@@ -1608,7 +1608,7 @@ if credentials:
                         
                         # Calcola i valori medi di CTR e Posizione solo per le query selezionate
                         average_ctr_query = df_query_performance['CTR'].mean()
-                        average_position = df_query_performance['Position'].mean()
+                        average_position_query = df_query_performance['Position'].mean()
                         
                         # Arrotonda la posizione media a due cifre decimali
                         df_query_performance['Position'] = df_query_performance['Position'].round(2)
@@ -1629,21 +1629,21 @@ if credentials:
                         fig.update_xaxes(range=[min_ctr, max_ctr], tickformat=".2f%%") # Formatta l'asse X come percentuale
                         
                         # Aggiungi rettangoli colorati per i quadranti
-                        fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr_query, y0=min_position, y1=average_position,
+                        fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr_query, y0=min_position, y1=average_position_query,
                                     fillcolor='rgba(0, 0, 255, 0.2)', line=dict(width=0), layer='below')  # Bottom left quadrant - blue
-                        fig.add_shape(type='rect', x0=average_ctr_query, x1=max_ctr, y0=min_position, y1=average_position,
+                        fig.add_shape(type='rect', x0=average_ctr_query, x1=max_ctr, y0=min_position, y1=average_position_query,
                                     fillcolor='rgba(0, 255, 0, 0.2)', line=dict(width=0), layer='below')  # top right quadrant - green
-                        fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr_query, y0=average_position, y1=max_position,
+                        fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr_query, y0=average_position_query, y1=max_position,
                                     fillcolor='rgba(255, 0, 0, 0.2)', line=dict(width=0), layer='below')  # Top left quadrant - red
-                        fig.add_shape(type='rect', x0=average_ctr_query, x1=max_ctr, y0=average_position, y1=max_position,
+                        fig.add_shape(type='rect', x0=average_ctr_query, x1=max_ctr, y0=average_position_query, y1=max_position,
                                     fillcolor='rgba(255, 255, 0, 0.2)', line=dict(width=0), layer='below')  # bottom right quadrant - yellow
                         
                         # Aggiungi linee di riferimento per la media di CTR e posizione
                         fig.add_shape(type='line', x0=average_ctr_query, x1=average_ctr_query, y0=min_position, y1=max_position, line=dict(color='red', dash='dash'))
                         fig.add_annotation(x=average_ctr_query, y=max_position, text="Average", showarrow=False, yshift=10, font=dict(color='white'))
                         
-                        fig.add_shape(type='line', x0=min_ctr, x1=max_ctr, y0=average_position, y1=average_position, line=dict(color='red', dash='dash'))
-                        fig.add_annotation(x=max_ctr, y=average_position, text="Average", showarrow=False, xshift=10, font=dict(color='white'))
+                        fig.add_shape(type='line', x0=min_ctr, x1=max_ctr, y0=average_position_query, y1=average_position_query, line=dict(color='red', dash='dash'))
+                        fig.add_annotation(x=max_ctr, y=average_position_query, text="Average", showarrow=False, xshift=10, font=dict(color='white'))
                     
                         # Aggiorna le tracce delle bolle
                         fig.update_traces(marker=dict(sizemin=4), hovertemplate='<b>Query:</b> %{customdata[0]}<br><b>CTR:</b> %{x:.2f}%<br><b>Position:</b> %{y:.2f}<br><b>Clicks:</b> %{marker.size}')
@@ -1669,7 +1669,7 @@ if credentials:
                         with col3:                      
                             st.metric("AVG. CTR", f"{average_ctr_query:.2f}%")
                         with col4:                                             
-                            st.metric("AVG. Position", f"{average_position:.2f}")
+                            st.metric("AVG. Position", f"{average_position_query:.2f}")
                             
                         col1, col2 = st.columns(2)
                         with col1:
@@ -1698,12 +1698,12 @@ if credentials:
                             fig.show()
                         with col2:
                             # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] >= average_position) & (df['CTR'] > average_ctr_query)]
+                            upper_high_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] >= average_ctr_query)]
                             st.write(df['CTR'].mean())
                             st.write(df['Position'].mean())
-                            lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr_query)]
-                            lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr_query)]
-                            upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr_query)]
+                            lower_high_ctr = df[(df['Position'] >= average_position_query) & (df['CTR'] >= average_ctr_query)]
+                            lower_low_ctr = df[(df['Position'] > average_position_query) & (df['CTR'] <= average_ctr_query)]
+                            upper_low_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] <= average_ctr_query)]
                         
                             def unique_pages(series):
                                 return ', '.join(series.unique())
