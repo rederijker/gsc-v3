@@ -1207,7 +1207,7 @@ def authorize_app():
             <hr>
             <br>
             <p>GSC InsightHub leverages Google Search Console data to provide comprehensive SEO analytics. Here's a breakdown of its core functionalities:</p>    
-            <h2>1. Access Search Analytics API</h2>
+            <h2>1. Easy Access Search Analytics API</h2>
             <p>With GSC InsightHub, you can easily access the Search Analytics API to:</p>
             <ul>
                 <li>Generate performance reports on queries and pages.</li>
@@ -1697,7 +1697,7 @@ if credentials:
                             fig.show()
                         with col2:
                             # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] > average_ctr)]
+                            upper_high_ctr = df[(df['Position'] >= average_position) & (df['CTR'] > average_ctr)]
                             lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
                             lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
                             upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
