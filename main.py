@@ -1701,9 +1701,9 @@ if credentials:
                             upper_high_ctr = df[(df['Position'] >= average_position) & (df['CTR'] > average_ctr_query)]
                             st.write(df['CTR'].mean())
                             st.write(df['Position'].mean())
-                            lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
-                            lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
-                            upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
+                            lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr_query)]
+                            lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr_query)]
+                            upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr_query)]
                         
                             def unique_pages(series):
                                 return ', '.join(series.unique())
