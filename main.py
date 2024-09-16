@@ -1698,7 +1698,7 @@ if credentials:
                         with col2:
                           
                             #Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
+                            rupper_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
 
                             
                             lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
@@ -1718,7 +1718,7 @@ if credentials:
                                 }
                         
                                 # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-                                df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_upper_high_ctr = rupper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
