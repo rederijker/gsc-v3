@@ -1607,7 +1607,7 @@ if credentials:
                         
                         # Calcola i valori medi di CTR e Posizione solo per le query selezionate
                         average_ctr_query = df_query_performance['CTR'].mean()
-                        average_position_query = df_query_performance['Position'].mean()
+                        average_position = df_query_performance['Position'].mean()
                         
                         # Arrotonda la posizione media a due cifre decimali
                         df_query_performance['Position'] = df_query_performance['Position'].round(2)
