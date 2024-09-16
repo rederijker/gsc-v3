@@ -2,7 +2,6 @@ import streamlit as st
 import httplib2
 import pandas as pd
 from apiclient.discovery import build
-
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 import numpy as np
@@ -1580,10 +1579,12 @@ if credentials:
             elif selected2 == "QUERIES REPORT":
                 if st.session_state.data_loaded:
                     df = st.session_state.df
-                    
+                    average_ctr_perc = st.session_state.average_ctr_perc
+            
                 with st.container(border=True):
                     st.subheader("1. Queries Performance Report")
                     st.divider()
+                
                     
                     if all(dim in selected_dimensions for dim in ['Query']):
                         query_funcs = {
@@ -1592,7 +1593,7 @@ if credentials:
                             'CTR': 'mean',
                             'Position': 'mean'
                         }
-                        # Raggruppiamo df per query
+                        # Raggruppiamo df per query per il bubble chart
                         df_query_performance = df.groupby('Query').agg(query_funcs).reset_index()
                         
                         # Converti il CTR in percentuale
@@ -1604,14 +1605,14 @@ if credentials:
                         min_position = df_query_performance['Position'].min()
                         max_position = df_query_performance['Position'].max()
                         
-                        # Calcola i valori medi di CTR e Posizione
+                        # Calcola i valori medi di CTR e Posizione solo per le query selezionate
                         average_ctr = df_query_performance['CTR'].mean()
                         average_position = df_query_performance['Position'].mean()
                         
                         # Arrotonda la posizione media a due cifre decimali
                         df_query_performance['Position'] = df_query_performance['Position'].round(2)
                         
-                        # Crea il grafico a bolle con Plotly
+                        # Crea il grafico a bolle con Plotly utilizzando il DataFrame filtrato
                         fig = px.scatter(
                             df_query_performance, 
                             x='CTR', 
@@ -1624,17 +1625,17 @@ if credentials:
                         # Configura gli assi
                         fig.update_yaxes(autorange="reversed")
                         fig.update_yaxes(range=[min_position, max_position])
-                        fig.update_xaxes(range=[min_ctr, max_ctr], tickformat=".2f%%")
+                        fig.update_xaxes(range=[min_ctr, max_ctr], tickformat=".2f%%") # Formatta l'asse X come percentuale
                         
                         # Aggiungi rettangoli colorati per i quadranti
                         fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=min_position, y1=average_position,
-                                      fillcolor='rgba(0, 0, 255, 0.2)', line=dict(width=0), layer='below')
+                                    fillcolor='rgba(0, 0, 255, 0.2)', line=dict(width=0), layer='below')  # Bottom left quadrant - blue
                         fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=min_position, y1=average_position,
-                                      fillcolor='rgba(0, 255, 0, 0.2)', line=dict(width=0), layer='below')
+                                    fillcolor='rgba(0, 255, 0, 0.2)', line=dict(width=0), layer='below')  # top right quadrant - green
                         fig.add_shape(type='rect', x0=min_ctr, x1=average_ctr, y0=average_position, y1=max_position,
-                                      fillcolor='rgba(255, 0, 0, 0.2)', line=dict(width=0), layer='below')
+                                    fillcolor='rgba(255, 0, 0, 0.2)', line=dict(width=0), layer='below')  # Top left quadrant - red
                         fig.add_shape(type='rect', x0=average_ctr, x1=max_ctr, y0=average_position, y1=max_position,
-                                      fillcolor='rgba(255, 255, 0, 0.2)', line=dict(width=0), layer='below')
+                                    fillcolor='rgba(255, 255, 0, 0.2)', line=dict(width=0), layer='below')  # bottom right quadrant - yellow
                         
                         # Aggiungi linee di riferimento per la media di CTR e posizione
                         fig.add_shape(type='line', x0=average_ctr, x1=average_ctr, y0=min_position, y1=max_position, line=dict(color='red', dash='dash'))
@@ -1642,9 +1643,10 @@ if credentials:
                         
                         fig.add_shape(type='line', x0=min_ctr, x1=max_ctr, y0=average_position, y1=average_position, line=dict(color='red', dash='dash'))
                         fig.add_annotation(x=max_ctr, y=average_position, text="Average", showarrow=False, xshift=10, font=dict(color='white'))
-                        
+                    
                         # Aggiorna le tracce delle bolle
                         fig.update_traces(marker=dict(sizemin=4), hovertemplate='<b>Query:</b> %{customdata[0]}<br><b>CTR:</b> %{x:.2f}%<br><b>Position:</b> %{y:.2f}<br><b>Clicks:</b> %{marker.size}')
+                            
                         
                         # Aggiungi titolo
                         fig.update_layout(
@@ -1653,17 +1655,19 @@ if credentials:
                             plot_bgcolor='rgb(10,14,18)' 
                         )
                         
+                        # Aggiungi la mappa di colori per la dimensione delle bolle
+                    
                         # Mostra il grafico interattivo
                         col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
                         with col1:
                             st.write("This section provides a visual representation of how different search queries are performing. It analyzes and displays metrics such as the position of queries in search results and their click-through rates (CTR). By comparing these metrics to overall averages, it helps identify which queries are performing well and which need improvement.")
-                
+
                         with col2:
                             unique_query_count_metric = df_query_performance['Query'].nunique()
                             st.metric("Queries", f"{unique_query_count_metric}")
-                        with col3:
-                            st.metric("AVG. CTR", f"{average_ctr:.2f}%")
-                        with col4:
+                        with col3:                      
+                            st.metric("AVG. CTR", f"{average_ctr_perc:.2f}%")
+                        with col4:                                             
                             st.metric("AVG. Position", f"{average_position:.2f}")
                             
                         col1, col2 = st.columns(2)
@@ -1671,6 +1675,7 @@ if credentials:
                             st.write("")
                             with st.popover("How to read the graph?🤔"):
                                 st.markdown("""                            
+                                
                                 #### Chart Elements
                                 - **Bubbles:** Each bubble represents a single search query.
                                 - **Axes:** 
@@ -1686,14 +1691,14 @@ if credentials:
                                 - **Red Quadrant (Bottom Left):** Queries with below-average CTR and position. These queries have poor visibility and attract few clicks.
                                 
                                 This structure helps quickly identify where queries stand relative to the overall average, facilitating the identification of areas for improvement and optimization opportunities.
-                                """)
-                            
+                                """)                            
+                        
                             st.plotly_chart(fig, use_container_width=False)
                             fig.show()
                         with col2:
-                            # Suddividere i dati in quattro DataFrame in base ai quadranti specificati
-                            upper_high_ctr = df[(df['Position'] <= average_position) & (df['CTR'] >= average_ctr)]
-                            lower_high_ctr = df[(df['Position'] >= average_position) & (df['CTR'] >= average_ctr)]
+                            # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
+                            upper_high_ctr = df[(df['Position'] >= average_position) & (df['CTR'] > average_ctr)]
+                            lower_high_ctr = df[(df['Position'] > average_position) & (df['CTR'] > average_ctr)]
                             lower_low_ctr = df[(df['Position'] > average_position) & (df['CTR'] <= average_ctr)]
                             upper_low_ctr = df[(df['Position'] <= average_position) & (df['CTR'] <= average_ctr)]
                         
@@ -1721,15 +1726,6 @@ if credentials:
                                 with st.expander(":green[GREEN QUADRANT: Queries with Above-Average Position and CTR]"):
                                     st.write("Queries with CTR and position equal or grather then the average")
                                     st.write(df_upper_high_ctr)    
-                                    st.write(f"Min CTR: {min_ctr}, Max CTR: {max_ctr}, Average CTR: {average_ctr}")
-                                    st.write(f"Min Position: {min_position}, Max Position: {max_position}, Average Position: {average_position}")
-
-
-
-                                    st.write(f"Queries con CTR > {average_ctr} e Position <= {average_position}: {df_query_performance[(df_query_performance['CTR'] > average_ctr) & (df_query_performance['Position'] <= average_position)].shape[0]}")
-
-
-
                                     
                                 with st.expander(":orange[YELLO QUADRANT: Queries with Below-Average Position and Above-Average CTR]"):
                                     st.write("""
