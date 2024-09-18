@@ -906,8 +906,9 @@ def analyze_query_performance(df):
                     'Position_Second_Half': '{:.2f}',
                     'Position_Change': '{:.2f}'
                 }))
-    #REPORT CAMBI DI POSIZIONAMENTO
-    pd.set_option("styler.render.max_elements", 20000000)
+
+#REPORT CAMBI DI POSIZIONAMENTO
+pd.set_option("styler.render.max_elements", 20000000)
 
 def analyze_query_position_changes(df):
     # Creare una copia del DataFrame di partenza per evitare conflitti con altre analisi
@@ -1096,6 +1097,7 @@ def analyze_query_position_changes(df):
                     'Clicks_First_Half': '{:.0f}',
                     'Impressions_First_Half': '{:.0f}'
                 }))
+
 # Funzione per ispezionare un singolo URL
 # Funzione per ispezionare un singolo URL con retry
 def inspect_url(url_to_inspect, selected_site, retries=3):
