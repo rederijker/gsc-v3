@@ -907,8 +907,248 @@ def analyze_query_performance(df):
                     'Position_Change': '{:.2f}'
                 }))
 
-#REPORT CAMBI DI POSIZIONAMENTO
-pd.set_option("styler.render.max_elements", 20000000)
+def analyze_query_seasonality(df):
+    with st.container(border=True):
+        st.subheader("4. Query Seasonality Report")
+        st.divider()
+
+        if 'Date' not in df.columns or 'Query' not in df.columns:
+            st.warning("Add 'Date' and 'Query' to dimensions to show the Query Seasonality Report")
+            return
+
+        # Converti la colonna 'Date' in datetime se non lo è già
+        df['Date'] = pd.to_datetime(df['Date'])
+
+        # Raggruppa i dati per Query e Data, sommando Clicks e Impressions
+        grouped_df = df.groupby(['Query', 'Date']).agg({
+            'Clicks': 'sum',
+            'Impressions': 'sum'
+        }).reset_index()
+
+        # Ordina il DataFrame per Query e Data
+        grouped_df = grouped_df.sort_values(['Query', 'Date'])
+
+        # Calcola la durata totale dei dati in giorni
+        total_days = (grouped_df['Date'].max() - grouped_df['Date'].min()).days
+
+        st.write(f"Analyzing seasonality over {total_days} days")
+
+        # Funzione per rilevare picchi stagionali
+        def detect_seasonality(series):
+            # Calcola la media mobile a 7 giorni
+            rolling_mean = series.rolling(window=7).mean()
+            # Calcola la deviazione standard
+            std_dev = series.std()
+            # Identifica i picchi (valori superiori a 2 deviazioni standard dalla media mobile)
+            peaks = series[series > (rolling_mean + 2 * std_dev)]
+            return peaks
+
+        # Analizza le query più frequenti
+        top_queries = grouped_df['Query'].value_counts().nlargest(10).index
+
+        for query in top_queries:
+            query_data = grouped_df[grouped_df['Query'] == query]
+
+            # Rileva picchi stagionali per Clicks e Impressions
+            click_peaks = detect_seasonality(query_data.set_index('Date')['Clicks'])
+            impression_peaks = detect_seasonality(query_data.set_index('Date')['Impressions'])
+
+            if not click_peaks.empty or not impression_peaks.empty:
+                st.write(f"### Seasonality for query: {query}")
+
+                # Crea un grafico per visualizzare i trend e i picchi
+                fig = go.Figure()
+
+                # Aggiungi linee per Clicks e Impressions
+                fig.add_trace(go.Scatter(x=query_data['Date'], y=query_data['Clicks'], mode='lines', name='Clicks'))
+                fig.add_trace(go.Scatter(x=query_data['Date'], y=query_data['Impressions'], mode='lines', name='Impressions'))
+
+                # Aggiungi punti per i picchi
+                if not click_peaks.empty:
+        with st.container(border=True):
+            st.subheader("4. Queries Traffic Changes Report")
+            st.divider()
+            col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
+            with col1:        
+                st.markdown("""
+                This report divides the time period into two halves and compares them.
+                The comparison is made between the following date ranges:
+                """)
+                st.markdown(f"""
+                - **First half period**: {start_date_query_performance_analysis} to {midpoint_query_performance_analysis}
+                - **Second half period**: {midpoint_query_performance_analysis + pd.Timedelta(days=1)} to {end_date_query_performance_analysis}
+                """)
+            with col2:
+                st.metric("Total Clicks Change", f"{overall_clicks_trend_query_performance_analysis:.0f}", f"{clicks_percentage_change:.2f}%")
+            with col3:
+                st.metric("Total Impressions Change", f"{overall_impressions_trend_query_performance_analysis:.0f}", f"{impressions_percentage_change:.2f}%")
+            with col4:
+                st.metric("Average CTR Change", f"{overall_ctr_trend_query_performance_analysis * 100:.2f}%", f"{overall_ctr_trend_query_performance_analysis * 100:.2f}%")
+            with col5:
+                if overall_position_trend_query_performance_analysis < 0:
+                    st.metric("Average Position Change", f"{overall_position_trend_query_performance_analysis:.2f}", f"{-position_percentage_change:.2f}%", delta_color="normal")
+                else:
+                    st.metric("Average Position Change", f"{overall_position_trend_query_performance_analysis:.2f}", f"{position_percentage_change:.2f}%", delta_color="inverse")
+        
+            # Creazione del grafico a barre con plotly
+            bar_data_query_performance_analysis = {
+                "Traffic Change": ["Gained Traffic", "Lost Traffic", "No Changes"],
+                "Count": [gained_traffic_query_performance_analysis.shape[0], lost_traffic_query_performance_analysis.shape[0], stable_traffic_query_performance_analysis.shape[0]]
+            }
+            
+            fig_query_performance_analysis = px.bar(
+                bar_data_query_performance_analysis, 
+                x="Traffic Change", 
+                y="Count", 
+                title="Traffic Change Overview",
+                labels={"Traffic Change": "Traffic Change Type", "Count": "Number of Queries"},
+                color="Traffic Change",
+                color_discrete_map={
+                    "Gained Traffic": "#32CD32",
+                    "Lost Traffic": "coral",
+                    "No Changes": "grey"
+                }
+            )
+            fig_query_performance_analysis.update_layout(
+                showlegend=False,
+                title=dict(
+                    text="Traffic Change Overview",
+                    y=0.8,  # Alza il titolo più vicino al grafico
+                    yanchor='bottom'
+                ),
+                paper_bgcolor='rgb(10,14,18)',  # Colore di sfondo del layout
+                plot_bgcolor='rgb(10,14,18)'    # Colore di sfondo dell'area del grafico
+            )
+            col1, col2 = st.columns(2)
+            with col1:
+                st.plotly_chart(fig_query_performance_analysis, use_container_width=True)
+            with col2:
+                st.markdown("<br></br>", unsafe_allow_html=True)
+                if overall_impressions_trend_query_performance_analysis > 0:
+                    st.success("The overall trend of impressions is increasing.")
+                else:
+                    st.warning("The overall trend of impressions is decreasing.")
+                
+                if overall_clicks_trend_query_performance_analysis > 0:
+                    st.success("The overall trend of clicks is increasing.")
+                else:
+                    st.warning("The overall trend of clicks is decreasing.")
+                
+                if overall_ctr_trend_query_performance_analysis > 0:
+                    st.success("The overall trend of CTR is increasing.")
+                else:
+                    st.warning("The overall trend of CTR is decreasing.")
+                
+                if overall_position_trend_query_performance_analysis < 0:
+                    st.success(f"The overall trend of average position is improving (lowering). Variation: {position_score_change:.2f} positions, improvement of {position_score_percentage_change:.2f}%.")
+                else:
+                    st.warning(f"The overall trend of average position is worsening (rising). Variation: {position_score_change:.2f} positions, worsening of {position_score_percentage_change:.2f}%.")
+        
+            # Visualizza i risultati
+            with st.expander("QUERIES THAT GAINED TRAFFIC ⬆️"):
+                st.dataframe(gained_traffic_query_performance_analysis[[
+                    'Query', 'Clicks_First_Half', 'Clicks_Second_Half', 'Clicks_Change',
+                    'Impressions_First_Half', 'Impressions_Second_Half', 'Impressions_Change',
+                    'CTR_First_Half', 'CTR_Second_Half', 'CTR_Change',
+                    'Position_First_Half', 'Position_Second_Half', 'Position_Change'
+                ]].reset_index(drop=True).style.format({
+                    'Clicks_First_Half': '{:.0f}',
+                    'Clicks_Second_Half': '{:.0f}',
+                    'Clicks_Change': '{:.0f}',
+                    'Impressions_First_Half': '{:.0f}',
+                    'Impressions_Second_Half': '{:.0f}',
+                    'Impressions_Change': '{:.0f}',
+                    'CTR_First_Half': '{:.2%}',
+                    'CTR_Second_Half': '{:.2%}',
+                    'CTR_Change': '{:.2%}',
+                    'Position_First_Half': '{:.2f}',
+                    'Position_Second_Half': '{:.2f}',
+                    'Position_Change': '{:.2f}'
+                }))
+            
+            with st.expander("QUERIES THAT LOST TRAFFIC ⬇️"):
+                st.dataframe(lost_traffic_query_performance_analysis[[
+                    'Query', 'Clicks_First_Half', 'Clicks_Second_Half', 'Clicks_Change',
+                    'Impressions_First_Half', 'Impressions_Second_Half', 'Impressions_Change',
+                    'CTR_First_Half', 'CTR_Second_Half', 'CTR_Change',
+                    'Position_First_Half', 'Position_Second_Half', 'Position_Change'
+                ]].reset_index(drop=True).style.format({
+                    'Clicks_First_Half': '{:.0f}',
+                    'Clicks_Second_Half': '{:.0f}',
+                    'Clicks_Change': '{:.0f}',
+                    'Impressions_First_Half': '{:.0f}',
+                    'Impressions_Second_Half': '{:.0f}',
+                    'Impressions_Change': '{:.0f}',
+                    'CTR_First_Half': '{:.2%}',
+                    'CTR_Second_Half': '{:.2%}',
+                    'CTR_Change': '{:.2%}',
+                    'Position_First_Half': '{:.2f}',
+                    'Position_Second_Half': '{:.2f}',
+                    'Position_Change': '{:.2f}'
+                }))
+                # Aggiungi un selettore per stabilire la soglia
+                st.write("")
+                st.markdown(f"<h4>Which queries have contributed the most to the traffic loss?</h4>",
+                            unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write("Identify the queries that have contributed the most to your website's traffic loss. You can select a specific percentage of the total loss to determine the influence threshold. This will show you which queries had the biggest impact on the overall traffic decrease.")
+                with col2:
+                    threshold_query_performance_analysis = st.slider(
+                        "Set the threshold for significant loss in traffic (percentage of total loss)",
+                        min_value=1, max_value=100, value=10, step=5,
+                        format="%d%%",
+                        help="Adjust the threshold to determine which queries are considered to have significant loss in traffic."
+                    ) / 100.0
+                
+                # Identifica le query che causano la perdita di traffico
+                if overall_clicks_trend_query_performance_analysis != 0:
+                    significant_lost_traffic_query_performance_analysis = lost_traffic_query_performance_analysis[abs(lost_traffic_query_performance_analysis['Clicks_Change']) > abs(overall_clicks_trend_query_performance_analysis) * threshold_query_performance_analysis]  # Perdita significativa > soglia della perdita totale
+                    if not significant_lost_traffic_query_performance_analysis.empty:
+                        st.write("Queries causing the loss in traffic:")
+                        st.dataframe(significant_lost_traffic_query_performance_analysis[[
+                            'Query', 'Clicks_First_Half', 'Clicks_Second_Half', 'Clicks_Change',
+                            'Impressions_First_Half', 'Impressions_Second_Half', 'Impressions_Change',
+                            'CTR_First_Half', 'CTR_Second_Half', 'CTR_Change',
+                            'Position_First_Half', 'Position_Second_Half', 'Position_Change'
+                        ]].reset_index(drop=True).style.format({
+                            'Clicks_First_Half': '{:.0f}',
+                            'Clicks_Second_Half': '{:.0f}',
+                            'Clicks_Change': '{:.0f}',
+                            'Impressions_First_Half': '{:.0f}',
+                            'Impressions_Second_Half': '{:.0f}',
+                            'Impressions_Change': '{:.0f}',
+                            'CTR_First_Half': '{:.2%}',
+                            'CTR_Second_Half': '{:.2%}',
+                            'CTR_Change': '{:.2%}',
+                            'Position_First_Half': '{:.2f}',
+                            'Position_Second_Half': '{:.2f}',
+                            'Position_Change': '{:.2f}'
+                        }))
+                else:
+                    st.write("No significant loss in traffic detected.")
+            with st.expander("QUERIES WITH NO CHANGES TRAFFIC ➡️"):
+                st.dataframe(stable_traffic_query_performance_analysis[[
+                    'Query', 'Clicks_First_Half', 'Clicks_Second_Half', 'Clicks_Change',
+                    'Impressions_First_Half', 'Impressions_Second_Half', 'Impressions_Change',
+                    'CTR_First_Half', 'CTR_Second_Half', 'CTR_Change',
+                    'Position_First_Half', 'Position_Second_Half', 'Position_Change'
+                ]].reset_index(drop=True).style.format({
+                    'Clicks_First_Half': '{:.0f}',
+                    'Clicks_Second_Half': '{:.0f}',
+                    'Clicks_Change': '{:.0f}',
+                    'Impressions_First_Half': '{:.0f}',
+                    'Impressions_Second_Half': '{:.0f}',
+                    'Impressions_Change': '{:.0f}',
+                    'CTR_First_Half': '{:.2%}',
+                    'CTR_Second_Half': '{:.2%}',
+                    'CTR_Change': '{:.2%}',
+                    'Position_First_Half': '{:.2f}',
+                    'Position_Second_Half': '{:.2f}',
+                    'Position_Change': '{:.2f}'
+                }))
+    #REPORT CAMBI DI POSIZIONAMENTO
+    pd.set_option("styler.render.max_elements", 20000000)
 
 def analyze_query_position_changes(df):
     # Creare una copia del DataFrame di partenza per evitare conflitti con altre analisi
@@ -1097,7 +1337,6 @@ def analyze_query_position_changes(df):
                     'Clicks_First_Half': '{:.0f}',
                     'Impressions_First_Half': '{:.0f}'
                 }))
-
 # Funzione per ispezionare un singolo URL
 # Funzione per ispezionare un singolo URL con retry
 def inspect_url(url_to_inspect, selected_site, retries=3):
