@@ -1698,15 +1698,27 @@ if credentials:
                             fig.show()
                         with col2:
                             # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] >= average_ctr_query)]
+                            # Raggruppamento prima dei filtri
+                            agg_funcs2 = {
+                                'Impressions': 'sum',
+                                'Clicks': 'sum',
+                                'CTR': 'mean',
+                                'Position': 'mean',
+                                'Page': unique_pages
+                            }
+                            
+                            df_grouped = df.groupby('Query').agg(agg_funcs2).reset_index()
+                            
+                            # Applichiamo i filtri sui dati aggregati
+                            df_upper_high_ctr = df_grouped[(df_grouped['Position'] <= average_position_query) & (df_grouped['CTR'] >= average_ctr_query)]
+                            df_lower_high_ctr = df_grouped[(df_grouped['Position'] >= average_position_query) & (df_grouped['CTR'] >= average_ctr_query)]
+                            df_upper_low_ctr = df_grouped[(df_grouped['Position'] <= average_position_query) & (df_grouped['CTR'] <= average_ctr_query)]
+                            df_lower_low_ctr = df_grouped[(df_grouped['Position'] > average_position_query) & (df_grouped['CTR'] <= average_ctr_query)]
+
                             
                             st.write(df['CTR'].mean())
                             st.write(df['Position'].mean())
 
-                            
-                            lower_high_ctr = df[(df['Position'] >= average_position_query) & (df['CTR'] >= average_ctr_query)]
-                            lower_low_ctr = df[(df['Position'] > average_position_query) & (df['CTR'] <= average_ctr_query)]
-                            upper_low_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] <= average_ctr_query)]
                         
                             def unique_pages(series):
                                 return ', '.join(series.unique())
@@ -1721,13 +1733,11 @@ if credentials:
                                 }
                         
                                 # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-                                df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                st.write("df_upper_hight_ctr")
-                                st.write(df_upper_high_ctr)
 
-                                df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+
+
+                                
+                
 
 
 
