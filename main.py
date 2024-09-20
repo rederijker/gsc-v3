@@ -1713,6 +1713,10 @@ if credentials:
                                 }
                                 
                                 df_grouped = df.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_grouped['CTR'] = df_grouped['ctr'].apply(lambda x: f'{x:.2f}%')
+
+
+                                
                                 ctr_mean_df_grouped = df_grouped["CTR"].mean()
                                 position_mean_df_grouped = df_grouped["Position"].mean()
 
