@@ -1697,6 +1697,9 @@ if credentials:
                             st.plotly_chart(fig, use_container_width=False)
                             fig.show()
                         with col2:
+                        
+                            def unique_pages(series):
+                                return ', '.join(series.unique())
                             # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
                             # Raggruppamento prima dei filtri
                             agg_funcs2 = {
@@ -1720,17 +1723,7 @@ if credentials:
                             st.write(df['Position'].mean())
 
                         
-                            def unique_pages(series):
-                                return ', '.join(series.unique())
-                        
-                            try:
-                                agg_funcs2 = {
-                                    'Impressions': 'sum',
-                                    'Clicks': 'sum',
-                                    'CTR': 'mean',
-                                    'Position': 'mean',
-                                    'Page': unique_pages
-                                }
+        
                         
                                 # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
 
