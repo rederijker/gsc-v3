@@ -1468,7 +1468,7 @@ if credentials:
                     col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
                     with col1:
                         st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
-                        with st.popover("Filters"):
+                        with st.expander("Filters"):
                             dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
                             selected_dimension = st.selectbox("Select Dimension", dimensions)
                     
