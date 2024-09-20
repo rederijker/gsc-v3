@@ -1723,7 +1723,7 @@ if credentials:
                                 # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
                                 df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 st.write("df_upper_hight_ctr")
-                                st.write("df_upper_high_ctr)
+                                st.write(df_upper_high_ctr)
 
                                 df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                                 df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
