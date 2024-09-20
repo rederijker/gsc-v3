@@ -1713,12 +1713,14 @@ if credentials:
                                 }
                                 
                                 df_grouped = df.groupby('Query').agg(agg_funcs2).reset_index()
-                                
+                                ctr_mean_df_grouped = df_grouped["CTR"].mean()
+                                position_mean_df_grouped = df_grouped["Position"].mean()
+
                                 # Applichiamo i filtri sui dati aggregati
-                                df_upper_high_ctr = df_grouped[(df_grouped['Position'] <= average_position_query) & (df_grouped['CTR'] >= average_ctr_query)]
-                                df_lower_high_ctr = df_grouped[(df_grouped['Position'] >= average_position_query) & (df_grouped['CTR'] >= average_ctr_query)]
-                                df_upper_low_ctr = df_grouped[(df_grouped['Position'] <= average_position_query) & (df_grouped['CTR'] <= average_ctr_query)]
-                                df_lower_low_ctr = df_grouped[(df_grouped['Position'] > average_position_query) & (df_grouped['CTR'] <= average_ctr_query)]
+                                df_upper_high_ctr = df_grouped[(df_grouped['Position'] <= position_mean_df_grouped) & (df_grouped['CTR'] >= ctr_mean_df_grouped )]
+                                df_lower_high_ctr = df_grouped[(df_grouped['Position'] >= position_mean_df_grouped) & (df_grouped['CTR'] >= ctr_mean_df_grouped )]
+                                df_upper_low_ctr = df_grouped[(df_grouped['Position'] <= position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
+                                df_lower_low_ctr = df_grouped[(df_grouped['Position'] > position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
 
                                 # Mostrare df
                                 st.markdown("<br><br>", unsafe_allow_html=True)
