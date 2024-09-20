@@ -1465,7 +1465,7 @@ if credentials:
                 
                     
                     # Aggiornamento delle metriche
-                    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+                    col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
                     with col1:
                         st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
                         with st.expander("Filters"):
