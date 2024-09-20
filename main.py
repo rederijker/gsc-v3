@@ -1608,13 +1608,12 @@ if credentials:
                         
                         # Calcola i valori medi di CTR e Posizione solo per le query selezionate
                         average_ctr_query = df_query_performance['CTR'].mean()
-                        average_position_query = df_query_performance['Position'].mean()                        
+                        average_position_query = df_query_performance['Position'].mean()
+                        
                         # Arrotonda la posizione media a due cifre decimali
                         df_query_performance['Position'] = df_query_performance['Position'].round(2)
                         
                         # Crea il grafico a bolle con Plotly utilizzando il DataFrame filtrato
-                        #
-                        ##############################
                         fig = px.scatter(
                             df_query_performance, 
                             x='CTR', 
@@ -1657,6 +1656,7 @@ if credentials:
                             plot_bgcolor='rgb(10,14,18)' 
                         )
                         
+                        # Aggiungi la mappa di colori per la dimensione delle bolle
                     
                         # Mostra il grafico interattivo
                         col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
@@ -1697,48 +1697,31 @@ if credentials:
                             st.plotly_chart(fig, use_container_width=False)
                             fig.show()
                         with col2:
+                            # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
+                            upper_high_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] >= average_ctr_query)]
+                            st.write(df['CTR'].mean())
+                            st.write(df['Position'].mean())
+                            lower_high_ctr = df[(df['Position'] >= average_position_query) & (df['CTR'] >= average_ctr_query)]
+                            lower_low_ctr = df[(df['Position'] > average_position_query) & (df['CTR'] <= average_ctr_query)]
+                            upper_low_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] <= average_ctr_query)]
                         
                             def unique_pages(series):
                                 return ', '.join(series.unique())
-                            # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            # Raggruppamento prima dei filtri
-                            agg_funcs2 = {
-                                'Impressions': 'sum',
-                                'Clicks': 'sum',
-                                'CTR': 'mean',
-                                'Position': 'mean',
-                                'Page': unique_pages
-                            }
-                            
-                            df_grouped = df.groupby('Query').agg(agg_funcs2).reset_index()
-                            
-                            # Applichiamo i filtri sui dati aggregati
-                            df_upper_high_ctr = df_grouped[(df_grouped['Position'] <= average_position_query) & (df_grouped['CTR'] >= average_ctr_query)]
-                            df_lower_high_ctr = df_grouped[(df_grouped['Position'] >= average_position_query) & (df_grouped['CTR'] >= average_ctr_query)]
-                            df_upper_low_ctr = df_grouped[(df_grouped['Position'] <= average_position_query) & (df_grouped['CTR'] <= average_ctr_query)]
-                            df_lower_low_ctr = df_grouped[(df_grouped['Position'] > average_position_query) & (df_grouped['CTR'] <= average_ctr_query)]
-
-                            
-                            st.write(df['CTR'].mean())
-                            st.write(df['Position'].mean())
-
                         
-        
+                            try:
+                                agg_funcs2 = {
+                                    'Impressions': 'sum',
+                                    'Clicks': 'sum',
+                                    'CTR': 'mean',
+                                    'Position': 'mean',
+                                    'Page': unique_pages
+                                }
                         
                                 # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-
-
-
-                                
-                
-
-
-
-
-
-
-
-                                
+                                df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
                         
                                 # Mostrare df
                                 st.markdown("<br><br>", unsafe_allow_html=True)
