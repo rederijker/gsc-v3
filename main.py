@@ -1847,7 +1847,10 @@ if credentials:
                 
                         with col2:
                             # Visualizza il DataFrame
+                            page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'] * 100
+                            page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'].apply(lambda x: f"{x:.2f}%")
                             st.dataframe(page_distribution)
+                            
                         
                         # Selezionare la pagina per vedere i dettagli delle query
                         selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
