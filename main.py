@@ -1465,10 +1465,10 @@ if credentials:
                 
                     
                     # Aggiornamento delle metriche
-                    col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1])
+                    col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
                     with col1:
                         st.write(f"Performance overview of your website **from** {start_date.strftime('%Y-%m-%d')} **to** {end_date.strftime('%Y-%m-%d')}")
-                        with st.popover("Filters"):
+                        with st.expander("Filters"):
                             dimensions = [col for col in copy_website_data.columns if col not in ['Date', 'Clicks', 'Impressions', 'CTR', 'Position']]
                             selected_dimension = st.selectbox("Select Dimension", dimensions)
                     
@@ -1698,17 +1698,12 @@ if credentials:
                             fig.show()
                         with col2:
                             # Suddividere i dati in quattro DataFrame in base ai quadranti specificati e fornire all'utente la lista delle query in ciascun quadrante
-                            upper_high_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] >= average_ctr_query)]
-                            st.write(df['CTR'].mean())
-                            st.write(df['Position'].mean())
-                            lower_high_ctr = df[(df['Position'] >= average_position_query) & (df['CTR'] >= average_ctr_query)]
-                            lower_low_ctr = df[(df['Position'] > average_position_query) & (df['CTR'] <= average_ctr_query)]
-                            upper_low_ctr = df[(df['Position'] <= average_position_query) & (df['CTR'] <= average_ctr_query)]
-                        
+                      
                             def unique_pages(series):
                                 return ', '.join(series.unique())
                         
                             try:
+
                                 agg_funcs2 = {
                                     'Impressions': 'sum',
                                     'Clicks': 'sum',
@@ -1716,13 +1711,22 @@ if credentials:
                                     'Position': 'mean',
                                     'Page': unique_pages
                                 }
-                        
-                                # Raggruppiamo e aggreghiamo i DataFrame dei quadranti
-                                df_upper_high_ctr = upper_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_lower_high_ctr = lower_high_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_lower_low_ctr = lower_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_upper_low_ctr = upper_low_ctr.groupby('Query').agg(agg_funcs2).reset_index()
-                        
+                                
+                                df_grouped = df.groupby('Query').agg(agg_funcs2).reset_index()
+                                df_grouped['CTR'] = df_grouped['CTR'] * 100
+
+                                                       
+                                ctr_mean_df_grouped = df_grouped["CTR"].mean()
+                                position_mean_df_grouped = df_grouped["Position"].mean()
+
+                                # Applichiamo i filtri sui dati aggregati
+                                df_upper_high_ctr = df_grouped[(df_grouped['Position'] <= position_mean_df_grouped) & (df_grouped['CTR'] >= ctr_mean_df_grouped )]
+                                df_lower_high_ctr = df_grouped[(df_grouped['Position'] >= position_mean_df_grouped) & (df_grouped['CTR'] >= ctr_mean_df_grouped )]
+                                df_upper_low_ctr = df_grouped[(df_grouped['Position'] <= position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
+                                df_lower_low_ctr = df_grouped[(df_grouped['Position'] > position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
+                                for df in [df_upper_high_ctr, df_lower_high_ctr, df_upper_low_ctr, df_lower_low_ctr]:
+                                    df['CTR'] = df['CTR'].apply(lambda x: f"{x:.2f}%")
+
                                 # Mostrare df
                                 st.markdown("<br><br>", unsafe_allow_html=True)
                                 st.markdown("<br><br>", unsafe_allow_html=True)
@@ -1843,7 +1847,10 @@ if credentials:
                 
                         with col2:
                             # Visualizza il DataFrame
+                            page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'] * 100/100
+                            page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'].apply(lambda x: f"{x:.2f}%")
                             st.dataframe(page_distribution)
+                            
                         
                         # Selezionare la pagina per vedere i dettagli delle query
                         selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
