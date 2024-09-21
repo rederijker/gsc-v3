@@ -1713,9 +1713,6 @@ if credentials:
                                 }
                                 
                                 df_grouped = df.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_grouped['CTR'] = df_grouped['CTR'] * 100
-
-                                                       
                                 ctr_mean_df_grouped = df_grouped["CTR"].mean()
                                 position_mean_df_grouped = df_grouped["Position"].mean()
 
@@ -1724,8 +1721,6 @@ if credentials:
                                 df_lower_high_ctr = df_grouped[(df_grouped['Position'] >= position_mean_df_grouped) & (df_grouped['CTR'] >= ctr_mean_df_grouped )]
                                 df_upper_low_ctr = df_grouped[(df_grouped['Position'] <= position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
                                 df_lower_low_ctr = df_grouped[(df_grouped['Position'] > position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
-                                for df in [df_upper_high_ctr, df_lower_high_ctr, df_upper_low_ctr, df_lower_low_ctr]:
-                                    df['CTR'] = df['CTR'].apply(lambda x: f"{x:.2f}%")
 
                                 # Mostrare df
                                 st.markdown("<br><br>", unsafe_allow_html=True)
@@ -1847,10 +1842,7 @@ if credentials:
                 
                         with col2:
                             # Visualizza il DataFrame
-                            page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'] * 100/100
-                            page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'].apply(lambda x: f"{x:.2f}%")
                             st.dataframe(page_distribution)
-                            
                         
                         # Selezionare la pagina per vedere i dettagli delle query
                         selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
@@ -1944,10 +1936,6 @@ if credentials:
                         st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
                 except Exception as e:
                     st.error(f"Si è verificato un errore: {e}")
-
-                st.write(df) 
-                st.write("Colonne nel DataFrame:", df.columns.tolist())
-                st.write("Prime righe del DataFrame:", df.head())
                 
                 analyze_query_performance(df)
 
