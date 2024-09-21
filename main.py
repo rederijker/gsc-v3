@@ -1713,12 +1713,9 @@ if credentials:
                                 }
                                 
                                 df_grouped = df.groupby('Query').agg(agg_funcs2).reset_index()
-                                df_grouped['ctr'] = df_grouped['ctr'] * 100
+                                df_grouped['CTR'] = df_grouped['CTR'] * 100
 
-                                df_grouped['CTR'] = df_grouped['ctr'].apply(lambda x: f'{x:.2f}%')
-
-
-                                
+                                                       
                                 ctr_mean_df_grouped = df_grouped["CTR"].mean()
                                 position_mean_df_grouped = df_grouped["Position"].mean()
 
@@ -1727,6 +1724,8 @@ if credentials:
                                 df_lower_high_ctr = df_grouped[(df_grouped['Position'] >= position_mean_df_grouped) & (df_grouped['CTR'] >= ctr_mean_df_grouped )]
                                 df_upper_low_ctr = df_grouped[(df_grouped['Position'] <= position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
                                 df_lower_low_ctr = df_grouped[(df_grouped['Position'] > position_mean_df_grouped) & (df_grouped['CTR'] <= ctr_mean_df_grouped )]
+                                for df in [df_upper_high_ctr, df_lower_high_ctr, df_upper_low_ctr, df_lower_low_ctr]:
+                                    df['CTR'] = df['CTR'].apply(lambda x: f"{x:.2f}%")
 
                                 # Mostrare df
                                 st.markdown("<br><br>", unsafe_allow_html=True)
