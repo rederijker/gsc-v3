@@ -1064,7 +1064,6 @@ st.markdown("""
           )
 
 # Aggiungi questa chiamata di funzione dove desideri che appaia il report di stagionalità
-analyze_query_seasonality(df)
 
 # ... (resto del codice) ...
 
@@ -1619,6 +1618,8 @@ if credentials:
                                         - If you already have a page, contemplate adding more content to better address the needs of users searching for this query.
                                     """)
                                     st.write(df_lower_high_ctr)
+                                    analyze_query_seasonality(df)
+
             
                                 with st.expander(":blue[BLUE QUADRANT: Top position and low CTR Queries]"):
                                     st.write("""
