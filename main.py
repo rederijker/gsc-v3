@@ -1944,6 +1944,8 @@ if credentials:
                         st.warning("Add 'Page' to dimensions to show 3. Queries Cannibalization Report")
                 except Exception as e:
                     st.error(f"Si è verificato un errore: {e}")
+                st.write("Colonne nel DataFrame:", df.columns.tolist())
+                st.write("Prime righe del DataFrame:", df.head())
                 
                 analyze_query_performance(df)
 
