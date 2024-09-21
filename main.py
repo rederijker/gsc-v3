@@ -1149,7 +1149,6 @@ st.markdown("""
           )
 
 # Aggiungi questa chiamata di funzione dove desideri che appaia il report di stagionalità
-analyze_query_seasonality(df)
 
 # ... (resto del codice) ...
 
