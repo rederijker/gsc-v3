@@ -1867,15 +1867,14 @@ if credentials:
                 try:
                     # Controllo se la colonna 'Page' è presente
                     if 'Page' in df.columns:
-                        df_can = df.copy()
-                        df_can['Cleaned_Page'] = df_can['Page'].apply(lambda x: x.split('#')[0])
+                        df['Cleaned_Page'] = df['Page'].apply(lambda x: x.split('#')[0])
                 
                         with st.container(border=True):
                             st.subheader("3. Queries Cannibalization Report")            
                             st.divider()
                             
                             # Group by the cleaned page and query, and calculate the metrics
-                            query_page_metrics = df_can.groupby(['Query', 'Cleaned_Page']).agg({
+                            query_page_metrics = df.groupby(['Query', 'Cleaned_Page']).agg({
                                 'Position': 'mean',
                                 'CTR': 'mean',
                                 'Clicks': 'sum',
