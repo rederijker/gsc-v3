@@ -1848,7 +1848,7 @@ if credentials:
                         with col2:
                             # Visualizza il DataFrame
                             page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'] * 100
-                            page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'].apply(lambda x: f"{x:.2f}%")
+
                             st.dataframe(page_distribution)
                             
                         
