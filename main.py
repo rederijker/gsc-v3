@@ -2,7 +2,7 @@ import streamlit as st
 import httplib2
 import pandas as pd
 from apiclient.discovery import build
-from time import timedelta
+from datetime import timedelta
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 import numpy as np
