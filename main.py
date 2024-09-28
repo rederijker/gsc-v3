@@ -1,6 +1,8 @@
 import streamlit as st
 import httplib2
 import pandas as pd
+import zipfile
+
 from apiclient.discovery import build
 from datetime import timedelta
 from oauth2client.client import OAuth2WebServerFlow
@@ -30,7 +32,6 @@ from urllib.parse import urlparse, parse_qs
 import streamlit.components.v1 as components
 import concurrent.futures 
 from googleapiclient.errors import HttpError
-from st_tabs import TabBar
 from google.oauth2 import service_account
 from googleapiclient.http import BatchHttpRequest
 import json
@@ -1452,13 +1453,34 @@ if credentials:
                     except HttpError as e:
                         st.warning(f"HTTP Error: {e}")
                         
-                def convert_df_to_csv(df):
-                    return df.to_csv(index=False).encode('utf-8')
 
+
+
+        def convert_df_to_zip(df, file_name="data.csv"):
+            # Crea un buffer in memoria per il file ZIP
+            buffer = io.BytesIO()
+            
+            # Crea un file ZIP
+            with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+                # Converti il DataFrame in CSV e scrivilo nel file ZIP
+                csv_data = df.to_csv(index=False).encode('utf-8')
+                zf.writestr(file_name, csv_data)
+            
+            # Spostati all'inizio del buffer
+            buffer.seek(0)
+            
+            return buffer
+        
+        # Esempio di utilizzo con Streamlit
         if st.session_state.data_loaded and st.session_state.download_ready:
-            csv = st.session_state.df.to_csv(index=False).encode('utf-8')
-            st.download_button(label="Download data CSV", data=csv, file_name='data.csv', mime='text/csv')
-
+            # Converti il DataFrame in un file ZIP compresso
+            zip_buffer = convert_df_to_zip(st.session_state.df)
+            
+            # Fornisci il pulsante per scaricare il file ZIP
+            st.download_button(label="Download data ZIP", 
+                               data=zip_buffer, 
+                               file_name="data.zip", 
+                               mime="application/zip")
 
             if st.button('Perform analysis'):  
                 
