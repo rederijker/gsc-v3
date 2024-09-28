@@ -2,7 +2,7 @@ import streamlit as st
 import httplib2
 import pandas as pd
 from apiclient.discovery import build
-
+from time import timedelta
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 import numpy as np
@@ -1367,49 +1367,63 @@ if credentials:
 
         
 
+
         if st.button('GET DATA ⬇️'):
             clear_data()
             if st.session_state.selected_site:
                 dimensions = [dim for dim in selected_dimensions]
-        
+            
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 total_downloaded_rows = 0
-                start_row = 0
         
                 if st.session_state.df is None:
                     st.session_state.df = pd.DataFrame()
         
                 with st.spinner("Downloading data..."):
                     try:
-                        while True:
-                            rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, start_date, end_date, dimensions, st.session_state.dimension_filters, selected_type, start_row, row_limit)
+                        current_date = start_date
+                        
+                        while current_date <= end_date:
+                            # Imposta il termine per la richiesta a 1 giorno
+                            next_date = current_date + timedelta(days=1)
                             
-                            if not rows:
-                                st.warning("No data retrieved from API.")                            
-                                break
+                            # Inizializza il numero di righe scaricate per il giorno corrente
+                            daily_downloaded_rows = 0
+                            
+                            while daily_downloaded_rows < row_limit:
+                                # Effettua la richiesta per la data corrente
+                                rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, current_date, next_date, dimensions, st.session_state.dimension_filters, selected_type)
+                                
+                                if not rows:
+                                    st.warning(f"No data retrieved for {current_date}.")
+                                    break
         
-                            data_list = []
-                            for row in rows:
-                                data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
-                                data_entry.update({
-                                    'Clicks': row['clicks'],
-                                    'Impressions': row['impressions'],
-                                    'CTR': row['ctr'],
-                                    'Position': row['position']
-                                })
-                                data_list.append(data_entry)
+                                data_list = []
+                                for row in rows:
+                                    data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
+                                    data_entry.update({
+                                        'Clicks': row['clicks'],
+                                        'Impressions': row['impressions'],
+                                        'CTR': row['ctr'],
+                                        'Position': row['position']
+                                    })
+                                    data_list.append(data_entry)
         
-                            chunk_df = pd.DataFrame(data_list)
-                            st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
+                                chunk_df = pd.DataFrame(data_list)
+                                st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
+                                
+                                total_downloaded_rows += len(rows)
+                                daily_downloaded_rows += len(rows)
+                                status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
+                                
+                                # Se sono state scaricate più di 25.000 righe, fermati per il giorno corrente
+                                if len(rows) < 25000:
+                                    break  # Se meno di 25.000 righe, esci dalla richiesta per il giorno
+        
+                            current_date = next_date  # Passa al giorno successivo
                             
-                            total_downloaded_rows += len(rows)
-                            start_row += len(rows)
-                            status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
-                            
-                            if len(rows) < 25000 or (row_limit and total_downloaded_rows >= row_limit):
-                                break
-                            
+                            # Aggiorna la barra di progresso
                             progress_bar.progress(min(total_downloaded_rows / (row_limit if row_limit else total_downloaded_rows + len(rows)), 1.0))
         
                         st.session_state.data_loaded = True
@@ -1419,7 +1433,6 @@ if credentials:
         
                     except HttpError as e:
                         st.warning(f"HTTP Error: {e}")
-
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
 
