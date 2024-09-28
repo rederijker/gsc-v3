@@ -1368,6 +1368,7 @@ if credentials:
         
 
 
+
         if st.button('GET DATA ⬇️'):
             clear_data()
             if st.session_state.selected_site:
@@ -1382,6 +1383,10 @@ if credentials:
         
                 if row_limit is None:
                     row_limit = float('inf')
+        
+                # Calcola il numero totale di giorni da scaricare
+                total_days = (end_date - start_date).days + 1  # Include il giorno finale
+                completed_days = 0  # Inizializza il contatore dei giorni completati
         
                 with st.spinner("Downloading data..."):
                     try:
@@ -1432,19 +1437,21 @@ if credentials:
                                 if len(rows) < 25000:
                                     break  # Esci dalla richiesta per il giorno se meno di 25.000 righe
         
+                            # Incrementa il contatore dei giorni completati
+                            completed_days += 1
                             current_date = next_date  # Passa al giorno successivo
                             
-                            # Aggiorna la barra di progresso
-                            progress_bar.progress(min(total_downloaded_rows / (row_limit if row_limit else total_downloaded_rows + len(rows)), 1.0))
+                            # Aggiorna la barra di progresso in base ai giorni completati
+                            progress_bar.progress(completed_days / total_days)
         
                         st.session_state.data_loaded = True
                         st.session_state.download_ready = True
-                        progress_bar.progress(100)
+                        progress_bar.progress(1.0)  # Completa la barra di progresso
                         progress_bar.empty()
         
                     except HttpError as e:
                         st.warning(f"HTTP Error: {e}")
-                
+                        
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
 
