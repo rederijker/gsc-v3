@@ -1380,19 +1380,20 @@ if credentials:
                 if st.session_state.df is None:
                     st.session_state.df = pd.DataFrame()
         
+                # Assicurati che row_limit sia un intero
+                if row_limit is None:
+                    row_limit = float('inf')  # Imposta a infinito se None
+        
                 with st.spinner("Downloading data..."):
                     try:
                         current_date = start_date
                         
                         while current_date <= end_date:
-                            # Imposta il termine per la richiesta a 1 giorno
                             next_date = current_date + timedelta(days=1)
                             
-                            # Inizializza il numero di righe scaricate per il giorno corrente
                             daily_downloaded_rows = 0
                             
                             while daily_downloaded_rows < row_limit:
-                                # Effettua la richiesta per la data corrente
                                 rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, current_date, next_date, dimensions, st.session_state.dimension_filters, selected_type)
                                 
                                 if not rows:
@@ -1417,9 +1418,9 @@ if credentials:
                                 daily_downloaded_rows += len(rows)
                                 status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
                                 
-                                # Se sono state scaricate più di 25.000 righe, fermati per il giorno corrente
+                                # Controllo se il numero di righe scaricate è meno di 25.000
                                 if len(rows) < 25000:
-                                    break  # Se meno di 25.000 righe, esci dalla richiesta per il giorno
+                                    break  # Esci dalla richiesta per il giorno se meno di 25.000 righe
         
                             current_date = next_date  # Passa al giorno successivo
                             
@@ -1433,6 +1434,7 @@ if credentials:
         
                     except HttpError as e:
                         st.warning(f"HTTP Error: {e}")
+                
                 def convert_df_to_csv(df):
                     return df.to_csv(index=False).encode('utf-8')
 
