@@ -1380,9 +1380,8 @@ if credentials:
                 if st.session_state.df is None:
                     st.session_state.df = pd.DataFrame()
         
-                # Assicurati che row_limit sia un intero
                 if row_limit is None:
-                    row_limit = float('inf')  # Imposta a infinito se None
+                    row_limit = float('inf')
         
                 with st.spinner("Downloading data..."):
                     try:
@@ -1392,9 +1391,20 @@ if credentials:
                             next_date = current_date + timedelta(days=1)
                             
                             daily_downloaded_rows = 0
+                            start_row = 0  # Inizializza start_row per il giorno corrente
                             
                             while daily_downloaded_rows < row_limit:
-                                rows = fetch_data_chunk(webmasters_service, st.session_state.selected_site, current_date, next_date, dimensions, st.session_state.dimension_filters, selected_type)
+                                rows = fetch_data_chunk(
+                                    webmasters_service,
+                                    st.session_state.selected_site,
+                                    current_date,
+                                    next_date,
+                                    dimensions,
+                                    st.session_state.dimension_filters,
+                                    selected_type,
+                                    start_row,  # Passa start_row
+                                    row_limit
+                                )
                                 
                                 if not rows:
                                     st.warning(f"No data retrieved for {current_date}.")
@@ -1416,9 +1426,9 @@ if credentials:
                                 
                                 total_downloaded_rows += len(rows)
                                 daily_downloaded_rows += len(rows)
+                                start_row += len(rows)  # Incrementa start_row
                                 status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
                                 
-                                # Controllo se il numero di righe scaricate è meno di 25.000
                                 if len(rows) < 25000:
                                     break  # Esci dalla richiesta per il giorno se meno di 25.000 righe
         
