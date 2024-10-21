@@ -2524,7 +2524,7 @@ if credentials:
                 if st.session_state.selected_site:
                     csv = st.session_state.inspection_results.to_csv(index=False)
                     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-                        st.download_button(
+                    st.download_button(
                             label="Download URLs Inspection Results CSV 📥",
                             data=csv,
                             file_name=f'url_inspection_results_{current_time}.csv',
