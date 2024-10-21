@@ -96,7 +96,7 @@ if 'selected_page_on_page' not in st.session_state:
     st.session_state.selected_page = None
 # Inizializzazione dello stato della sessione indexing api
 if 'action' not in st.session_state:
-    st.session_state['action'] = "Aggiorna URL"
+    st.session_state['action'] = "Update URL"
 if 'urls' not in st.session_state:
     st.session_state['urls'] = ""
 if 'json_file' not in st.session_state:
