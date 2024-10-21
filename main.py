@@ -107,9 +107,9 @@ if "api_app" not in st.session_state:
 if "urls_to_inspect" not in st.session_state:
     st.session_state.urls_to_inspect = ""
 #Initialize download csv urls bulk inspection tool
-if 'inspection_results' not in st.session_state:
-    st.session_state.inspection_results = None
-
+# All'inizio dello script, inizializza il flag se non esiste
+if 'show_download' not in st.session_state:
+    st.session_state.show_download = False
 
 def handle_tab_selection(tab_index):
     st.session_state.selected_tab = tab_index
@@ -2522,19 +2522,17 @@ if credentials:
                 st.dataframe(index_results.drop(columns=['response']))
                 # Aggiungi il pulsante di download CSV
             
-                # Salva i risultati in session_state
-                st.session_state.inspection_results = index_results
-                
-                # Aggiungi il pulsante di download CSV
-                if 'inspection_results' in st.session_state and not st.session_state.inspection_results.empty:
-                    csv = st.session_state.inspection_results.to_csv(index=False)
-                    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    st.download_button(
-                        label="Download URLs Inspection Results CSV 📥",
-                        data=csv,
-                        file_name=f'url_inspection_results_{current_time}.csv',
-                        mime='text/csv',
-                    )
+                # Mostra il pulsante di download se il flag è attivo
+                if st.session_state.show_download:
+                    if 'inspection_results' in st.session_state and not st.session_state.inspection_results.empty:
+                        csv = st.session_state.inspection_results.to_csv(index=False)
+                        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        st.download_button(
+                            label="Download URLs Inspection Results CSV 📥",
+                            data=csv,
+                            file_name=f'url_inspection_results_{current_time}.csv',
+                            mime='text/csv',
+                        )
 
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
