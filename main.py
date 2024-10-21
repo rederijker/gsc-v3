@@ -106,6 +106,9 @@ if "api_app" not in st.session_state:
     st.session_state.api_app = "***GET INSIGHT FROM MY GSC DATA***"  # Imposta il valore predefinito
 if "urls_to_inspect" not in st.session_state:
     st.session_state.urls_to_inspect = ""
+#Initialize download csv urls bulk inspection tool
+if 'inspection_results' not in st.session_state:
+    st.session_state.inspection_results = None
 
 
 def handle_tab_selection(tab_index):
