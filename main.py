@@ -2537,17 +2537,6 @@ if credentials:
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
                 
     elif st.session_state.api_app == "***INDEXING API***":
-
-        st.write("s")
-        def index_api(request_id, response, exception):
-            if exception is not None:
-                st.error(f"Error: {exception}")
-            else:
-                st.write(response)      
-    
-    
-        
-        st.columns([1,2])
         with st.expander("How to use the Google Indexing API"):
             st.markdown("""
                         ## Google Cloud Setup Guide for Indexing API
@@ -2581,6 +2570,18 @@ if credentials:
                         ### 6. Add the Service Account to Google Search Console (Optional but Recommended)
                         - If you're using the Indexing API for your websites, make sure the service account is added as a property owner or user with appropriate access in **Google Search Console** for the domain you want to manage.
                         """)
+
+       
+        def index_api(request_id, response, exception):
+            if exception is not None:
+                st.error(f"Error: {exception}")
+            else:
+                st.write(response)      
+    
+    
+        
+        st.columns([1,2])
+
 
         with col1:            
             st.session_state['action'] = st.selectbox(
