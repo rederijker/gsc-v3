@@ -2576,21 +2576,20 @@ if credentials:
             if exception is not None:
                 st.error(f"Error: {exception}")
             else:
-                st.write(response)      
+                st.write(response)       
     
-    
-        
+        st.session_state['json_file'] = st.file_uploader("Upload Google Cloud JSON credentials file", type=["json"])
         st.columns([1,2])
-
-
         with col1:            
             st.session_state['action'] = st.selectbox(
                 "Action", 
                 ["Update URL", "Remove URL", "Check URL Status"], 
                 index=["Update URL", "Remove URL", "Check URL Status"].index(st.session_state['action'])
             )
+
+            
             # Upload the JSON credentials file
-            st.session_state['json_file'] = st.file_uploader("Upload Google Cloud JSON credentials file", type=["json"])
+            
         with col2:
             # URL Input
             st.session_state['urls'] = st.text_area("Enter URLs:", st.session_state['urls'])
