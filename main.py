@@ -1470,7 +1470,7 @@ if credentials:
             
             return buffer
         
-        # Esempio di utilizzo con Streamlit
+        # Download CSV
         if st.session_state.data_loaded and st.session_state.download_ready:
             # Converti il DataFrame in un file ZIP compresso
             zip_buffer = convert_df_to_zip(st.session_state.df)
@@ -2518,8 +2518,9 @@ if credentials:
                 st.write("### Inspection Results")
                 st.dataframe(index_results.drop(columns=['response']))
                 # Aggiungi il pulsante di download CSV
-                if not index_results.empty:
-                    csv = index_results.to_csv(index=False)
+            
+                if st.session_state.inspection_results is not None and not st.session_state.inspection_results.empty:
+                    csv = st.session_state.inspection_results.to_csv(index=False)
                     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
                     st.download_button(
                         label="Download URLs Inspection Results CSV 📥",
