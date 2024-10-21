@@ -2537,31 +2537,32 @@ if credentials:
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
                 
     elif st.session_state.api_app == "***INDEXING API***":
+
         st.write("s")
         def index_api(request_id, response, exception):
             if exception is not None:
                 st.error(f"Error: {exception}")
             else:
                 st.write(response)      
-
-
+    
+    
         
         st.columns([1,2])
         with col1:            
             st.session_state['action'] = st.selectbox(
-                "Azione", 
-                ["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"], 
-                index=["Aggiorna URL", "Rimuovi URL", "Conoscere lo stato dell'URL"].index(st.session_state['action'])
+                "Action", 
+                ["Update URL", "Remove URL", "Check URL Status"], 
+                index=["Update URL", "Remove URL", "Check URL Status"].index(st.session_state['action'])
             )
-            # Caricamento del file JSON delle credenziali
-            st.session_state['json_file'] = st.file_uploader("Carica il file JSON delle credenziali Google Cloud", type=["json"])
+            # Upload the JSON credentials file
+            st.session_state['json_file'] = st.file_uploader("Upload Google Cloud JSON credentials file", type=["json"])
         with col2:
-            # Input URL
-            st.session_state['urls'] = st.text_area("Inserisci gli URL:", st.session_state['urls'])
+            # URL Input
+            st.session_state['urls'] = st.text_area("Enter URLs:", st.session_state['urls'])
             
-        if st.button("Esegui"):
+        if st.button("Execute"):
             if not st.session_state['urls'] or not st.session_state['json_file']:
-                st.error("Assicurati di aver inserito gli URL e caricato il file JSON.")
+                st.error("Make sure you have entered the URLs and uploaded the JSON file.")
             else:
                 credentials = service_account.Credentials.from_service_account_info(
                     json.load(st.session_state['json_file'])
@@ -2573,19 +2574,19 @@ if credentials:
                     url = url.strip()
                     if url:
                         try:
-                            if st.session_state['action'] == "Aggiorna URL":
+                            if st.session_state['action'] == "Update URL":
                                 body = {"url": url, "type": "URL_UPDATED"}
                                 response = service.urlNotifications().publish(body=body).execute()
-                                st.success(f"L'URL {url} è stato aggiornato.")
+                                st.success(f"The URL {url} has been updated.")
                                 st.json(response)
             
-                            elif st.session_state['action'] == "Rimuovi URL":
+                            elif st.session_state['action'] == "Remove URL":
                                 body = {"url": url, "type": "URL_DELETED"}
                                 response = service.urlNotifications().publish(body=body).execute()
-                                st.success(f"L'URL {url} è stato rimosso.")
+                                st.success(f"The URL {url} has been removed.")
                                 st.json(response)
             
-                            elif st.session_state['action'] == "Conoscere lo stato dell'URL":
+                            elif st.session_state['action'] == "Check URL Status":
                                 response = service.urlNotifications().getMetadata(url=url).execute()
                                 st.json(response)
                         
@@ -2594,3 +2595,5 @@ if credentials:
                             st.error(f"HTTP Error {e.status_code}: {error_content['error']['message']}")
                         except Exception as e:
                             st.error(f"An unexpected error occurred: {e}")
+
+       
