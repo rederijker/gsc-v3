@@ -2522,7 +2522,7 @@ if credentials:
                 st.dataframe(index_results.drop(columns=['response']))
                 # Aggiungi il pulsante di download CSV
             
-                if st.session_state.inspection_results is not None and not st.session_state.inspection_results.empty:
+                if st.session_state.inspection_results is not None and not index_results.empty::
                     csv = st.session_state.inspection_results.to_csv(index=False)
                     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
                     st.download_button(
