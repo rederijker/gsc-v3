@@ -2519,7 +2519,8 @@ if credentials:
                 # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
                 st.write("### Inspection Results")
-                st.dataframe(st.session_state.inspection_results.drop(columns=['response']))
+                st.dataframe(index_results.drop(columns=['response']))
+
 
                 if st.session_state.inspection_results is not None and not st.session_state.inspection_results.empty:                
                     # Pulsante di download
