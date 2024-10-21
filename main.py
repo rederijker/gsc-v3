@@ -2520,16 +2520,16 @@ if credentials:
                 index_results = pd.DataFrame(results)
                 st.write("### Inspection Results")
                 st.dataframe(index_results.drop(columns=['response']))
+                # Genera un file CSV dai risultati e crea il pulsante di download
+                csv = index_results.to_csv(index=False)
+                st.download_button(
+                    label="Download results as CSV",
+                    data=csv,
+                    file_name='inspection_results.csv',
+                    mime='text/csv'
+                )
 
-                if st.session_state.selected_site:
-                    csv = results.to_csv(index=False)
-                    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    st.download_button(
-                            label="Download URLs Inspection Results CSV 📥",
-                            data=csv,
-                            file_name=f'url_inspection_results_{current_time}.csv',
-                            mime='text/csv',
-                        )
+         
 
 
                 # Cancellazione del placeholder dopo aver completato l'ispezione
