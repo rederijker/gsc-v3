@@ -2521,17 +2521,15 @@ if credentials:
                 st.write("### Inspection Results")
                 st.dataframe(index_results.drop(columns=['response']))
 
-
-                if st.session_state.inspection_results is not None and not st.session_state.inspection_results.empty:                
-                    # Pulsante di download
+                if st.session_state.selected_site:
                     csv = st.session_state.inspection_results.to_csv(index=False)
                     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    st.download_button(
-                        label="Download URLs Inspection Results CSV 📥",
-                        data=csv,
-                        file_name=f'url_inspection_results_{current_time}.csv',
-                        mime='text/csv',
-                    )
+                        st.download_button(
+                            label="Download URLs Inspection Results CSV 📥",
+                            data=csv,
+                            file_name=f'url_inspection_results_{current_time}.csv',
+                            mime='text/csv',
+                        )
 
 
                 # Cancellazione del placeholder dopo aver completato l'ispezione
