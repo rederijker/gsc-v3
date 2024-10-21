@@ -1,7 +1,6 @@
 import streamlit as st
 import httplib2
 import pandas as pd
-
 import zipfile
 import io
 from apiclient.discovery import build
@@ -2461,23 +2460,25 @@ if credentials:
                             except KeyError as e:
                                 st.warning(str(e))
 
-      
 
     elif st.session_state.api_app == "***BULK INSPECT URLS***":
-        # Mostra il campo di input con il valore memorizzato
         st.subheader("BULK INSPECT URLs")
         st.write("Paste a list of URLs. The tool provides information on the version of a specific page indexed by Google and also allows you to check if a URL could be indexable. The information includes details on structured data, linked videos, AMP, and indexing/indexability.")
+        
+        # Aggiungi rstrip() per rimuovere eventuali spazi o newline alla fine
         st.session_state.urls_to_inspect = st.text_area(
             "Insert URLs to inspect (one per line):",
             value=st.session_state.urls_to_inspect,
             height=200
-        )
+        ).rstrip()
     
         if st.button('URL INSPECTION 🕵️‍♂️'):
             if st.session_state.selected_site:
-                urls = [url.strip() for url in st.session_state.urls_to_inspect.split('\n') if url.strip()]
+                # Modifica qui: usa splitlines() invece di split('\n')
+                urls = [url.strip() for url in st.session_state.urls_to_inspect.splitlines() if url.strip()]
                 total_urls = len(urls)
                 results = []
+      
     
                 progress_placeholder = st.empty()
                 table_placeholder = st.empty()  # Placeholder per la tabella
