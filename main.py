@@ -2526,8 +2526,8 @@ if credentials:
                 st.session_state.inspection_results = index_results
                 
                 # Aggiungi il pulsante di download CSV
-                if not index_results.empty:
-                    csv = index_results.to_csv(index=False)
+                if 'inspection_results' in st.session_state and not st.session_state.inspection_results.empty:
+                    csv = st.session_state.inspection_results.to_csv(index=False)
                     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
                     st.download_button(
                         label="Download URLs Inspection Results CSV 📥",
@@ -2535,6 +2535,7 @@ if credentials:
                         file_name=f'url_inspection_results_{current_time}.csv',
                         mime='text/csv',
                     )
+
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
                 table_placeholder.empty()  # Pulisce la tabella parziale finale
