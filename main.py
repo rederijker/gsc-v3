@@ -2543,31 +2543,31 @@ if credentials:
                         
                         To use the Google Indexing API with your project, you need to download the **Service Account Key** from Google Cloud. This key allows you to authenticate with Google's APIs to update, remove, or check the indexing status of URLs.
                         
-                        ### 1. Create a Project on Google Cloud
+                        #### 1. Create a Project on Google Cloud
                         - Go to [Google Cloud Console](https://console.cloud.google.com/).
                         - Create a new project or select an existing project.
                         
-                        ### 2. Enable the Indexing API
+                        #### 2. Enable the Indexing API
                         - In the Cloud Console, go to **API & Services** > **Library**.
                         - Search for **Indexing API** and enable it for your project.
                         
-                        ### 3. Create a Service Account
+                        #### 3. Create a Service Account
                         - Go to **IAM & Admin** > **Service Accounts** in the side menu.
                         - Click **Create Service Account**.
                         - Name the service account (e.g., `indexing-api-account`).
                         - Assign the role **Owner** or **API Admin** to the new service account.
                         
-                        ### 4. Generate a JSON Key
+                        #### 4. Generate a JSON Key
                         - After creating the service account, go to the **Keys** tab.
                         - Click **Add Key** and select **Create New Key**.
                         - Choose **JSON** format.
                         - The JSON file will be automatically downloaded to your computer.
                         
-                        ### 5. Use the JSON Key in Your Application
+                        #### 5. Use the JSON Key in Your Application
                         - This JSON file contains the private key and other information needed to authenticate with Google APIs.
                         - Use this JSON file in your Streamlit app by uploading it with the `st.file_uploader` command.
                         
-                        ### 6. Add the Service Account to Google Search Console (Optional but Recommended)
+                        #### 6. Add the Service Account to Google Search Console (Optional but Recommended)
                         - If you're using the Indexing API for your websites, make sure the service account is added as a property owner or user with appropriate access in **Google Search Console** for the domain you want to manage.
                         """)
 
