@@ -2518,21 +2518,20 @@ if credentials:
     
                 # Creazione e visualizzazione del DataFrame finale
                 index_results = pd.DataFrame(results)
-                st.write("### Inspection Results")
-                st.dataframe(index_results.drop(columns=['response']))
-                # Aggiungi il pulsante di download CSV
-            
-                # Mostra il pulsante di download se il flag è attivo
-                if st.session_state.show_download:
-                    if 'inspection_results' in st.session_state and not st.session_state.inspection_results.empty:
-                        csv = st.session_state.inspection_results.to_csv(index=False)
-                        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-                        st.download_button(
-                            label="Download URLs Inspection Results CSV 📥",
-                            data=csv,
-                            file_name=f'url_inspection_results_{current_time}.csv',
-                            mime='text/csv',
-                        )
+                if st.session_state.inspection_results is not None and not st.session_state.inspection_results.empty:
+                    st.write("### Inspection Results")
+                    st.dataframe(st.session_state.inspection_results.drop(columns=['response']))
+                
+                    # Pulsante di download
+                    csv = st.session_state.inspection_results.to_csv(index=False)
+                    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    st.download_button(
+                        label="Download URLs Inspection Results CSV 📥",
+                        data=csv,
+                        file_name=f'url_inspection_results_{current_time}.csv',
+                        mime='text/csv',
+                    )
+
 
                 # Cancellazione del placeholder dopo aver completato l'ispezione
                 progress_placeholder.empty()
