@@ -2548,7 +2548,7 @@ if credentials:
     
         
         st.columns([1,2])
-        st.expander():
+        with st.expander("How to use the Google Indexing API"):
             st.markdown("""
                         ## Google Cloud Setup Guide for Indexing API
                         
