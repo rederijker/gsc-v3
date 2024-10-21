@@ -2522,7 +2522,7 @@ if credentials:
                 st.dataframe(index_results.drop(columns=['response']))
 
                 if st.session_state.selected_site:
-                    csv = st.session_state.inspection_results.to_csv(index=False)
+                    csv = results.to_csv(index=False)
                     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
                     st.download_button(
                             label="Download URLs Inspection Results CSV 📥",
