@@ -109,7 +109,7 @@ if "urls_to_inspect" not in st.session_state:
 #Initialize download csv urls bulk inspection tool
 # All'inizio dello script, inizializza il flag se non esiste
 if 'inspection_results' not in st.session_state:
-    st.session_state.show_download = False
+    st.session_state['inspection_results'] = None
 
 def handle_tab_selection(tab_index):
     st.session_state.selected_tab = tab_index
