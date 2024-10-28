@@ -1384,6 +1384,7 @@ if credentials:
             else:
                 return 30  # Intervalli mensili
         
+
         if st.button('GET DATA ⬇️'):
             clear_data()
             if st.session_state.selected_site:
@@ -1391,16 +1392,15 @@ if credentials:
                 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
-                total_downloaded_rows = 0
         
                 if st.session_state.df is None:
                     st.session_state.df = pd.DataFrame()
         
-                # Se row_limit è impostato, facciamo una singola chiamata
+                # Se row_limit è impostato, facciamo una sola chiamata con il limite
                 if row_limit:
                     with st.spinner("Downloading data..."):
                         try:
-                            # Esegui una singola chiamata con il limite complessivo di righe
+                            # Esegui una singola chiamata rispettando il limite di righe
                             rows = fetch_data_chunk(
                                 webmasters_service,
                                 st.session_state.selected_site,
@@ -1410,12 +1410,13 @@ if credentials:
                                 st.session_state.dimension_filters,
                                 selected_type,
                                 0,           # Inizia da riga 0
-                                row_limit    # Numero massimo di righe impostato dall'utente
+                                row_limit    # Numero massimo di righe imposto dall'utente
                             )
                             
                             if not rows:
                                 st.warning("No data retrieved for the selected period.")
                             else:
+                                # Costruisci DataFrame con le righe ottenute
                                 data_list = []
                                 for row in rows:
                                     data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
@@ -1431,13 +1432,14 @@ if credentials:
                                 st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
                                 
                                 status_text.text(f"Total rows downloaded: {len(rows)}")
-        
                                 st.session_state.data_loaded = True
                                 st.session_state.download_ready = True
-                                progress_bar.progress(1.0)  # Completa la barra di progresso
+                                progress_bar.progress(1.0)
         
                         except HttpError as e:
                             st.warning(f"HTTP Error: {e}")
+
+     
         
                 else:
                     # Se row_limit non è impostato, segui il comportamento della versione 1 con intervalli adattivi
