@@ -1897,12 +1897,55 @@ if credentials:
                                     return 'Beyond Page 10'
                 
                             # Calcolare la posizione media per ogni query
-                            df_query_page_serp1 = df.copy()
-                            df_query_page_serp = df_query_page_serp1[
-                                ~((df_query_page_serp1['Impressions'] == 1) & (df_query_page_serp1['Clicks'] == 0)) &  # Escludi 1 impressione e 0 clic
-                                ~((df_query_page_serp1['Clicks'] == 1) & (df_query_page_serp1['CTR'] == 1) & (df_query_page_serp1['Impressions'] == 1))  # Escludi anche le query con solo 1 impressione
+                            # Supponiamo che df_query_page_serp contenga le colonne 'Query', 'Impressions', 'Clicks', 'Position'
+                            df_query_page_serp = df.copy()
+                            
+                            # Selezionare le colonne da utilizzare per il clustering
+                            features = df_query_page_serp[['Impressions', 'Clicks', 'Position']]
+                            
+                            # Standardizzare le caratteristiche
+                            scaler = StandardScaler()
+                            features_scaled = scaler.fit_transform(features)
+                            
+                            # Applicare K-means per il clustering
+                            kmeans = KMeans(n_clusters=3)  # Puoi modificare il numero di cluster
+                            df_query_page_serp['Cluster'] = kmeans.fit_predict(features_scaled)
+                            
+                            # Identificare i cluster con meno osservazioni
+                            cluster_counts = df_query_page_serp['Cluster'].value_counts()
+                            small_clusters = cluster_counts[cluster_counts < 5].index  # Soglia di 5 per esempio
+                            
+                            # Identificare le query da escludere
+                            excluded_queries_cluster = df_query_page_serp[df_query_page_serp['Cluster'].isin(small_clusters)]
+                            
+                            # Identificare le query con valori estremi (analisi dei quantili)
+                            lower_bound_impressions = df_query_page_serp['Impressions'].quantile(0.05)
+                            upper_bound_impressions = df_query_page_serp['Impressions'].quantile(0.95)
+                            
+                            lower_bound_clicks = df_query_page_serp['Clicks'].quantile(0.05)
+                            upper_bound_clicks = df_query_page_serp['Clicks'].quantile(0.95)
+                            
+                            # Filtrare le query da escludere basate sui quantili
+                            excluded_queries_quantiles = df_query_page_serp[
+                                (df_query_page_serp['Impressions'] < lower_bound_impressions) | 
+                                (df_query_page_serp['Impressions'] > upper_bound_impressions) |
+                                (df_query_page_serp['Clicks'] < lower_bound_clicks) | 
+                                (df_query_page_serp['Clicks'] > upper_bound_clicks)
                             ]
-                                       
+                            
+                            # Unire le query escluse dai due metodi
+                            excluded_queries = pd.concat([excluded_queries_cluster, excluded_queries_quantiles]).drop_duplicates()
+                            
+                            # Visualizza le query escluse
+                            print("Query escluse:")
+                            print(excluded_queries[['Query', 'Impressions', 'Clicks', 'Position']])
+                            
+                            # Creare un DataFrame filtrato senza le query escluse
+                            df_filtered = df_query_page_serp[~df_query_page_serp['Query'].isin(excluded_queries['Query'])]
+                            
+                            # Visualizza il DataFrame filtrato
+                            print("Query dopo l'esclusione delle anomalie:")
+                            print(df_filtered[['Query', 'Impressions', 'Clicks', 'Position']])
                             df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
                             df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
                 
