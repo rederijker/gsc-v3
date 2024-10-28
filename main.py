@@ -1384,6 +1384,7 @@ if credentials:
             else:
                 return 30  # Intervalli mensili
         
+        total_downloaded_rows = 0  # Inizializzazione
 
         if st.button('GET DATA ⬇️'):
             clear_data()
