@@ -39,6 +39,7 @@ import urllib.parse
 from googleapiclient.errors import HttpError
 from streamlit_option_menu import option_menu
 
+from sklearn.preprocessing import StandardScaler
 
 
 #PAGE CONFIGURATION
