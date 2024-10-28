@@ -1898,6 +1898,8 @@ if credentials:
                 
                             # Calcolare la posizione media per ogni query
                             df_query_page_serp = df.copy()
+                            df_query_page_serp = df_query_page_serp[(df['Impressions'] > 1) | (df['Clicks'] > 1)]
+
                             df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
                             df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
                 
