@@ -1376,48 +1376,34 @@ if credentials:
             clear_data()
             if st.session_state.selected_site:
                 dimensions = [dim for dim in selected_dimensions]
-            
+                
                 progress_bar = st.progress(0)
                 status_text = st.empty()
-                total_downloaded_rows = 0
-        
+                
                 if st.session_state.df is None:
                     st.session_state.df = pd.DataFrame()
-        
-                if row_limit is None:
-                    row_limit = float('inf')
-        
-                # Calcola il numero totale di giorni da scaricare
-                total_days = (end_date - start_date).days + 1  # Include il giorno finale
-                completed_days = 0  # Inizializza il contatore dei giorni completati
-        
-                with st.spinner("Downloading data..."):
-                    try:
-                        current_date = start_date
-                        
-                        while current_date <= end_date:
-                            next_date = current_date + timedelta(days=1)
+                
+                # Verifica se row_limit è impostato
+                if row_limit is not None:
+                    # Caso in cui row_limit è impostato: esegui una sola chiamata API
+                    with st.spinner("Downloading data with row limit..."):
+                        try:
+                            rows = fetch_data_chunk(
+                                webmasters_service,
+                                st.session_state.selected_site,
+                                start_date,
+                                end_date,
+                                dimensions,
+                                st.session_state.dimension_filters,
+                                selected_type,
+                                0,           # Inizia da riga 0
+                                row_limit    # Numero massimo di righe imposto dall'utente
+                            )
                             
-                            daily_downloaded_rows = 0
-                            start_row = 0  # Inizializza start_row per il giorno corrente
-                            
-                            while daily_downloaded_rows < row_limit:
-                                rows = fetch_data_chunk(
-                                    webmasters_service,
-                                    st.session_state.selected_site,
-                                    current_date,
-                                    next_date,
-                                    dimensions,
-                                    st.session_state.dimension_filters,
-                                    selected_type,
-                                    start_row,  # Passa start_row
-                                    row_limit
-                                )
-                                
-                                if not rows:
-                                    st.warning(f"No data retrieved for {current_date}.")
-                                    break
-        
+                            if not rows:
+                                st.warning("No data retrieved for the selected period.")
+                            else:
+                                # Costruisci DataFrame con le righe ottenute
                                 data_list = []
                                 for row in rows:
                                     data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
@@ -1428,33 +1414,83 @@ if credentials:
                                         'Position': row['position']
                                     })
                                     data_list.append(data_entry)
-        
+                
                                 chunk_df = pd.DataFrame(data_list)
                                 st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
                                 
-                                total_downloaded_rows += len(rows)
-                                daily_downloaded_rows += len(rows)
-                                start_row += len(rows)  # Incrementa start_row
-                                status_text.text(f"Total rows downloaded: {total_downloaded_rows}")
-                                
-                                if len(rows) < 25000:
-                                    break  # Esci dalla richiesta per il giorno se meno di 25.000 righe
-        
-                            # Incrementa il contatore dei giorni completati
-                            completed_days += 1
-                            current_date = next_date  # Passa al giorno successivo
+                                status_text.text(f"Total rows downloaded: {len(rows)}")
+                                st.session_state.data_loaded = True
+                                st.session_state.download_ready = True
+                                progress_bar.progress(1.0)
+                
+                        except HttpError as e:
+                            st.warning(f"HTTP Error: {e}")
+                
+                else:
+                    # Caso in cui row_limit non è impostato: utilizza la logica di download incrementale
+                    total_days = (end_date - start_date).days + 1  # Include il giorno finale
+                    completed_days = 0
+                
+                    with st.spinner("Downloading data without row limit..."):
+                        try:
+                            current_date = start_date
                             
-                            # Aggiorna la barra di progresso in base ai giorni completati
-                            progress_bar.progress(completed_days / total_days)
-        
-                        st.session_state.data_loaded = True
-                        st.session_state.download_ready = True
-                        progress_bar.progress(1.0)  # Completa la barra di progresso
-                        progress_bar.empty()
-        
-                    except HttpError as e:
-                        st.warning(f"HTTP Error: {e}")
-                        
+                            while current_date <= end_date:
+                                next_date = current_date + timedelta(days=1)
+                                
+                                daily_downloaded_rows = 0
+                                start_row = 0
+                                
+                                while daily_downloaded_rows < 25000:
+                                    rows = fetch_data_chunk(
+                                        webmasters_service,
+                                        st.session_state.selected_site,
+                                        current_date,
+                                        next_date,
+                                        dimensions,
+                                        st.session_state.dimension_filters,
+                                        selected_type,
+                                        start_row,
+                                        25000
+                                    )
+                                    
+                                    if not rows:
+                                        st.warning(f"No data retrieved for {current_date}.")
+                                        break
+                
+                                    data_list = []
+                                    for row in rows:
+                                        data_entry = {dimension: row['keys'][dimensions.index(dimension)] for dimension in dimensions}
+                                        data_entry.update({
+                                            'Clicks': row['clicks'],
+                                            'Impressions': row['impressions'],
+                                            'CTR': row['ctr'],
+                                            'Position': row['position']
+                                        })
+                                        data_list.append(data_entry)
+                
+                                    chunk_df = pd.DataFrame(data_list)
+                                    st.session_state.df = pd.concat([st.session_state.df, chunk_df], ignore_index=True)
+                                    
+                                    daily_downloaded_rows += len(rows)
+                                    start_row += len(rows)
+                                    status_text.text(f"Total rows downloaded: {len(rows)}")
+                                    
+                                    if len(rows) < 25000:
+                                        break
+                
+                                completed_days += 1
+                                current_date = next_date
+                                
+                                progress_bar.progress(completed_days / total_days)
+                
+                            st.session_state.data_loaded = True
+                            st.session_state.download_ready = True
+                            progress_bar.progress(1.0)
+                
+                        except HttpError as e:
+                            st.warning(f"HTTP Error: {e}")
+                                
 
 
 
