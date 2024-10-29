@@ -39,7 +39,6 @@ import urllib.parse
 from googleapiclient.errors import HttpError
 from streamlit_option_menu import option_menu
 
-from sklearn.preprocessing import StandardScaler
 
 
 #PAGE CONFIGURATION
@@ -1898,10 +1897,14 @@ if credentials:
                                     return 'Beyond Page 10'
                 
                             # Calcolare la posizione media per ogni query
-                            # Supponiamo che df_query_page_serp contenga le colonne 'Query', 'Impressions', 'Clicks', 'Position'
-                            df_query_page_serp = df.copy()
-                           
-
+                            df_query_page_serp1 = df.copy()
+                            df_query_page_serp = df_query_page_serp1[
+                                ~((df_query_page_serp1['Impressions'] == 1) & (df_query_page_serp1['Clicks'] == 0)) &  # Escludi 1 impressione e 0 clic
+                                ~((df_query_page_serp1['Clicks'] == 1) & (df_query_page_serp1['CTR'] == 1) & (df_query_page_serp1['Impressions'] == 1))  # Escludi anche le query con solo 1 impressione
+                            ]
+                                       
+                            df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
+                            df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
                 
                             # Unire la posizione media di nuovo con il DataFrame originale
                             df_query_page_serp = pd.merge(df_query_page_serp, df_query_avg_position, on='Query', how='left')
