@@ -1969,8 +1969,8 @@ if credentials:
                             df_filtered_page = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
                             st.write(f"Query details for {selected_page}")
                             st.dataframe(df_filtered_page[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
-                    else:
-                        st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
+                else:
+                    st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
 
             
                 try:
