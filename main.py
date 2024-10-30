@@ -1870,13 +1870,7 @@ if credentials:
                 median_ctr = df['CTR'].median()
                 quantile_impressions = df['Impressions'].quantile(0.75)
                 
-                # Mostra i valori calcolati come riferimento per l'utente
-                st.write("### Valori di partenza calcolati per i filtri")
-                st.write(f"- Media ponderata Position: {weighted_avg_position:.2f}")
-                st.write(f"- Mediana Clicks: {median_clicks}")
-                st.write(f"- Mediana CTR: {median_ctr:.2%}")
-                st.write(f"- 75° Percentile Impressions: {quantile_impressions:.0f}")
-                
+
                 # Imposta i controlli con i valori calcolati come default
                 min_impressions = st.slider("Minimum Impressions", min_value=0, max_value=500, value=int(quantile_impressions))
                 min_position = st.slider("Minimum Position", min_value=0, max_value=100, value=int(weighted_avg_position))
