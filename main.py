@@ -1864,11 +1864,40 @@ if credentials:
 
                 # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
                 # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
-                if 'Query' in df.columns and 'Page' in df.columns:
-                    with st.container(border=True):
+                 # Calcolo dei valori di partenza per i filtri
+                weighted_avg_position = (df['Position'] * df['Impressions']).sum() / df['Impressions'].sum()
+                median_clicks = df['Clicks'].median()
+                median_ctr = df['CTR'].median()
+                quantile_impressions = df['Impressions'].quantile(0.75)
+                
+                # Mostra i valori calcolati come riferimento per l'utente
+                st.write("### Valori di partenza calcolati per i filtri")
+                st.write(f"- Media ponderata Position: {weighted_avg_position:.2f}")
+                st.write(f"- Mediana Clicks: {median_clicks}")
+                st.write(f"- Mediana CTR: {median_ctr:.2%}")
+                st.write(f"- 75° Percentile Impressions: {quantile_impressions:.0f}")
+                
+                # Imposta i controlli con i valori calcolati come default
+                min_impressions = st.slider("Minimum Impressions", min_value=0, max_value=500, value=int(quantile_impressions))
+                min_position = st.slider("Minimum Position", min_value=0, max_value=100, value=int(weighted_avg_position))
+                min_ctr = st.slider("Minimum CTR (%)", min_value=0.0, max_value=1.0, value=median_ctr)
+                min_clicks = st.slider("Minimum Clicks", min_value=0, max_value=20, value=int(median_clicks))
+                
+                # Applica i filtri al DataFrame globale
+                df_filtered = df[(df['Impressions'] >= min_impressions) & 
+                                 (df['Position'] >= min_position) & 
+                                 (df['CTR'] >= min_ctr) & 
+                                 (df['Clicks'] >= min_clicks)]
+                
+                # Passiamo `df_filtered` nelle varie sezioni per mantenere i filtri attivi su tutto il report
+                
+                # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
+                if 'Query' in df_filtered.columns and 'Page' in df_filtered.columns:
+                    with st.container():
                         st.subheader("2. Queries distribution on SERP Pages Report")
                         st.divider()
                         col1, col2 = st.columns([2, 1])
+                
                         with col1:
                             st.write("")
                 
@@ -1897,9 +1926,8 @@ if credentials:
                                     return 'Beyond Page 10'
                 
                             # Calcolare la posizione media per ogni query
-                            df_query_page_serp = df.copy()
-
-                                       
+                            df_query_page_serp = df_filtered.copy()
+                
                             df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
                             df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
                 
@@ -1911,7 +1939,7 @@ if credentials:
                 
                             # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
                             df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
-
+                
                             # Conta il numero totale di query uniche
                             total_unique_queries = df_query_performance_unique['Query'].nunique()
                 
@@ -1936,29 +1964,19 @@ if credentials:
                 
                             # Rimuovere la legenda
                             fig_bar.update_layout(showlegend=False, paper_bgcolor='rgb(10,14,18)', plot_bgcolor='rgb(10,14,18)')
-                            # Visualizzare il grafico utilizzando Streamlit
                             st.plotly_chart(fig_bar)
                 
                         with col2:
-                            # Visualizza il DataFrame
-                            #page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'] * 100/100
-                            #page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'].apply(lambda x: f"{x:.2f}%")
                             page_distribution['Percentage_of_Total'] = page_distribution['Percentage_of_Total'].apply(lambda x: f"{x:.2f}%")
-
-                          
                             st.dataframe(page_distribution)
-                        
-                        # Selezionare la pagina per vedere i dettagli delle query
+                
                         selected_page = st.selectbox("Select SERP Page to view query details", options=page_order)
-                        
-                        # Filtrare il DataFrame per la pagina selezionata
-                        df_filtered = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
-                        
-                        # Visualizzare i dettagli delle query per la pagina selezionata
+                        df_filtered_page = df_query_performance_unique[df_query_performance_unique['SERP_Page'] == selected_page]
                         st.write(f"Query details for {selected_page}")
-                        st.dataframe(df_filtered[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
+                        st.dataframe(df_filtered_page[['Query', 'Avg_Position', 'Clicks', 'Impressions', 'CTR']])
                 else:
                     st.warning("Add the necessary columns (Query, Page, Position, Clicks, Impressions, CTR) to generate the 2. Queries distribution on SERP Pages Report")
+
             
                 try:
                     # Controllo se la colonna 'Page' è presente
