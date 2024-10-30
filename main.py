@@ -1910,11 +1910,8 @@ if credentials:
                             df_query_page_serp['SERP_Page'] = df_query_page_serp['Avg_Position'].apply(assign_page)
                 
                             # Rimuovere i duplicati dalle query basandosi sulla combinazione di 'Query' e 'SERP_Page'
-                            df_query_performance_unique1 = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
-                            df_query_performance_unique =  df_query_performance_unique1[
-                                                                                        ~ (df_query_performance_unique1['Impressions'] < 5)
-                                                                                        ]                                                                                     
-                
+                            df_query_performance_unique = df_query_page_serp.drop_duplicates(subset=['Query', 'SERP_Page'])
+
                             # Conta il numero totale di query uniche
                             total_unique_queries = df_query_performance_unique['Query'].nunique()
                 
