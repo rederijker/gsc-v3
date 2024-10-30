@@ -1865,35 +1865,36 @@ if credentials:
                 # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
                 # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
                  # Calcolo dei valori di partenza per i filtri
-                weighted_avg_position = (df['Position'] * df['Impressions']).sum() / df['Impressions'].sum()
-                median_clicks = df['Clicks'].median()
-                median_ctr = df['CTR'].median()
-                quantile_impressions = df['Impressions'].quantile(0.75)
-                
 
-                # Imposta i controlli con i valori calcolati come default
-                min_impressions = st.slider("Minimum Impressions", min_value=0, max_value=500, value=int(quantile_impressions))
-                min_position = st.slider("Minimum Position", min_value=0, max_value=100, value=int(weighted_avg_position))
-                min_ctr = st.slider("Minimum CTR (%)", min_value=0.0, max_value=1.0, value=median_ctr)
-                min_clicks = st.slider("Minimum Clicks", min_value=0, max_value=20, value=int(median_clicks))
-                
-                # Applica i filtri al DataFrame globale
-                df_filtered = df[(df['Impressions'] >= min_impressions) & 
-                                 (df['Position'] >= min_position) & 
-                                 (df['CTR'] >= min_ctr) & 
-                                 (df['Clicks'] >= min_clicks)]
-                
-                # Passiamo `df_filtered` nelle varie sezioni per mantenere i filtri attivi su tutto il report
                 
                 # Controllo se il DataFrame contiene le colonne 'Query' e 'Page'
                 if 'Query' in df_filtered.columns and 'Page' in df_filtered.columns:
                     with st.container():
                         st.subheader("2. Queries distribution on SERP Pages Report")
                         st.divider()
+                        
                         col1, col2 = st.columns([2, 1])
                 
                         with col1:
-                            st.write("")
+                            weighted_avg_position = (df['Position'] * df['Impressions']).sum() / df['Impressions'].sum()
+                            median_clicks = df['Clicks'].median()
+                            median_ctr = df['CTR'].median()
+                            quantile_impressions = df['Impressions'].quantile(0.75)
+                            
+            
+                            # Imposta i controlli con i valori calcolati come default
+                            min_impressions = st.slider("Minimum Impressions", min_value=0, max_value=500, value=int(quantile_impressions))
+                            min_position = st.slider("Minimum Position", min_value=0, max_value=100, value=int(weighted_avg_position))
+                            min_ctr = st.slider("Minimum CTR (%)", min_value=0.0, max_value=1.0, value=median_ctr)
+                            min_clicks = st.slider("Minimum Clicks", min_value=0, max_value=20, value=int(median_clicks))
+                            
+                            # Applica i filtri al DataFrame globale
+                            df_filtered = df[(df['Impressions'] >= min_impressions) & 
+                                             (df['Position'] >= min_position) & 
+                                             (df['CTR'] >= min_ctr) & 
+                                             (df['Clicks'] >= min_clicks)]
+                            
+                            # Passiamo `df_filtered` nelle varie sezioni per mantenere i filtri attivi su tutto il report
                 
                             def assign_page(position):
                                 if position <= 10:
