@@ -1872,30 +1872,29 @@ if credentials:
                     with st.container():
                         st.subheader("2. Queries distribution on SERP Pages Report")
                         st.divider()
-                        
+                    
                         col1, col2 = st.columns([2, 1])
-                
+                    
                         with col1:
                             weighted_avg_position = (df['Position'] * df['Impressions']).sum() / df['Impressions'].sum()
                             median_clicks = df['Clicks'].median()
                             median_ctr = df['CTR'].median()
                             quantile_impressions = df['Impressions'].quantile(0.75)
-                            
-            
+                    
                             # Imposta i controlli con i valori calcolati come default
                             min_impressions = st.slider("Minimum Impressions", min_value=0, max_value=500, value=int(quantile_impressions))
                             min_position = st.slider("Minimum Position", min_value=0, max_value=100, value=int(weighted_avg_position))
                             min_ctr = st.slider("Minimum CTR (%)", min_value=0.0, max_value=1.0, value=median_ctr)
                             min_clicks = st.slider("Minimum Clicks", min_value=0, max_value=20, value=int(median_clicks))
-                            
+                    
                             # Applica i filtri al DataFrame globale
                             df_filtered = df[(df['Impressions'] >= min_impressions) & 
                                              (df['Position'] >= min_position) & 
                                              (df['CTR'] >= min_ctr) & 
                                              (df['Clicks'] >= min_clicks)]
+                                             
                             if 'Query' in df_filtered.columns and 'Page' in df_filtered.columns:
-                                # Passiamo `df_filtered` nelle varie sezioni per mantenere i filtri attivi su tutto il report
-                    
+                                # Funzione per assegnare la pagina basata sulla posizione
                                 def assign_page(position):
                                     if position <= 10:
                                         return 'Page 1'
@@ -1922,7 +1921,6 @@ if credentials:
                     
                                 # Calcolare la posizione media per ogni query
                                 df_query_page_serp = df_filtered.copy()
-                    
                                 df_query_avg_position = df_query_page_serp.groupby('Query')['Position'].mean().reset_index()
                                 df_query_avg_position.rename(columns={'Position': 'Avg_Position'}, inplace=True)
                     
