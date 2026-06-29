@@ -100,6 +100,11 @@ def refresh_credentials_if_needed(creds: Credentials) -> Credentials:
     return creds
 
 
+def _generate_pkce_verifier() -> str:
+    """PKCE code_verifier: 43-128 caratteri URL-safe."""
+    return secrets.token_urlsafe(96)[:128]
+
+
 def _encode_oauth_state(code_verifier: str) -> str:
     """Embed PKCE verifier in OAuth state (survives Streamlit redirect)."""
     payload = json.dumps({
@@ -112,7 +117,8 @@ def _encode_oauth_state(code_verifier: str) -> str:
 def _decode_oauth_state(state: str) -> str | None:
     try:
         payload = json.loads(base64.urlsafe_b64decode(state.encode()).decode())
-        return payload.get("verifier")
+        verifier = payload.get("verifier")
+        return verifier if verifier else None
     except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
         return None
 
@@ -130,14 +136,14 @@ def authorize_app() -> Credentials:
         get_oauth_client_config(),
         scopes=OAUTH_SCOPES,
         redirect_uri=REDIRECT_URI,
-        autogenerate_code_verifier=True,
+        autogenerate_code_verifier=False,
     )
 
     auth_code = st.query_params.get("code")
-    oauth_state = st.query_params.get("state")
+    oauth_state_param = st.query_params.get("state")
 
     if auth_code:
-        code_verifier = _decode_oauth_state(oauth_state) if oauth_state else None
+        code_verifier = _decode_oauth_state(oauth_state_param) if oauth_state_param else None
         if not code_verifier:
             code_verifier = st.session_state.get("oauth_code_verifier")
 
@@ -173,8 +179,11 @@ def authorize_app() -> Credentials:
         st.query_params.clear()
         st.rerun()
 
-    oauth_state = _encode_oauth_state(flow.code_verifier)
-    st.session_state.oauth_code_verifier = flow.code_verifier
+    # Genera verifier PRIMA di authorization_url (la libreria lo crea solo lì dentro)
+    code_verifier = _generate_pkce_verifier()
+    flow.code_verifier = code_verifier
+    oauth_state = _encode_oauth_state(code_verifier)
+    st.session_state.oauth_code_verifier = code_verifier
 
     auth_url, _ = flow.authorization_url(
         access_type="offline",
