@@ -1,13 +1,15 @@
 """
 GSC InsightHub — SEO analytics tool with Google Search Console data.
-OAuth fixed: offline access, refresh token handling, no PKCE (confidential web client).
+OAuth fixed: offline access, refresh token, PKCE verifier persisted via OAuth state param.
 """
 
+import base64
 import concurrent.futures
 import io
 import itertools
 import json
 import re
+import secrets
 import time
 import zipfile
 from collections import Counter
@@ -98,6 +100,23 @@ def refresh_credentials_if_needed(creds: Credentials) -> Credentials:
     return creds
 
 
+def _encode_oauth_state(code_verifier: str) -> str:
+    """Embed PKCE verifier in OAuth state (survives Streamlit redirect)."""
+    payload = json.dumps({
+        "csrf": secrets.token_urlsafe(16),
+        "verifier": code_verifier,
+    })
+    return base64.urlsafe_b64encode(payload.encode()).decode()
+
+
+def _decode_oauth_state(state: str) -> str | None:
+    try:
+        payload = json.loads(base64.urlsafe_b64decode(state.encode()).decode())
+        return payload.get("verifier")
+    except (json.JSONDecodeError, ValueError, UnicodeDecodeError):
+        return None
+
+
 def authorize_app() -> Credentials:
     creds = credentials_from_session()
     if creds:
@@ -111,15 +130,32 @@ def authorize_app() -> Credentials:
         get_oauth_client_config(),
         scopes=OAUTH_SCOPES,
         redirect_uri=REDIRECT_URI,
+        autogenerate_code_verifier=True,
     )
 
     auth_code = st.query_params.get("code")
+    oauth_state = st.query_params.get("state")
 
     if auth_code:
+        code_verifier = _decode_oauth_state(oauth_state) if oauth_state else None
+        if not code_verifier:
+            code_verifier = st.session_state.get("oauth_code_verifier")
+
+        if not code_verifier:
+            st.error(
+                "Sessione OAuth scaduta dopo il redirect. "
+                "Clicca di nuovo «Login con Google» (usa una sola tab del browser)."
+            )
+            st.query_params.clear()
+            st.stop()
+
+        flow.code_verifier = code_verifier
+
         try:
             flow.fetch_token(code=auth_code)
         except Exception as exc:
             st.error(f"Errore durante fetch_token: {exc}")
+            st.query_params.clear()
             st.stop()
 
         creds = flow.credentials
@@ -133,13 +169,18 @@ def authorize_app() -> Credentials:
             st.stop()
 
         save_credentials_to_session(creds)
+        st.session_state.pop("oauth_code_verifier", None)
         st.query_params.clear()
         st.rerun()
+
+    oauth_state = _encode_oauth_state(flow.code_verifier)
+    st.session_state.oauth_code_verifier = flow.code_verifier
 
     auth_url, _ = flow.authorization_url(
         access_type="offline",
         prompt="consent",
         include_granted_scopes="false",
+        state=oauth_state,
     )
 
     gif_url = "https://github.com/rederijker/gsc-v3/blob/main/assets/back.gif?raw=true"
