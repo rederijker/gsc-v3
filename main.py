@@ -1150,7 +1150,7 @@ def inspect_url(url_to_inspect, selected_site, retries=3):
 
 #AUTH APP
 OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
-REDIRECT_URI = 'https://seo-tool.streamlit.app/'  # Updated redirect URI
+REDIRECT_URI = 'https://gsc-seo.streamlit.app/'  # Updated redirect URI
 
 
 def authorize_app():
