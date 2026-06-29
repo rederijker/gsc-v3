@@ -38,6 +38,8 @@ import json
 import urllib.parse
 from googleapiclient.errors import HttpError
 from streamlit_option_menu import option_menu
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
 
 
 
@@ -1149,11 +1151,12 @@ def inspect_url(url_to_inspect, selected_site, retries=3):
                 }
 
 #AUTH APP
-OAUTH_SCOPE = ['https://www.googleapis.com/auth/webmasters.readonly']
+OAUTH_SCOPE = ["https://www.googleapis.com/auth/webmasters.readonly"]
 REDIRECT_URI = 'https://gsc-seo.streamlit.app/'  # Updated redirect URI
 
 
 def authorize_app():
+
     client_config = {
         "web": {
             "client_id": st.secrets["gcp_service_account"]["client_id"],
@@ -1162,31 +1165,54 @@ def authorize_app():
             "token_uri": st.secrets["gcp_service_account"]["token_uri"],
             "auth_provider_x509_cert_url": st.secrets["gcp_service_account"]["auth_provider_x509_cert_url"],
             "client_secret": st.secrets["gcp_service_account"]["client_secret"],
-            "redirect_uris": st.secrets["gcp_service_account"]["redirect_uris"]
+            "redirect_uris": [REDIRECT_URI],
         }
     }
 
-    flow = Flow.from_client_config(client_config, scopes=OAUTH_SCOPE)
-    flow.redirect_uri = REDIRECT_URI
+    if "credentials" not in st.session_state:
+        st.session_state.credentials = None
 
     query_params = st.query_params
-    auth_code = query_params.get('code', None)
 
-    if auth_code:
-        st.markdown(f"""
-        <h1 style="text-align:center;">GSC InsightHub</h1><br>""",
-        unsafe_allow_html=True
-        )        
-        if not st.session_state.credentials:
-            
-            try:
-                flow.fetch_token(code=auth_code)
-                credentials = flow.credentials
-                st.session_state.credentials = credentials
-                st.write("✅ Auth code received:. Now you are connected with Google Search Console API")
-            except Exception as e:
-                st.write(f"Error during authorization: {e}")
-                st.write(f"Please reauthenticate")
+    # Se abbiamo già le credenziali
+    if st.session_state.credentials:
+        return st.session_state.credentials
+
+    # Creazione Flow
+    flow = Flow.from_client_config(
+        client_config,
+        scopes=OAUTH_SCOPE,
+        redirect_uri=REDIRECT_URI,
+        autogenerate_code_verifier=True,
+    )
+
+    # Callback di Google
+    if "code" in query_params:
+
+        if "code_verifier" in st.session_state:
+            flow.code_verifier = st.session_state.code_verifier
+
+        flow.fetch_token(code=query_params["code"])
+
+        st.session_state.credentials = flow.credentials
+
+        st.query_params.clear()
+
+        st.rerun()
+
+    # Primo accesso
+    auth_url, state = flow.authorization_url(
+        access_type="offline",
+        include_granted_scopes="true",
+        prompt="consent",
+    )
+
+    st.session_state.code_verifier = flow.code_verifier
+    st.session_state.oauth_state = state
+
+    st.link_button("🔑 Login con Google", auth_url)
+
+    st.stop()
 
     if st.session_state.credentials is None:
         auth_url, _ = flow.authorization_url(prompt='consent', access_type='offline')
