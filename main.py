@@ -222,6 +222,7 @@ _DEFAULTS = {
     "df": None,
     "available_sites": [],
     "dimension_filters": {},
+    "filter_lists": {},
     "selected_page": None,
     "page_data": None,
     "keyword_analysis": None,
@@ -250,6 +251,9 @@ for _key, _val in _DEFAULTS.items():
         st.session_state[_key] = _val
 
 REQUIRED_COLUMNS = ["Page", "Query", "Clicks", "Impressions", "CTR", "Position"]
+
+# Dimensions whose API name differs from lowercase(label)
+API_DIMENSION_NAMES = {"BrandedClassification": "brandedClassification"}
 
 
 def clear_data():
@@ -479,12 +483,12 @@ def calculate_click_totals(df, grouped_df, keyword_column, clicks_column):
 
 def fetch_data_chunk(
     webmasters_service, site_url, start_date, end_date,
-    dimensions, filters, selected_type, start_row, row_limit=None,
+    dimensions, filters, selected_type, start_row, row_limit=None, filter_lists=None,
 ):
     request_body = {
         "startDate": start_date.strftime("%Y-%m-%d"),
         "endDate": end_date.strftime("%Y-%m-%d"),
-        "dimensions": dimensions,
+        "dimensions": [API_DIMENSION_NAMES.get(d, d) for d in dimensions],
         "startRow": start_row,
         "type": selected_type,
         "rowLimit": min(row_limit, 25000) if row_limit else 25000,
@@ -496,11 +500,20 @@ def fetch_data_chunk(
                 request_body["dimensionFilterGroups"] = []
             request_body["dimensionFilterGroups"].append({
                 "filters": [{
-                    "dimension": dimension.lower(),
+                    "dimension": API_DIMENSION_NAMES.get(dimension, dimension.lower()),
                     "expression": filter_value,
                     "operator": filter_info["operator"],
                 }]
             })
+    active_lists = [
+        {"dimension": dim, "expressions": values}
+        for dim, values in (filter_lists or {}).items() if values
+    ]
+    if active_lists:
+        request_body.setdefault("dimensionFilterGroups", []).append({
+            "groupType": "and",
+            "filterLists": active_lists,
+        })
     response_data = webmasters_service.searchanalytics().query(
         siteUrl=site_url, body=request_body
     ).execute()
@@ -891,7 +904,7 @@ if credentials:
     if st.session_state.api_app == "***GET INSIGHT FROM MY GSC DATA***":
         col1, col2, col3 = st.columns([1, 2, 1])
         with col1:
-            options_type = {"Web": "web", "News": "news", "Discover": "discover", "Image": "image", "Video": "video"}
+            options_type = {"Web": "web", "News": "news", "Discover": "discover", "Image": "image", "Video": "video", "Web Multimodal (Lens / Circle to Search)": "webMultimodal"}
             today = datetime.now()
 
             def get_start_date(option):
@@ -918,25 +931,59 @@ if credentials:
 
         with col2:
             selected_dimensions = st.multiselect(
-                "DIMENSIONS", ["Date", "Page", "Query", "Device", "Country"],
+                "DIMENSIONS", ["Date", "Page", "Query", "Device", "Country", "BrandedClassification"],
                 default=["Date", "Query", "Page"],
             )
             with st.expander("Filters for Dimensions"):
                 unique_key = 0
+                st.session_state.filter_lists = {}
                 for dimension in selected_dimensions:
                     c1, c2 = st.columns(2)
-                    with c1:
-                        operator = st.selectbox(
-                            f"{dimension} operator",
-                            ["equals", "contains", "notEquals", "notContains", "includingRegex", "excludingRegex"],
-                            key=f"op_{dimension}",
-                        )
-                    with c2:
-                        filter_value = st.text_input("Value", placeholder="value", key=f"val_{unique_key}")
+                    if dimension == "BrandedClassification":
+                        with c1:
+                            operator = st.selectbox(
+                                f"{dimension} operator", ["equals"], key=f"op_{dimension}",
+                            )
+                        with c2:
+                            branded_choice = st.selectbox(
+                                "Value", ["(all)", "BRANDED", "NON_BRANDED"], key=f"val_{unique_key}",
+                            )
+                        filter_value = "" if branded_choice == "(all)" else branded_choice
+                    else:
+                        with c1:
+                            operator = st.selectbox(
+                                f"{dimension} operator",
+                                ["equals", "contains", "notEquals", "notContains", "includingRegex", "excludingRegex"],
+                                key=f"op_{dimension}",
+                            )
+                        with c2:
+                            filter_value = st.text_input("Value", placeholder="value", key=f"val_{unique_key}")
                     unique_key += 1
                     st.session_state.dimension_filters[dimension] = {
                         "operator": operator, "filter_value": filter_value,
                     }
+
+                st.caption("Multi-value filters (a dimension can't use both a single and a multi-value filter)")
+                multi_countries = st.text_input(
+                    "Countries (comma-separated ISO alpha-3, e.g. ITA, FRA, DEU)", key="multi_countries",
+                )
+                multi_devices = st.multiselect(
+                    "Devices", ["DESKTOP", "MOBILE", "TABLET"], key="multi_devices",
+                )
+                countries = [c.strip().upper() for c in multi_countries.split(",") if c.strip()]
+                if countries:
+                    st.session_state.filter_lists["country"] = countries
+                    st.session_state.dimension_filters.pop("Country", None)
+                if multi_devices:
+                    st.session_state.filter_lists["device"] = list(multi_devices)
+                    st.session_state.dimension_filters.pop("Device", None)
+
+                branded_active = (
+                    st.session_state.dimension_filters.get("BrandedClassification", {}).get("filter_value")
+                    or "BrandedClassification" in selected_dimensions
+                )
+                if branded_active and st.session_state.dimension_filters.get("Query", {}).get("filter_value"):
+                    st.warning("BrandedClassification can't be combined with a Query filter.")
 
         with col3:
             check_box_row = st.radio("SET ROW LIMIT?", ["No", "Yes"])
@@ -960,6 +1007,7 @@ if credentials:
                                 webmasters_service, st.session_state.selected_site,
                                 start_date, end_date, dimensions,
                                 st.session_state.dimension_filters, selected_type, 0, row_limit,
+                                filter_lists=st.session_state.filter_lists,
                             )
                             if rows:
                                 st.session_state.df = rows_to_dataframe(rows, dimensions)
@@ -979,9 +1027,10 @@ if credentials:
                                 while True:
                                     rows = fetch_data_chunk(
                                         webmasters_service, st.session_state.selected_site,
-                                        current_date, next_date, dimensions,
+                                        current_date, current_date, dimensions,
                                         st.session_state.dimension_filters, selected_type,
                                         start_row, 25000,
+                                        filter_lists=st.session_state.filter_lists,
                                     )
                                     if not rows:
                                         break
@@ -1003,6 +1052,14 @@ if credentials:
                     st.warning(f"HTTP Error: {e}")
 
         if st.session_state.data_loaded and st.session_state.download_ready:
+            if (
+                st.session_state.df is None
+                or st.session_state.df.empty
+                or "CTR" not in st.session_state.df.columns
+            ):
+                st.warning("No data retrieved from Search Console for the selected parameters.")
+                st.stop()
+
             zip_buffer = convert_df_to_zip(st.session_state.df)
             st.download_button(
                 label="Download data ZIP", data=zip_buffer,
@@ -1022,9 +1079,6 @@ if credentials:
             # OVERVIEW
             # ----------------------------------------------------------
             if selected2 == "GSC DATA OVERVIEW":
-                if df.empty or "CTR" not in df.columns:
-                    st.warning("No data returned from Google Search Console.")
-                    st.stop()
                 average_ctr_perc = df["CTR"].mean() * 100
                 formatted_ctr_m = f"{average_ctr_perc:.2f}%"
                 st.session_state["average_ctr_perc"] = average_ctr_perc
