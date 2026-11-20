@@ -1022,6 +1022,9 @@ if credentials:
             # OVERVIEW
             # ----------------------------------------------------------
             if selected2 == "GSC DATA OVERVIEW":
+                if df.empty or "CTR" not in df.columns:
+                    st.warning("No data returned from Google Search Console.")
+                    st.stop()
                 average_ctr_perc = df["CTR"].mean() * 100
                 formatted_ctr_m = f"{average_ctr_perc:.2f}%"
                 st.session_state["average_ctr_perc"] = average_ctr_perc
